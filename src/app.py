@@ -3,7 +3,7 @@ import time
 
 import spotipy
 from flask import Flask, redirect, request, session, url_for
-from spot_api import create_spotify_oauth
+from src.spot_api import create_spotify_oauth
 
 # https://www.youtube.com/watch?v=1TYyX8soQ8M
 
