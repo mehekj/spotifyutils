@@ -6,6 +6,11 @@ from flask_pymongo import MongoClient
 mongo = MongoClient(os.environ.get("MONGO_URI")).get_database('spotutils')
 
 
+def clear_db():
+    mongo.users.delete_many({})
+    mongo.streams.delete_many({})
+
+
 def get_user_data(uri):
     return mongo.users.find_one({'uri': uri})
 
