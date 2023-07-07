@@ -9,7 +9,6 @@ def main():
         data = json.load(f)
 
         for item in data:
-            # print(i)
             song = '' if item['master_metadata_track_name'] is None else item['master_metadata_track_name']
             artist = '' if item['master_metadata_album_artist_name'] is None else item['master_metadata_album_artist_name']
             song_str = song + ' - ' + artist
