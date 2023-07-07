@@ -26,7 +26,9 @@
 
     <hr />
 
-    <div>
+    {% if streams %}
+
+        <div>
         RANKING OF SONGS BY NUMBER OF streams <br />
         (where a stream is playing the song for at least 30s) <br />
         (this DOES NOT exclude private session) <br /><br />
@@ -34,7 +36,10 @@
         {% for stream in streams %}
         <p style=" margin: 0">{{stream.track}} - {{stream.artist}} - {{stream.count}}</p>
         {% endfor %}
+
         </div>
+
+        {% endif %}
 </body>
 
 </html>
