@@ -86,8 +86,8 @@ def home():
 
     curr_user = get_curr_user(token_info)
     user_data = get_user_data(session["user_uri"])
-    streams = get_most_streamed(session["user_uri"])
-    print(streams)
+    # streams = get_most_streamed(session["user_uri"])
+    # print(streams)
     return render_template("home.html", username=curr_user['display_name'], user=user_data, streams=streams)
 
 # ts
