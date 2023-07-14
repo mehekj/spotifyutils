@@ -22,13 +22,13 @@ const App = () => {
 
       if (!response.ok) {
         const message = `An error has occurred: ${response.statusText}`;
-        window.alert(message);
+        alert(message);
         return;
       }
 
       const record = await response.json();
       if (!record) {
-        window.alert(`Not found`);
+        alert(`Not found`);
         navigate("/");
         return;
       }
@@ -56,7 +56,7 @@ const App = () => {
       },
       body: JSON.stringify(form),
     }).catch((error) => {
-      window.alert(error);
+      alert(error);
       return;
     });
 
