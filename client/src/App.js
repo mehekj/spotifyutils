@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch(config.server + "record", { method: "GET" });
+      const response = await fetch(config.server, { method: "GET" });
 
       if (!response.ok) {
         const message = `An error has occurred: ${response.statusText}`;
@@ -49,7 +49,7 @@ const App = () => {
     // // When a post request is sent to the create url, we'll add a new record to the database.
     // const newPerson = { ...form };
 
-    await fetch(config.server + "record", {
+    await fetch(config.server, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
