@@ -17,37 +17,26 @@ const App = () => {
   };
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(config.server, { method: "GET" });
+    async function getRecords() {
+      const response = await fetch(config.server);
 
       if (!response.ok) {
-        const message = `An error has occurred: ${response.statusText}`;
-        alert(message);
+        const message = `An error occurred: ${response.statusText}`;
+        window.alert(message);
         return;
       }
 
-      const record = await response.json();
-      if (!record) {
-        alert(`Not found`);
-        navigate("/");
-        return;
-      }
-
-      console.log(record);
-
-      setBody(record);
+      const records = await response.json();
+      setBody(records);
     }
 
-    fetchData();
+    getRecords();
 
     return;
-  }, [navigate]);
+  }, [body.length]);
 
   async function onSubmit(e) {
     e.preventDefault();
-
-    // // When a post request is sent to the create url, we'll add a new record to the database.
-    // const newPerson = { ...form };
 
     await fetch(config.server, {
       method: "POST",
