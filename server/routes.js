@@ -29,7 +29,7 @@ router.get("/login", (req, res) => {
 		"https://accounts.spotify.com/authorize?" +
 			QueryString.stringify({
 				response_type: "code",
-				client_id: process.env.CLIENT_ID,
+				client_id: CLIENT_ID,
 				scope: scope,
 				redirect_uri: REDIRECT_URI,
 				state: state,
