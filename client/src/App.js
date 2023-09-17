@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { config } from "./constants.js";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { accessToken, logout } from "./spotify";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Upload from "./pages/Upload";
+import NavBar from "./components/NavBar";
 
 const App = () => {
 	const [token, setToken] = useState(null);
@@ -11,11 +15,19 @@ const App = () => {
 
 	return (
 		<div>
-			<h1>spotify utils</h1>
 			{token ? (
-				<button onClick={logout}>log out</button>
+				<>
+					<NavBar />
+					<button onClick={logout}>log out</button>
+					<Router>
+						<Routes>
+							<Route path="/" element={<Home />}></Route>
+							<Route path="/upload" element={<Upload />}></Route>
+						</Routes>
+					</Router>
+				</>
 			) : (
-				<a href={`${config.server}/login`}>get started</a>
+				<Login />
 			)}
 		</div>
 	);

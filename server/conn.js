@@ -13,4 +13,6 @@ try {
 
 let db = conn.db("spotutils");
 
+export const users = db.collection("users");
+export const streams = db.collection("streams");
 export default db;
