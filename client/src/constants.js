@@ -1,6 +1,6 @@
 const production = {
-	client: "https://spotifyutils.mehekjethani.me",
-	server: "https://spotifyutils-backend.mehekjethani.me",
+	client: "https://spotifyutils.mehekjethani.com",
+	server: "https://spotifyutils-backend.mehekjethani.com",
 };
 
 const development = {
