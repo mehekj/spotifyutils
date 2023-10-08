@@ -113,7 +113,6 @@ router.post("/beginUpload", (req, res) => {
 	chunks[user] = [];
 	totalChunks[user] = req.body.totalChunks;
 	chunksPerFile[user] = req.body.chunksPerFile;
-	deleteStreams();
 	res
 		.status(200)
 		.send(
@@ -171,7 +170,7 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 								delete item[key];
 							});
 
-							item[user] = user;
+							item["user"] = user;
 						});
 
 						streams.push(...json);
