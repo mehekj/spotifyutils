@@ -3,8 +3,7 @@ import express from "express";
 import QueryString from "qs";
 import { config } from "./constants.js";
 import multer from "multer";
-import fs from "fs";
-import { deleteStreams, insertStreams } from "./db_api.js";
+import { deleteStreams, insertStreams, deleteUserStreams } from "./db_api.js";
 
 const router = express.Router();
 
@@ -105,40 +104,46 @@ router.get("/refresh_token", (req, res) => {
 		});
 });
 
-let chunks = [];
-let numChunks = 0;
-let chunksPerFile = [];
+let chunks = {};
+let totalChunks = {};
+let chunksPerFile = {};
 
 router.post("/beginUpload", (req, res) => {
-	chunks = [];
-	numChunks = req.body.numChunks;
-	chunksPerFile = req.body.chunksPerFile;
+	const user = req.body.userID;
+	chunks[user] = [];
+	totalChunks[user] = req.body.totalChunks;
+	chunksPerFile[user] = req.body.chunksPerFile;
 	deleteStreams();
-	res.status(200).send("beginning upload");
+	res
+		.status(200)
+		.send(
+			"beginning upload of " + totalChunks[user] + " chunks for user " + user
+		);
 });
 
 const upload = multer();
 
 router.post("/upload", upload.single("chunk"), async (req, res) => {
+	const user = req.body.userID;
 	let chunk = req.file;
-	chunks.push(chunk);
-	if (chunks.length === numChunks) {
+	chunks[user].push(chunk);
+	if (chunks[user].length === totalChunks[user]) {
 		const compareFn = (a, b) => {
 			const aIndex = parseInt(a["originalname"]);
 			const bIndex = parseInt(b["originalname"]);
 			return aIndex - bIndex;
 		};
 
-		chunks.sort(compareFn);
+		chunks[user].sort(compareFn);
 
 		let fileBuffers = [];
 		let chunkIndex = 0;
-		chunksPerFile.map((numChunks, fileIndex) => {
+		chunksPerFile[user].map((fileChunks, fileIndex) => {
 			fileBuffers.push([]);
-			for (let i = 0; i < numChunks; i++) {
-				fileBuffers[fileIndex].push(chunks[chunkIndex + i].buffer);
+			for (let i = 0; i < fileChunks; i++) {
+				fileBuffers[fileIndex].push(chunks[user][chunkIndex + i].buffer);
 			}
-			chunkIndex += numChunks;
+			chunkIndex += fileChunks;
 		});
 
 		let extraFields = [
@@ -165,8 +170,11 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 							extraFields.forEach((key) => {
 								delete item[key];
 							});
+
+							item[user] = user;
 						});
-						streams.push(json[0]);
+
+						streams.push(...json);
 					})
 					.catch((err) => console.error(err))
 			);
@@ -174,12 +182,17 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 
 		Promise.all(promises)
 			.then(() => {
-				insertStreams(streams);
+				deleteUserStreams(user).then(
+					insertStreams(streams).then(
+						console.log("uploaded", streams.length, "streams")
+					)
+				);
 			})
 			.catch((err) => console.error(err));
 	}
 
-	const response = "uploaded chunk " + chunks.length + "/" + numChunks;
+	const response =
+		"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
 	res.status(200).send(response);
 });
 

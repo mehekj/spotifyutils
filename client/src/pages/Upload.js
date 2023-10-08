@@ -1,8 +1,10 @@
-import { useState } from "react";
 import axios from "axios";
+import { useContext, useState } from "react";
+import { UserContext } from "../App";
 import { config } from "../constants.js";
 
 export default function Upload() {
+	const { user } = useContext(UserContext);
 	const [files, setFiles] = useState([]);
 	const [progress, setProgress] = useState(null);
 
@@ -36,8 +38,9 @@ export default function Upload() {
 
 		await axios
 			.post(`${config.server}/beginUpload`, {
-				numChunks: chunks.length,
+				totalChunks: chunks.length,
 				chunksPerFile: chunksPerFile,
+				userID: user.id,
 			})
 			.then((res) => console.log(res))
 			.catch((err) => console.error(err));
@@ -51,6 +54,7 @@ export default function Upload() {
 			let fileName = `${index}chunk`;
 			let fileData = new File([chunk], fileName);
 			formData.append("chunk", fileData, fileName);
+			formData.append("userID", user.id);
 
 			promises.push(
 				axios
