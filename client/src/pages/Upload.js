@@ -14,7 +14,7 @@ export default function Upload() {
 
 	const onFileUpload = async (e) => {
 		e.preventDefault();
-		const chunkSize = 5 * 1024 * 1024;
+		const chunkSize = 4 * 1024 * 1024;
 		let chunks = [];
 		const numFiles = files.length;
 		let chunksPerFile = [];
