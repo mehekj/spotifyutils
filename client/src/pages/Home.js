@@ -1,16 +1,8 @@
-import { getUserData } from "../spotify";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { UserContext } from "../App";
 
 export default function Home() {
-	const [user, setUser] = useState({});
-
-	useEffect(() => {
-		const fetchUser = async () => {
-			getUserData().then((res) => setUser(res.data));
-		};
-
-		fetchUser().catch((err) => console.error(err));
-	}, []);
+	const { user } = useContext(UserContext);
 
 	return <div>Welcome {user.display_name}!</div>;
 }
