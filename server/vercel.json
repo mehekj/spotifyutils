@@ -12,9 +12,6 @@
 			"dest": "/"
 		}
 	],
-	"git": {
-		"deploymentEnabled": true
-	},
 	"headers": [
 		{
 			"source": "/(.*)",
@@ -31,5 +28,8 @@
 				}
 			]
 		}
-	]
+	],
+	"git": {
+		"deploymentEnabled": true
+	}
 }
