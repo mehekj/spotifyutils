@@ -140,6 +140,9 @@ const upload = multer();
 router.post("/upload", upload.single("chunk"), async (req, res) => {
 	const user = req.body.userID;
 	let chunk = req.file;
+	if (!chunks[user]) {
+		console.log(chunks);
+	}
 	chunks[user].push(chunk);
 	if (chunks[user].length === totalChunks[user]) {
 		const compareFn = (a, b) => {
