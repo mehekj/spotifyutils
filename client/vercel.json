@@ -4,10 +4,7 @@
 	},
 	"headers": [
 		{
-			"source": "/(.*)",
-			"headers": {
-				"Access-Control-Allow-Origin": "*"
-			}
+			"source": "/(.*)"
 		}
 	]
 }
