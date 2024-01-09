@@ -113,6 +113,9 @@ router.get("/refresh_token", (req, res) => {
 router.get("/userData", async (req, res) => {
 	const { userID } = req.query;
 	const data = await getUserUpload(userID);
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader("Access-Control-Allow-Methods", "*");
+	res.setHeader("Access-Control-Allow-Headers", "*");
 	res.send(data);
 });
 
