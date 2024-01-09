@@ -91,9 +91,21 @@ const getAccessToken = () => {
 export const accessToken = getAccessToken();
 
 export const getUserData = async () => {
-	const data = await axios.get("https://api.spotify.com/v1/me", {
+	const spotifyData = await axios.get("https://api.spotify.com/v1/me", {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 
-	return data;
+	const mongoData = await axios.get(
+		`${config.server}/userData?userID=${spotifyData.data.id}`
+	);
+
+	let returnData = spotifyData.data;
+
+	if (mongoData.data) {
+		returnData["lastUpload"] = mongoData.data.time;
+	}
+
+	console.log(returnData);
+
+	return returnData;
 };

@@ -14,3 +14,15 @@ export const insertStreams = async (data) => {
 		.then(console.log("inserted", data.length, "documents"))
 		.catch((err) => console.error(err));
 };
+
+export const setUserUpload = async (userID) => {
+	users.updateOne(
+		{ user: userID },
+		{ $set: { user: userID, time: Date.now() } },
+		{ upsert: true }
+	);
+};
+
+export const getUserUpload = async (userID) => {
+	return users.findOne({ user: userID });
+};

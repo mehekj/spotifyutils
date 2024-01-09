@@ -18,7 +18,7 @@ const App = () => {
 
 		if (accessToken) {
 			const fetchUser = async () => {
-				getUserData().then((res) => setUser(res.data));
+				getUserData().then((res) => setUser(res));
 			};
 
 			fetchUser().catch((err) => console.error(err));

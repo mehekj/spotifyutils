@@ -3,7 +3,13 @@ import express from "express";
 import QueryString from "qs";
 import { config } from "./constants.js";
 import multer from "multer";
-import { deleteStreams, insertStreams, deleteUserStreams } from "./db_api.js";
+import {
+	deleteStreams,
+	insertStreams,
+	deleteUserStreams,
+	setUserUpload,
+	getUserUpload,
+} from "./db_api.js";
 
 const router = express.Router();
 
@@ -104,6 +110,12 @@ router.get("/refresh_token", (req, res) => {
 		});
 });
 
+router.get("/userData", async (req, res) => {
+	const { userID } = req.query;
+	const data = await getUserUpload(userID);
+	res.send(data);
+});
+
 let chunks = {};
 let totalChunks = {};
 let chunksPerFile = {};
@@ -183,13 +195,18 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 			.then(() => {
 				deleteUserStreams(user).then(
 					insertStreams(streams).then(
-						console.log("uploaded", streams.length, "streams")
+						setUserUpload(user).then(
+							console.log("uploaded", streams.length, "streams")
+						)
 					)
 				);
 			})
 			.catch((err) => console.error(err));
 	}
 
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader("Access-Control-Allow-Methods", "*");
+	res.setHeader("Access-Control-Allow-Headers", "*");
 	const response =
 		"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
 	res.status(200).send(response);
