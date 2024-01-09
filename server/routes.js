@@ -215,6 +215,7 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 			"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
 		res.status(200).send(response);
 	} catch (err) {
+		console.log(chunks);
 		res.send(err);
 	}
 });
