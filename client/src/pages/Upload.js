@@ -41,6 +41,8 @@ export default function Upload() {
 
 			chunkNum++;
 			start = end;
+
+			setProgress((chunkNum / totalChunks) * ((fileNum + 1) / files.length));
 		}
 	};
 
@@ -53,9 +55,28 @@ export default function Upload() {
 			return;
 		}
 
+		if (user.lastUpload) {
+			const confirmMsg =
+				"Are you sure you would like to proceed? This will delete your previously uploaded data from " +
+				new Date(user.lastUpload).toLocaleString();
+
+			if (!window.confirm(confirmMsg)) {
+				return;
+			}
+		}
+
+		let res = await axios.post(
+			`${config.server}/deleteUserStreams?userID=${user.id}`
+		);
+		console.log(res);
+
+		setProgress(0);
 		for (let i = 0; i < numFiles; i++) {
 			await uploadFile(i);
 		}
+
+		res = await axios.post(`${config.server}/setUserUpload?userID=${user.id}`);
+		console.log(res);
 	};
 
 	return (
@@ -65,6 +86,7 @@ export default function Upload() {
 				<input type="file" multiple accept=".json" onChange={onFileChange} />
 				<button onClick={onFileSubmit}>Upload!</button>
 				{progress && <div>{progress * 100}%</div>}
+				{progress && progress < 1 && <div>DO NOT REFRESH THE PAGE</div>}
 			</form>
 		</div>
 	);

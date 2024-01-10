@@ -6,7 +6,12 @@ import path from "path";
 import QueryString from "qs";
 import { fileURLToPath } from "url";
 import { config } from "./constants.js";
-import { getUserUpload } from "./db_api.js";
+import {
+	deleteUserStreams,
+	getUserUpload,
+	insertStreams,
+	setUserUpload,
+} from "./db_api.js";
 
 const router = express.Router();
 
@@ -128,6 +133,20 @@ router.get("/userData", async (req, res) => {
 	res.send(data);
 });
 
+router.post("/deleteUserStreams", async (req, res) => {
+	const { userID } = req.query;
+	await deleteUserStreams(userID);
+	res
+		.status(200)
+		.send("Successfully cleared streaming data for user " + userID);
+});
+
+router.post("/setUserUpload", async (req, res) => {
+	const { userID } = req.query;
+	await setUserUpload(userID);
+	res.status(200).send("Updated latest upload for user " + userID);
+});
+
 // https://medium.com/@theyograjthakur/simplifying-large-file-uploads-with-react-and-node-js-a-step-by-step-guide-bd72967f57fe
 const mergeChunks = async (fileName, totalChunks, userID) => {
 	const chunkDir = __dirname + "/chunks";
@@ -138,7 +157,7 @@ const mergeChunks = async (fileName, totalChunks, userID) => {
 		chunkBuffs.push(fs.promises.readFile(chunkFilePath));
 	}
 
-	const fileJSON = Promise.all(chunkBuffs)
+	const fileJSON = await Promise.all(chunkBuffs)
 		.then((chunks) => new Blob(chunks))
 		.then((fullFile) =>
 			fullFile.text().then((text) => {
@@ -151,9 +170,13 @@ const mergeChunks = async (fileName, totalChunks, userID) => {
 
 					item["user"] = userID;
 				});
+
+				return json;
 			})
 		)
 		.catch((err) => console.error(err));
+
+	await insertStreams(fileJSON);
 
 	for (let i = 0; i < totalChunks; i++) {
 		const chunkFilePath = `${chunkDir}/${fileName}.part_${i}`;
