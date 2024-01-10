@@ -17,8 +17,7 @@ const REDIRECT_URI = `${config.server}/redirect`;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = "/tmp";
 
 const scopes = [
 	"user-library-modify",
