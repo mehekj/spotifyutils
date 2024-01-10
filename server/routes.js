@@ -138,86 +138,78 @@ router.post("/beginUpload", (req, res) => {
 const upload = multer();
 
 router.post("/upload", upload.single("chunk"), async (req, res) => {
-	try {
-		const user = req.body.userID;
-		let chunk = req.file;
-		chunks[user].push(chunk);
-		if (chunks[user].length === totalChunks[user]) {
-			const compareFn = (a, b) => {
-				const aIndex = parseInt(a["originalname"]);
-				const bIndex = parseInt(b["originalname"]);
-				return aIndex - bIndex;
-			};
+	const user = req.body.userID;
+	let chunk = req.file;
+	chunks[user].push(chunk);
+	if (chunks[user].length === totalChunks[user]) {
+		const compareFn = (a, b) => {
+			const aIndex = parseInt(a["originalname"]);
+			const bIndex = parseInt(b["originalname"]);
+			return aIndex - bIndex;
+		};
 
-			chunks[user].sort(compareFn);
+		chunks[user].sort(compareFn);
 
-			let fileBuffers = [];
-			let chunkIndex = 0;
-			chunksPerFile[user].map((fileChunks, fileIndex) => {
-				fileBuffers.push([]);
-				for (let i = 0; i < fileChunks; i++) {
-					fileBuffers[fileIndex].push(chunks[user][chunkIndex + i].buffer);
-				}
-				chunkIndex += fileChunks;
-			});
+		let fileBuffers = [];
+		let chunkIndex = 0;
+		chunksPerFile[user].map((fileChunks, fileIndex) => {
+			fileBuffers.push([]);
+			for (let i = 0; i < fileChunks; i++) {
+				fileBuffers[fileIndex].push(chunks[user][chunkIndex + i].buffer);
+			}
+			chunkIndex += fileChunks;
+		});
 
-			let extraFields = [
-				"username",
-				"ip_addr_decrypted",
-				"user_agent_decrypted",
-				"episode_name",
-				"episode_show_name",
-				"spotify_episode_uri",
-				"offline_timestamp",
-			];
+		let extraFields = [
+			"username",
+			"ip_addr_decrypted",
+			"user_agent_decrypted",
+			"episode_name",
+			"episode_show_name",
+			"spotify_episode_uri",
+			"offline_timestamp",
+		];
 
-			let promises = [];
-			let streams = [];
-			fileBuffers.map((buffs) => {
-				const completeFile = new Blob(buffs);
-				promises.push(
-					completeFile
-						.text()
-						.then((text) => {
-							let json = JSON.parse(text);
+		let promises = [];
+		let streams = [];
+		fileBuffers.map((buffs) => {
+			const completeFile = new Blob(buffs);
+			promises.push(
+				completeFile
+					.text()
+					.then((text) => {
+						let json = JSON.parse(text);
 
-							json.forEach((item) => {
-								extraFields.forEach((key) => {
-									delete item[key];
-								});
-
-								item["user"] = user;
+						json.forEach((item) => {
+							extraFields.forEach((key) => {
+								delete item[key];
 							});
 
-							streams.push(...json);
-						})
-						.catch((err) => console.error(err))
-				);
-			});
+							item["user"] = user;
+						});
 
-			Promise.all(promises)
-				.then(() => {
-					deleteUserStreams(user).then(
-						insertStreams(streams).then(
-							setUserUpload(user).then(
-								console.log("uploaded", streams.length, "streams")
-							)
+						streams.push(...json);
+					})
+					.catch((err) => console.error(err))
+			);
+		});
+
+		Promise.all(promises)
+			.then(() => {
+				deleteUserStreams(user).then(
+					insertStreams(streams).then(
+						setUserUpload(user).then(
+							console.log("uploaded", streams.length, "streams")
 						)
-					);
-				})
-				.catch((err) => console.error(err));
-		}
-
-		res.setHeader("Access-Control-Allow-Origin", "*");
-		res.setHeader("Access-Control-Allow-Methods", "*");
-		res.setHeader("Access-Control-Allow-Headers", "*");
-		const response =
-			"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
-		res.status(200).send(response);
-	} catch (err) {
-		console.log(JSON.toString(chunks));
-		res.error(err);
+					)
+				);
+			})
+			.catch((err) => console.error(err));
 	}
+
+	const response =
+		"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
+	res.status(200).send(response);
 });
 
 export default router;
