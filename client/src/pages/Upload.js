@@ -19,6 +19,11 @@ export default function Upload() {
 		const numFiles = files.length;
 		let chunksPerFile = [];
 
+		if (numFiles === 0) {
+			alert("No files selected");
+			return;
+		}
+
 		for (let i = 0; i < numFiles; i++) {
 			const file = files[i];
 			let fileSize = file.size;

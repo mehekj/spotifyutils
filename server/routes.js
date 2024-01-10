@@ -216,7 +216,7 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 		res.status(200).send(response);
 	} catch (err) {
 		console.log(JSON.toString(chunks));
-		res.send(err);
+		res.error(err);
 	}
 });
 
