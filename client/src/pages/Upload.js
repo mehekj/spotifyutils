@@ -12,12 +12,41 @@ export default function Upload() {
 		setFiles(e.target.files);
 	};
 
-	const onFileUpload = async (e) => {
-		e.preventDefault();
+	const uploadFile = async (fileNum) => {
+		const file = files[fileNum];
 		const chunkSize = 4 * 1024 * 1024;
-		let chunks = [];
+		const fileSize = file.size;
+		const totalChunks = Math.ceil(fileSize / chunkSize);
+
+		let chunkNum = 0;
+		let start = 0;
+		while (start < fileSize) {
+			const end = start + chunkSize;
+			const chunk = file.slice(start, end);
+
+			const formData = new FormData();
+			formData.append("chunk", chunk);
+			formData.append("chunkNum", chunkNum);
+			formData.append("fileNum", fileNum);
+			formData.append("userID", user.id);
+			formData.append("totalChunks", totalChunks);
+
+			const res = await axios({
+				method: "post",
+				url: `${config.server}/upload`,
+				data: formData,
+				headers: { "Content-Type": "multipart/form-data" },
+			});
+			console.log(res);
+
+			chunkNum++;
+			start = end;
+		}
+	};
+
+	const onFileSubmit = async (e) => {
+		e.preventDefault();
 		const numFiles = files.length;
-		let chunksPerFile = [];
 
 		if (numFiles === 0) {
 			alert("No files selected");
@@ -25,58 +54,8 @@ export default function Upload() {
 		}
 
 		for (let i = 0; i < numFiles; i++) {
-			const file = files[i];
-			let fileSize = file.size;
-			let start = 0;
-			let end = chunkSize;
-			let numChunks = 0;
-
-			while (start < fileSize) {
-				chunks.push(file.slice(start, end));
-				start = end;
-				end = start + chunkSize;
-				numChunks++;
-			}
-
-			chunksPerFile.push(numChunks);
+			await uploadFile(i);
 		}
-
-		await axios
-			.post(`${config.server}/beginUpload`, {
-				totalChunks: chunks.length,
-				chunksPerFile: chunksPerFile,
-				userID: user.id,
-			})
-			.then((res) => console.log(res))
-			.catch((err) => console.error(err));
-
-		let promises = [];
-		let finished = 0;
-		setProgress(0);
-
-		chunks.forEach((chunk, index) => {
-			let formData = new FormData();
-			let fileName = `${index}chunk`;
-			let fileData = new File([chunk], fileName);
-			formData.append("chunk", fileData, fileName);
-			formData.append("userID", user.id);
-
-			promises.push(
-				axios
-					.post(`${config.server}/upload`, formData, {
-						headers: { "Content-Type": "multipart/form-data" },
-					})
-					.then((res) => {
-						finished++;
-						setProgress(finished / chunks.length);
-						console.log(res);
-					})
-			);
-		});
-
-		Promise.all(promises).catch((err) => {
-			console.error(err);
-		});
 	};
 
 	return (
@@ -84,7 +63,7 @@ export default function Upload() {
 			<div>Upload</div>
 			<form>
 				<input type="file" multiple accept=".json" onChange={onFileChange} />
-				<button onClick={onFileUpload}>Upload!</button>
+				<button onClick={onFileSubmit}>Upload!</button>
 				{progress && <div>{progress * 100}%</div>}
 			</form>
 		</div>

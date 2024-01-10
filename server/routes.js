@@ -1,27 +1,40 @@
 import axios from "axios";
 import express from "express";
-import QueryString from "qs";
-import { config } from "./constants.js";
+import fs from "fs";
 import multer from "multer";
-import {
-	deleteStreams,
-	insertStreams,
-	deleteUserStreams,
-	setUserUpload,
-	getUserUpload,
-} from "./db_api.js";
+import path from "path";
+import QueryString from "qs";
+import { fileURLToPath } from "url";
+import { config } from "./constants.js";
+import { getUserUpload } from "./db_api.js";
 
 const router = express.Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const REDIRECT_URI = `${config.server}/redirect`;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const scopes = [
 	"user-library-modify",
 	"user-library-read",
 	"playlist-read-private",
 	"playlist-modify-private",
+];
+
+const extraFields = [
+	"username",
+	"ip_addr_decrypted",
+	"user_agent_decrypted",
+	"episode_name",
+	"episode_show_name",
+	"spotify_episode_uri",
+	"offline_timestamp",
 ];
 
 const generateRandomString = (length) =>
@@ -113,103 +126,82 @@ router.get("/refresh_token", (req, res) => {
 router.get("/userData", async (req, res) => {
 	const { userID } = req.query;
 	const data = await getUserUpload(userID);
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Access-Control-Allow-Methods", "*");
-	res.setHeader("Access-Control-Allow-Headers", "*");
 	res.send(data);
 });
 
-let chunks = {};
-let totalChunks = {};
-let chunksPerFile = {};
+// https://medium.com/@theyograjthakur/simplifying-large-file-uploads-with-react-and-node-js-a-step-by-step-guide-bd72967f57fe
+const mergeChunks = async (fileName, totalChunks, userID) => {
+	const chunkDir = __dirname + "/chunks";
 
-router.post("/beginUpload", (req, res) => {
-	const user = req.body.userID;
-	chunks[user] = [];
-	totalChunks[user] = req.body.totalChunks;
-	chunksPerFile[user] = req.body.chunksPerFile;
-	res
-		.status(200)
-		.send(
-			"beginning upload of " + totalChunks[user] + " chunks for user " + user
-		);
-});
-
-const upload = multer();
-
-router.post("/upload", upload.single("chunk"), async (req, res) => {
-	const user = req.body.userID;
-	let chunk = req.file;
-	chunks[user].push(chunk);
-	if (chunks[user].length === totalChunks[user]) {
-		const compareFn = (a, b) => {
-			const aIndex = parseInt(a["originalname"]);
-			const bIndex = parseInt(b["originalname"]);
-			return aIndex - bIndex;
-		};
-
-		chunks[user].sort(compareFn);
-
-		let fileBuffers = [];
-		let chunkIndex = 0;
-		chunksPerFile[user].map((fileChunks, fileIndex) => {
-			fileBuffers.push([]);
-			for (let i = 0; i < fileChunks; i++) {
-				fileBuffers[fileIndex].push(chunks[user][chunkIndex + i].buffer);
-			}
-			chunkIndex += fileChunks;
-		});
-
-		let extraFields = [
-			"username",
-			"ip_addr_decrypted",
-			"user_agent_decrypted",
-			"episode_name",
-			"episode_show_name",
-			"spotify_episode_uri",
-			"offline_timestamp",
-		];
-
-		let promises = [];
-		let streams = [];
-		fileBuffers.map((buffs) => {
-			const completeFile = new Blob(buffs);
-			promises.push(
-				completeFile
-					.text()
-					.then((text) => {
-						let json = JSON.parse(text);
-
-						json.forEach((item) => {
-							extraFields.forEach((key) => {
-								delete item[key];
-							});
-
-							item["user"] = user;
-						});
-
-						streams.push(...json);
-					})
-					.catch((err) => console.error(err))
-			);
-		});
-
-		Promise.all(promises)
-			.then(() => {
-				deleteUserStreams(user).then(
-					insertStreams(streams).then(
-						setUserUpload(user).then(
-							console.log("uploaded", streams.length, "streams")
-						)
-					)
-				);
-			})
-			.catch((err) => console.error(err));
+	let chunkBuffs = [];
+	for (let i = 0; i < totalChunks; i++) {
+		const chunkFilePath = `${chunkDir}/${fileName}.part_${i}`;
+		chunkBuffs.push(fs.promises.readFile(chunkFilePath));
 	}
 
-	const response =
-		"uploaded chunk " + chunks[user].length + "/" + totalChunks[user];
-	res.status(200).send(response);
+	const fileJSON = Promise.all(chunkBuffs)
+		.then((chunks) => new Blob(chunks))
+		.then((fullFile) =>
+			fullFile.text().then((text) => {
+				let json = JSON.parse(text);
+
+				json.forEach((item) => {
+					extraFields.forEach((key) => {
+						delete item[key];
+					});
+
+					item["user"] = userID;
+				});
+			})
+		)
+		.catch((err) => console.error(err));
+
+	for (let i = 0; i < totalChunks; i++) {
+		const chunkFilePath = `${chunkDir}/${fileName}.part_${i}`;
+		fs.unlink(chunkFilePath, (err) => err && console.error(err));
+	}
+
+	console.log("Chunks merged successfully");
+};
+
+router.post("/upload", upload.single("chunk"), async (req, res) => {
+	const chunk = req.file.buffer;
+	const chunkNum = Number(req.body.chunkNum);
+	const fileNum = req.body.fileNum;
+	const totalChunks = Number(req.body.totalChunks);
+	const userID = req.body.userID;
+	const fileName = userID + fileNum;
+
+	const chunkDir = __dirname + "/chunks";
+
+	if (!fs.existsSync(chunkDir)) {
+		fs.mkdirSync(chunkDir);
+	}
+
+	const chunkFilePath = `${chunkDir}/${fileName}.part_${chunkNum}`;
+
+	try {
+		await fs.promises.writeFile(
+			chunkFilePath,
+			chunk,
+			(err) => err && console.error(err)
+		);
+		console.log(`Chunk ${chunkNum}/${totalChunks} saved`);
+
+		if (chunkNum === totalChunks - 1) {
+			await mergeChunks(fileName, totalChunks, userID);
+			console.log("File merged successfully");
+		}
+
+		res
+			.status(200)
+			.send("Chunk " + (chunkNum + 1) + " of " + totalChunks + " received");
+	} catch (error) {
+		console.error("Error saving chunk:", error);
+		res
+			.status(500)
+			.send("Error saving chunk " + (chunkNum + 1) + " of " + totalChunks);
+	}
 });
 
 export default router;
