@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { config } from "./constants.js";
 import {
 	deleteUserStreams,
+	getTop20,
 	getUserUpload,
 	insertStreams,
 	setUserUpload,
@@ -224,6 +225,11 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 			.status(500)
 			.send("Error saving chunk " + (chunkNum + 1) + " of " + totalChunks);
 	}
+});
+
+router.get("/getTop20", async (req, res) => {
+	const { userID } = req.query;
+	res.send(await getTop20(userID));
 });
 
 export default router;

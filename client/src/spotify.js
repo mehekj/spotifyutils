@@ -109,3 +109,8 @@ export const getUserData = async () => {
 
 	return returnData;
 };
+
+export const getTop20 = async (userID) => {
+	const res = await axios.get(`${config.server}/getTop20?userID=${userID}`);
+	return res;
+};

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { accessToken, logout } from "./spotify";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import Upload from "./pages/Upload";
+import React, { useEffect, useState } from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import NavBar from "./components/NavBar";
-import { getUserData } from "./spotify";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Upload from "./pages/Upload";
+import { accessToken, getUserData, logout } from "./spotify";
 
 export const UserContext = React.createContext(null);
 
