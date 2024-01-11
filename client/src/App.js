@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Upload from "./pages/Upload";
 import { accessToken, getUserData, logout } from "./spotify";
+import { ChakraProvider, Button } from "@chakra-ui/react";
 
 export const UserContext = React.createContext(null);
 
@@ -25,11 +26,11 @@ const App = () => {
 	}, []);
 
 	return (
-		<div>
+		<ChakraProvider>
 			{token ? (
 				<>
 					<NavBar />
-					<button onClick={logout}>log out</button>
+					<Button onClick={logout}>log out</Button>
 					<Router>
 						<UserContext.Provider value={{ user: user }}>
 							<Routes>
@@ -42,7 +43,7 @@ const App = () => {
 			) : (
 				<Login />
 			)}
-		</div>
+		</ChakraProvider>
 	);
 };
 
