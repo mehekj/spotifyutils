@@ -6,15 +6,14 @@ export default function Home() {
 	const { user } = useContext(UserContext);
 	const [top20, setTop20] = useState([]);
 
-	// useEffect(() => {
-	// 	if (user) {
-	// 		const fetchTop20 = async () => {
-	// 			getTop20(user.id).then((res) => setTop20(res.data));
-	// 		};
-
-	// 		fetchTop20().catch((err) => console.error(err));
-	// 	}
-	// }, [user]);
+	useEffect(() => {
+		if (user) {
+			const fetchTop20 = async () => {
+				getTop20(user.id).then((res) => setTop20(res.data));
+			};
+			fetchTop20().catch((err) => console.error(err));
+		}
+	}, [user]);
 
 	return (
 		<div>
