@@ -1,3 +1,4 @@
+import { Heading, Text, VStack } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
 import { getTop20 } from "../spotify";
@@ -16,12 +17,15 @@ export default function Home() {
 	}, [user]);
 
 	return (
-		<div>
-			<div>Welcome {user.display_name}!</div>
-			<div>
-				Your last data upload: {new Date(user.lastUpload).toLocaleString()}
-			</div>
-			<div>{JSON.stringify(top20)}</div>
-		</div>
+		<VStack align={"flex-start"} spacing={5}>
+			<Heading size={"2xl"}>
+				Welcome{user.display_name ? " " + user.display_name : ""}!
+			</Heading>
+			<Text>
+				Your last data upload:{" "}
+				{user.lastUpload && new Date(user.lastUpload).toLocaleString()}
+			</Text>
+			{/* <div>{JSON.stringify(top20)}</div> */}
+		</VStack>
 	);
 }
