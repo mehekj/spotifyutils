@@ -5,7 +5,7 @@ export default function Login() {
 	return (
 		<VStack py={8} justify={"center"} h={"100vh"} spacing={10}>
 			<Heading size={"2xl"}>
-				<Highlight query={"spot"} styles={{ color: "spot" }}>
+				<Highlight query={"spot"} styles={{ color: "spot.100" }}>
 					welcome to spotutils
 				</Highlight>
 			</Heading>

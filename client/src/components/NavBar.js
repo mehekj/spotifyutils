@@ -21,7 +21,7 @@ const NavBar = (props) => {
 		<Flex as="nav" justify="space-between" wrap="wrap" w="100%" mb={8} py={8}>
 			<Link href={"/"} _hover={{ textDecoration: "none" }}>
 				<Heading size={"lg"}>
-					<Highlight query={"spot"} styles={{ color: "spot" }}>
+					<Highlight query={"spot"} styles={{ color: "spot.100" }}>
 						spotutils
 					</Highlight>
 				</Heading>
