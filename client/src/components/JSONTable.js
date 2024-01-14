@@ -7,6 +7,7 @@ import {
 	Th,
 	Thead,
 	Tr,
+	Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
@@ -47,13 +48,17 @@ export default function JSONTable({ data, keys }) {
 			case "liked":
 				return likeButton(row);
 			default:
-				return row[key].toString();
+				return <Text>{row[key].toString()}</Text>;
 		}
 	};
 
 	return (
 		<TableContainer w={"100%"}>
-			<Table variant={"striped"} colorScheme={"whiteAlpha"}>
+			<Table
+				variant={"striped"}
+				colorScheme={"whiteAlpha"}
+				size={{ base: "sm", md: "md" }}
+			>
 				<Thead>
 					<Tr>
 						{columns.map((col, i) => (
