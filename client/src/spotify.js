@@ -112,5 +112,46 @@ export const getUserData = async () => {
 
 export const getTop20 = async (userID) => {
 	const res = await axios.get(`${config.server}/getTop20?userID=${userID}`);
-	return res;
+	const tracks = res.data;
+
+	const ids = tracks.map((track) => track._id.split(":")[2]);
+	const idStr = ids.join("%2C");
+
+	const likedRes = await axios
+		.get(`https://api.spotify.com/v1/me/tracks/contains?ids=${idStr}`, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		})
+		.catch((err) => console.error(err));
+
+	tracks.forEach((track, i) => (track.liked = likedRes.data[i]));
+
+	console.log(tracks);
+
+	return tracks;
+};
+
+export const toggleLike = async (trackID, liked) => {
+	const id = trackID.split(":")[2];
+
+	if (liked) {
+		await axios.delete(`https://api.spotify.com/v1/me/tracks?ids=${id}`, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+		});
+	} else {
+		await axios.put(
+			`https://api.spotify.com/v1/me/tracks?ids=${id}`,
+			{},
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+			}
+		);
+	}
 };

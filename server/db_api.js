@@ -49,7 +49,7 @@ export const getTop20 = async (userID) => {
 				count: { $sum: 1 },
 			},
 		},
-		{ $sort: { count: -1 } },
+		{ $sort: { count: 1 } },
 		{ $limit: 20 },
 	];
 
