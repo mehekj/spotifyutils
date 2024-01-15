@@ -5,6 +5,7 @@ import { theme } from "./Theme";
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Track from "./pages/Track";
 import Upload from "./pages/Upload";
 import { accessToken, getUserData } from "./spotify";
 
@@ -37,6 +38,7 @@ const App = () => {
 								<Routes>
 									<Route path="/" element={<Home />}></Route>
 									<Route path="/upload" element={<Upload />}></Route>
+									<Route path="/track" element={<Track />}></Route>
 								</Routes>
 							</UserContext.Provider>
 						</Router>

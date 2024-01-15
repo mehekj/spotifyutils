@@ -49,8 +49,27 @@ export const getTop20 = async (userID) => {
 				count: { $sum: 1 },
 			},
 		},
-		{ $sort: { count: 1 } },
+		{ $sort: { count: -1 } },
 		{ $limit: 20 },
+	];
+
+	const result = await streams.aggregate(pipeline).toArray();
+
+	return result;
+};
+
+export const trackListens = async (userID, trackID) => {
+	const pipeline = [
+		{
+			$match: {
+				$and: [{ user: userID }, { spotify_track_uri: trackID }],
+			},
+		},
+		{
+			$sort: {
+				ts: -1,
+			},
+		},
 	];
 
 	const result = await streams.aggregate(pipeline).toArray();

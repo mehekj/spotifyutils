@@ -155,3 +155,25 @@ export const toggleLike = async (trackID, liked) => {
 		);
 	}
 };
+
+export const getTrackListens = async (userID, trackID) => {
+	const res = await axios.get(
+		`${config.server}/trackListens?userID=${userID}&trackID=${trackID}`
+	);
+
+	return res;
+};
+
+export const getLiked = async (trackID) => {
+	const id = trackID.split(":")[2];
+
+	const likedRes = await axios
+		.get(`https://api.spotify.com/v1/me/tracks/contains?ids=${id}`, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		})
+		.catch((err) => console.error(err));
+
+	return likedRes.data;
+};

@@ -8,47 +8,36 @@ import {
 	Thead,
 	Tr,
 	Text,
+	Link,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toggleLike } from "../spotify";
+import LikeButton from "./LikeButton";
 
-export default function JSONTable({ data, keys }) {
+export default function JSONTable({ data, keys = null }) {
 	const [columns, setColumns] = useState([]);
-	const [likes, setLikes] = useState([]);
 
 	useEffect(() => {
 		if (data && keys) {
 			setColumns(Object.keys(data[0]).filter((col) => keys.includes(col)));
-
-			if (keys.includes("liked")) {
-				setLikes([...data].map((row) => row.liked));
-			}
+		} else if (data) {
+			setColumns(Object.keys(data[0]));
 		}
 	}, [data, keys]);
-
-	const likeButton = (track) => {
-		return (
-			<Box
-				onPointerDown={async (e) => {
-					e.stopPropagation();
-					await toggleLike(track._id, track.liked);
-					track.liked = !track.liked;
-					setLikes([...data].map((row) => row.liked));
-				}}
-				cursor={"pointer"}
-			>
-				{track.liked ? <FaHeart /> : <FaRegHeart />}
-			</Box>
-		);
-	};
 
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":
-				return likeButton(row);
+				return <LikeButton id={row["_id"]} like={row["liked"]} size={18} />;
+			case "track":
+				return (
+					<Link href={`/track?id=${row["_id"]}`}>
+						<Text>{row[key].toString()}</Text>
+					</Link>
+				);
 			default:
-				return <Text>{row[key].toString()}</Text>;
+				return <Text>{String(row[key])}</Text>;
 		}
 	};
 

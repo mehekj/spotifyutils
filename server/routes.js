@@ -12,6 +12,7 @@ import {
 	getUserUpload,
 	insertStreams,
 	setUserUpload,
+	trackListens,
 } from "./db_api.js";
 
 const router = express.Router();
@@ -230,6 +231,12 @@ router.post("/upload", upload.single("chunk"), async (req, res) => {
 router.get("/getTop20", async (req, res) => {
 	const { userID } = req.query;
 	res.send(await getTop20(userID));
+});
+
+router.get("/trackListens", async (req, res) => {
+	const { userID, trackID } = req.query;
+
+	res.send(await trackListens(userID, trackID));
 });
 
 export default router;

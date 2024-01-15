@@ -7,7 +7,6 @@ import {
 	Stack,
 	Text,
 	VStack,
-	Container,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useContext, useState } from "react";
