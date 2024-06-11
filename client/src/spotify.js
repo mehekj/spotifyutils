@@ -84,6 +84,8 @@ const getAccessToken = () => {
 
 		window.localStorage.setItem(LOCAL_KEYS.timestamp, Date.now());
 
+        window.location.search = "";
+
 		return queryParams[LOCAL_KEYS.accessToken];
 	}
 };
