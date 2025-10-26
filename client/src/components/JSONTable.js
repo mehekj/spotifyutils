@@ -1,18 +1,15 @@
 import {
-	Box,
-	Table,
-	TableContainer,
-	Tbody,
-	Td,
-	Th,
-	Thead,
-	Tr,
-	Text,
-	Link,
+    Link,
+    Table,
+    TableContainer,
+    Tbody,
+    Td,
+    Text,
+    Th,
+    Thead,
+    Tr
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { toggleLike } from "../spotify";
 import LikeButton from "./LikeButton";
 
 export default function JSONTable({ data, keys = null }) {

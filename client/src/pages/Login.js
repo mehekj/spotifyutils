@@ -1,4 +1,4 @@
-import { Button, Heading, Highlight, Link, VStack } from "@chakra-ui/react";
+import { Button, Heading, Highlight, Link, VStack, Text } from "@chakra-ui/react";
 import { config } from "../constants.js";
 
 export default function Login() {
@@ -12,6 +12,7 @@ export default function Login() {
 			<Link href={`${config.server}/login`}>
 				<Button type="submit">get started</Button>
 			</Link>
+            <Text>developed by Mehek Jethani</Text>
 		</VStack>
 	);
 }
