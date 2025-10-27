@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import { ChakraProvider, Container } from "@chakra-ui/react";
+import React from "react";
+import Login from "./pages/Login";
+import { system } from "./theme";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+export const UserContext = React.createContext(null);
+
+const App = () => {
+	return (
+		<ChakraProvider value={system}>
+			<Container maxW={"container.xl"} bg={"body"} color={"text"}>
+				<Login />
+			</Container>
+		</ChakraProvider>
+	);
+};
 
 export default App;
