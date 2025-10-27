@@ -8,7 +8,8 @@
 		"client": "cd client && npm start",
 		"dev": "concurrently \"npm run server\" \"npm run client\"",
 		"build": "cd client && npm run build",
-		"start": "cd backend && node server.js"
+		"deploy-build": "npm install && cd client && npm install && npm run build && cd ../backend && npm install",
+		"deploy-server": "cd backend && npm start"
 	},
 	"author": "",
 	"license": "ISC",
