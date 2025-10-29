@@ -9,16 +9,14 @@ import {
 
 export default function Login() {
 	return (
-		<VStack py={8} justify={"center"} h={"100vh"} spacing={10}>
-			<Heading size={"2xl"}>
+		<VStack py={8} justify={"center"} h={"100vh"} gap={10}>
+			<Heading size={"5xl"} fontWeight={"bold"}>
 				<Highlight query={"spot"} styles={{ color: "spot.100" }}>
 					welcome to spotutils
 				</Highlight>
 			</Heading>
-			<Link href={`/login`}>
-				<Button bg="bg.muted" color="white">
-					get started
-				</Button>
+			<Link href={`/login`} variant={"subtle"}>
+				<Button variant={"subtle"}>get started</Button>
 			</Link>
 			<Text>developed by Mehek Jethani</Text>
 		</VStack>

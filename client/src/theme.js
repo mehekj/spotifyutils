@@ -1,6 +1,31 @@
-import { createSystem, defaultConfig } from "@chakra-ui/react";
+import {
+	createSystem,
+	defaultConfig,
+	defineConfig,
+	defineRecipe,
+} from "@chakra-ui/react";
 
-export const system = createSystem(defaultConfig, {
+const buttonRecipe = defineRecipe({
+	variants: {
+		variant: {
+			subtle: {
+				fontWeight: "bold",
+				fontSize: "md",
+				bg: "gray.100/50",
+				color: "white",
+				borderRadius: "md",
+				_hover: {
+					bg: "gray.200/70",
+				},
+				_focus: {
+					bg: "gray.200/90",
+				},
+			},
+		},
+	},
+});
+
+const customConfig = defineConfig({
 	theme: {
 		tokens: {
 			colors: {
@@ -27,5 +52,10 @@ export const system = createSystem(defaultConfig, {
 				},
 			},
 		},
+		recipes: {
+			button: buttonRecipe,
+		},
 	},
 });
+
+export const system = createSystem(defaultConfig, customConfig);
