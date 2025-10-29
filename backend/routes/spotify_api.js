@@ -1,4 +1,10 @@
 import express from "express";
+import QueryString from "qs";
+import axios from "axios";
+
+const REDIRECT_URI = `${process.env.SERVER}/spotify/redirect`;
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 export const spotifyRouter = express.Router();
 
@@ -13,7 +19,7 @@ const generateRandomString = (length) =>
 	Math.random().toString(20).substring(2, length);
 
 spotifyRouter.get("/login", (req, res) => {
-	console.log("HELLLO");
+	console.log(process.env.CLIENT_ID);
 
 	var state = generateRandomString(16);
 	var scope = scopes.join(" ");
@@ -36,21 +42,23 @@ spotifyRouter.get("/redirect", (req, res) => {
 	else {
 		const code = req.query.code;
 
-		axios({
-			method: "post",
-			url: "https://accounts.spotify.com/api/token",
-			data: QueryString.stringify({
-				grant_type: "authorization_code",
-				code: code,
-				redirect_uri: REDIRECT_URI,
-			}),
-			headers: {
-				"content-type": "application/x-www-form-urlencoded",
-				Authorization: `Basic ${new Buffer.from(
-					`${CLIENT_ID}:${CLIENT_SECRET}`
-				).toString("base64")}`,
-			},
-		})
+		axios
+			.post(
+				"https://accounts.spotify.com/api/token",
+				QueryString.stringify({
+					grant_type: "authorization_code",
+					code: code,
+					redirect_uri: REDIRECT_URI,
+				}),
+				{
+					headers: {
+						"content-type": "application/x-www-form-urlencoded",
+						Authorization: `Basic ${Buffer.from(
+							`${CLIENT_ID}:${CLIENT_SECRET}`
+						).toString("base64")}`,
+					},
+				}
+			)
 			.then((response) => {
 				if (response.status === 200) {
 					const { access_token, refresh_token, expires_in } = response.data;

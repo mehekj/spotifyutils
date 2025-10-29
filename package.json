@@ -9,7 +9,8 @@
 		"dev": "concurrently \"npm run server\" \"npm run client\"",
 		"build": "cd client && npm run build",
 		"deploy-build": "npm install && cd client && npm install && npm run build && cd ../backend && npm install",
-		"deploy-server": "cd backend && npm start"
+		"deploy-server": "cd backend && npm start",
+		"local-deploy": "npm run build && npm run server"
 	},
 	"author": "",
 	"license": "ISC",
