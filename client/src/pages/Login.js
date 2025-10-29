@@ -15,7 +15,7 @@ export default function Login() {
 					welcome to spotutils
 				</Highlight>
 			</Heading>
-			<Link href={`/login`} variant={"subtle"}>
+			<Link href={`/spotify/login`} variant={"subtle"}>
 				<Button variant={"subtle"}>get started</Button>
 			</Link>
 			<Text>developed by Mehek Jethani</Text>

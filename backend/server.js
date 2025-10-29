@@ -1,14 +1,17 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { spotifyRouter } from "./routes/spotify_api.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+app.use("/spotify/", spotifyRouter);
+
 app.use(express.static(path.join(__dirname, "../client/build")));
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5050;
 
 app.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`);
