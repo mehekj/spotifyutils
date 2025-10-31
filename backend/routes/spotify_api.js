@@ -22,7 +22,7 @@ spotifyRouter.get("/login", (req, res) => {
 	var state = generateRandomString(16);
 	var scope = scopes.join(" ");
 
-	console.log("User attempting to log in");
+	console.log("User attempting to log in, redirect: ", REDIRECT_URI);
 
 	res.redirect(
 		"https://accounts.spotify.com/authorize?" +
