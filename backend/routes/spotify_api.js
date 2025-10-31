@@ -85,7 +85,7 @@ spotifyRouter.get("/user", (req, res) => {
 
 	const cookies = req.headers.cookie;
 	if (!cookies) {
-		res.send(401).send("Missing access token");
+		res.send(401);
 	}
 
 	const values = cookies.split(";").reduce((res, item) => {
