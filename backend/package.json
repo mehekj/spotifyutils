@@ -14,6 +14,7 @@
 	},
 	"type": "module",
 	"devDependencies": {
+		"cors": "^2.8.5",
 		"nodemon": "^3.1.10"
 	}
 }

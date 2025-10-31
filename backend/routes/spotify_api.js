@@ -1,6 +1,6 @@
+import axios from "axios";
 import express from "express";
 import QueryString from "qs";
-import axios from "axios";
 
 const REDIRECT_URI = `${process.env.SERVER}/spotify/redirect`;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -19,10 +19,10 @@ const generateRandomString = (length) =>
 	Math.random().toString(20).substring(2, length);
 
 spotifyRouter.get("/login", (req, res) => {
-	console.log(process.env.CLIENT_ID);
-
 	var state = generateRandomString(16);
 	var scope = scopes.join(" ");
+
+	console.log("User attempting to log in");
 
 	res.redirect(
 		"https://accounts.spotify.com/authorize?" +
@@ -41,6 +41,8 @@ spotifyRouter.get("/redirect", (req, res) => {
 	else if (!req.query.state) res.send("state mismatch");
 	else {
 		const code = req.query.code;
+
+		console.log("User logged in, requesting Spotify access token");
 
 		axios
 			.post(
@@ -62,14 +64,12 @@ spotifyRouter.get("/redirect", (req, res) => {
 			.then((response) => {
 				if (response.status === 200) {
 					const { access_token, refresh_token, expires_in } = response.data;
-
-					const queryParams = QueryString.stringify({
-						access_token,
-						refresh_token,
-						expires_in,
+					res.cookie("spotify_access_token", access_token, {
+						httpOnly: true,
+						maxAge: expires_in * 1000,
+						secure: process.env.NODE_ENV === "production",
 					});
-
-					res.send("HELLO SUCCESS");
+					res.redirect("/");
 				} else {
 					res.send("invalid token");
 				}
@@ -79,3 +79,44 @@ spotifyRouter.get("/redirect", (req, res) => {
 			});
 	}
 });
+
+spotifyRouter.get("/user", (req, res) => {
+	console.log("Fetching Spotify user data");
+
+	const cookies = req.headers.cookie;
+	if (!cookies) {
+		res.send(401).send("Missing access token");
+	}
+
+	const values = cookies.split(";").reduce((res, item) => {
+		const data = item.trim().split("=");
+		return { ...res, [data[0]]: data[1] };
+	}, {});
+
+	if (!values["spotify_access_token"]) {
+		return res.status(401).send("Missing access token");
+	}
+
+	axios
+		.get("https://api.spotify.com/v1/me", {
+			headers: { Authorization: `Bearer ${values["spotify_access_token"]}` },
+		})
+		.then((response) => {
+			res.json(response.data);
+		})
+		.catch((error) => {
+			res.status(502).send("Error fetching user data: ", error);
+		});
+});
+
+/**
+ * NEW FLOW
+ * client hits login
+ * server login route redirects to spotify auth
+ * user logs in and spotify redirects to server redirect route
+ * server redirect route gets access and refresh tokens from spotify
+ * server redirect route stores refresh token in database and sends access token to client as a cookie
+ * client attempts to make requests to spotify api routes with access token cookie
+ * if access token expired, client hits refresh token route
+ * server refresh token route gets refresh token from database, requests new access token from spotify, and sends it to client as a cookie
+ */
