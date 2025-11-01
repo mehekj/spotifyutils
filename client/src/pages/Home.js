@@ -2,7 +2,7 @@ import { Heading, VStack } from "@chakra-ui/react";
 import { useContext } from "react";
 import { UserContext } from "../App";
 
-export default function Home() {
+const Home = () => {
 	const { user } = useContext(UserContext);
 
 	return (
@@ -12,4 +12,6 @@ export default function Home() {
 			</Heading>
 		</VStack>
 	);
-}
+};
+
+export default Home;

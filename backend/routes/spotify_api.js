@@ -32,6 +32,7 @@ spotifyRouter.get("/login", (req, res) => {
 				scope: scope,
 				redirect_uri: REDIRECT_URI,
 				state: state,
+				show_dialog: true,
 			})
 	);
 });
@@ -80,16 +81,18 @@ spotifyRouter.get("/redirect", (req, res) => {
 	}
 });
 
+spotifyRouter.post("/logout", (req, res) => {
+	console.log("User logging out");
+	res.clearCookie("spotify_access_token");
+	res.end();
+});
+
 spotifyRouter.get("/user", (req, res) => {
 	console.log("Fetching Spotify user data");
 
 	const cookies = req.headers.cookie;
 	if (!cookies) {
 		return res.status(401).send("Missing access token");
-	}
-
-	if (cookies === undefined) {
-		console.log("WHY");
 	}
 
 	const values = cookies.split(";").reduce((res, item) => {
@@ -112,15 +115,3 @@ spotifyRouter.get("/user", (req, res) => {
 			res.status(502).send("Error fetching user data: ", error);
 		});
 });
-
-/**
- * NEW FLOW
- * client hits login
- * server login route redirects to spotify auth
- * user logs in and spotify redirects to server redirect route
- * server redirect route gets access and refresh tokens from spotify
- * server redirect route stores refresh token in database and sends access token to client as a cookie
- * client attempts to make requests to spotify api routes with access token cookie
- * if access token expired, client hits refresh token route
- * server refresh token route gets refresh token from database, requests new access token from spotify, and sends it to client as a cookie
- */

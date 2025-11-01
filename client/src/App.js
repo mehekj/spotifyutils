@@ -32,8 +32,8 @@ const App = () => {
 				maxW={"container.xl"}
 				bg={"body"}
 				color={"text"}
-				w={"100vw"}
-				h={"100vh"}
+				minW={"100vw"}
+				minH={"100vh"}
 				p={0}
 				m={0}
 			>

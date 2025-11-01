@@ -7,7 +7,7 @@ import {
 	VStack,
 } from "@chakra-ui/react";
 
-export default function Login() {
+const Login = () => {
 	return (
 		<VStack py={8} justify={"center"} h={"100vh"} gap={10}>
 			<Heading size={"5xl"} fontWeight={"bold"}>
@@ -21,4 +21,6 @@ export default function Login() {
 			<Text>developed by Mehek Jethani</Text>
 		</VStack>
 	);
-}
+};
+
+export default Login;
