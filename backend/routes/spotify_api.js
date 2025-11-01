@@ -70,7 +70,13 @@ spotifyRouter.get("/redirect", (req, res) => {
 						maxAge: expires_in * 1000,
 						secure: process.env.NODE_ENV === "production",
 					});
-					res.redirect("/");
+					res.redirect(
+						`${
+							process.env.NODE_ENV === "production"
+								? ""
+								: "http://localhost:3000"
+						}/`
+					);
 				} else {
 					res.send("invalid token");
 				}
