@@ -1,4 +1,3 @@
-import { FaHeart, FaBars } from "react-icons/fa";
 import {
 	Box,
 	Button,
@@ -10,6 +9,7 @@ import {
 	Text,
 } from "@chakra-ui/react";
 import React from "react";
+import { FaBars, FaHeart } from "react-icons/fa";
 import { logout } from "../spotify_client";
 
 const NavBar = () => {

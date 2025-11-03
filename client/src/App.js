@@ -14,13 +14,14 @@ const App = () => {
 
 	useEffect(() => {
 		const fetchUser = async () => {
-			getUserData()
-				.then((res) => {
-					setUser({ display_name: res.display_name });
-				})
-				.catch((err) => {
+			try {
+				const res = await getUserData();
+				setUser({ display_name: res.display_name });
+			} catch (err) {
+				if (!err._handled) {
 					console.error("Error fetching user data:", err);
-				});
+				}
+			}
 		};
 
 		fetchUser().catch((err) => console.error(err));
