@@ -1,6 +1,6 @@
 import { ChakraProvider, Container } from "@chakra-ui/react";
-import React, { useState, useEffect } from "react";
-import { Route, BrowserRouter, Routes } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -16,7 +16,8 @@ const App = () => {
 		const fetchUser = async () => {
 			try {
 				const res = await getUserData();
-				setUser({ display_name: res.display_name });
+				console.log(res);
+				setUser(res);
 			} catch (err) {
 				if (!err._handled) {
 					console.error("Error fetching user data:", err);

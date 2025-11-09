@@ -1,12 +1,22 @@
 import express from "express";
-import { SpotifyAPIError, spotifyRequest } from "../middleware/spotify.js";
+import { MongoAPIError } from "mongodb";
 import { requireSpotifyAuth } from "../middleware/auth.js";
+import { getUserUpload } from "../middleware/mongo.js";
+import { SpotifyAPIError, spotifyRequest } from "../middleware/spotify.js";
 
 export const spotifyRouter = express.Router();
 
 spotifyRouter.use((err, req, res, next) => {
 	if (err instanceof SpotifyAPIError) {
 		console.error("Spotify request error:", err);
+		return res.status(err.status || 500).json({
+			message: err.message,
+			details: err.details,
+		});
+	}
+
+	if (err instanceof MongoAPIError) {
+		console.error("MongoDB request error:", err);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -22,6 +32,8 @@ spotifyRouter.get("/me", requireSpotifyAuth(), async (req, res, next) => {
 
 	try {
 		const user = await spotifyRequest(req, res, "/me");
+		const lastUpload = await getUserUpload(user.id);
+		user.lastUpload = lastUpload.time;
 		res.json(user);
 	} catch (err) {
 		next(err);

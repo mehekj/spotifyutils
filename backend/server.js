@@ -2,8 +2,8 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
-import { spotifyRouter } from "./routes/spotify.js";
 import { authRouter } from "./routes/auth.js";
+import { spotifyRouter } from "./routes/spotify.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
