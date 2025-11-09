@@ -13,9 +13,9 @@ import { FaBars, FaHeart } from "react-icons/fa";
 import { logout } from "../spotify_client";
 
 const NavBar = () => {
-	const [open, setopen] = React.useState(false);
+	const [isOpen, setIsOpen] = React.useState(false);
 
-	const toggle = () => setopen(!open);
+	const toggle = () => setIsOpen(!isOpen);
 
 	return (
 		<Flex as="nav" justify="space-between" wrap="wrap" w="100%" mb={8} py={8}>
@@ -31,10 +31,10 @@ const NavBar = () => {
 				onPointerDown={toggle}
 				colorScheme="transparent"
 			>
-				{open ? <FaHeart boxSize={5} /> : <FaBars boxSize={7} />}
+				{isOpen ? <FaHeart boxSize={5} /> : <FaBars boxSize={7} />}
 			</Button>
 			<Box
-				display={{ base: open ? "block" : "none", md: "block" }}
+				display={{ base: isOpen ? "block" : "none", md: "block" }}
 				flexBasis={{ base: "100%", md: "auto" }}
 				bg={{ base: "gray.700", md: "transparent" }}
 				py={{ base: 5, md: 0 }}

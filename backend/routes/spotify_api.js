@@ -74,7 +74,7 @@ spotifyRouter.use((err, req, res, next) => {
 	}
 
 	console.error("Unhandled error:", err);
-	res.status(500).json({ message: "Internal server errro" });
+	res.status(500).json({ message: "Internal server error" });
 });
 
 spotifyRouter.get("/me", requireSpotifyAuth(), async (req, res) => {

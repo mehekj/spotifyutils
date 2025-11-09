@@ -7,11 +7,11 @@ export const login = async () => {
 };
 
 export const getUserData = async () => {
-	return api.get("/spotify/me").then((res) => res.data);
+	const response = await api.get("/spotify/me");
+	return response.data;
 };
 
 export const logout = async () => {
-	api.post("/auth/logout").then(() => {
-		window.location.reload();
-	});
+	await api.post("/auth/logout");
+	window.location.reload();
 };

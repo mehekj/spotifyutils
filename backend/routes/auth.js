@@ -116,10 +116,10 @@ const generateRandomString = (length) =>
 	Math.random().toString(20).substring(2, length);
 
 authRouter.get("/login", (req, res) => {
-	var state = generateRandomString(16);
-	var scope = scopes.join(" ");
+	const state = generateRandomString(16);
+	const scope = scopes.join(" ");
 
-	console.log("User attempting to log in, redirect: ", REDIRECT_URI);
+	console.log("User attempting to log in, redirect:", REDIRECT_URI);
 
 	res.redirect(
 		"https://accounts.spotify.com/authorize?" +
@@ -136,44 +136,49 @@ authRouter.get("/login", (req, res) => {
 
 authRouter.get("/redirect", async (req, res) => {
 	if (req.query.error) res.send(req.query.error);
-	else if (!req.query.state) res.send("Authorization code state mismatch");
 	else {
 		const code = req.query.code;
+	if (req.query.error) {
+		return res.status(400).json({ message: req.query.error });
+	}
 
-		console.log("User logged in, requesting Spotify access token");
+	if (!req.query.state) {
 
 		try {
 			const response = await axios.post(
-				"https://accounts.spotify.com/api/token",
 				QueryString.stringify({
 					grant_type: "authorization_code",
 					code: code,
-					redirect_uri: REDIRECT_URI,
-				}),
-				{
-					headers: {
-						"content-type": "application/x-www-form-urlencoded",
-						Authorization: `Basic ${Buffer.from(
-							`${CLIENT_ID}:${CLIENT_SECRET}`
-						).toString("base64")}`,
-					},
-				}
-			);
+	const code = req.query.code;
+	console.log("User logged in, requesting Spotify access token");
 
-			if (response.status === 200) {
-				const { access_token, refresh_token, expires_in } = response.data;
-				setTokenCookies(res, access_token, refresh_token, expires_in);
-				res.redirect(
-					`${
-						process.env.NODE_ENV === "production" ? "" : "http://localhost:3000"
-					}/`
-				);
-			} else {
-				res.status(500).send("Invalid token");
+	try {
+		const response = await axios.post(
+			"https://accounts.spotify.com/api/token",
+			QueryString.stringify({
+				grant_type: "authorization_code",
+				code,
+				redirect_uri: REDIRECT_URI,
+			}),
+			{
+				headers: {
+					"content-type": "application/x-www-form-urlencoded",
+					Authorization: `Basic ${Buffer.from(
+						`${CLIENT_ID}:${CLIENT_SECRET}`
+					).toString("base64")}`,
+				},
 			}
-		} catch (err) {
-			res.status(500).send("Error getting tokens:", err.message);
-		}
+		);
+
+		const { access_token, refresh_token, expires_in } = response.data;
+		setTokenCookies(res, access_token, refresh_token, expires_in);
+
+		const redirectBase =
+			process.env.NODE_ENV === "production" ? "" : "http://localhost:3000";
+		res.redirect(`${redirectBase}/`);
+	} catch (err) {
+		console.error("Error getting tokens:", err.message);
+		res.status(500).json({ message: "Failed to retrieve access token" });
 	}
 });
 
