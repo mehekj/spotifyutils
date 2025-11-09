@@ -1,123 +1,89 @@
 import axios from "axios";
 import express from "express";
-import QueryString from "qs";
-
-const REDIRECT_URI = `${process.env.SERVER}/spotify/redirect`;
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+import { requireSpotifyAuth, getTokenCookies } from "./auth.js";
 
 export const spotifyRouter = express.Router();
 
-const scopes = [
-	"user-library-modify",
-	"user-library-read",
-	"playlist-read-private",
-	"playlist-modify-private",
-];
-
-const generateRandomString = (length) =>
-	Math.random().toString(20).substring(2, length);
-
-spotifyRouter.get("/login", (req, res) => {
-	var state = generateRandomString(16);
-	var scope = scopes.join(" ");
-
-	console.log("User attempting to log in, redirect: ", REDIRECT_URI);
-
-	res.redirect(
-		"https://accounts.spotify.com/authorize?" +
-			QueryString.stringify({
-				response_type: "code",
-				client_id: CLIENT_ID,
-				scope: scope,
-				redirect_uri: REDIRECT_URI,
-				state: state,
-				show_dialog: true,
-			})
-	);
-});
-
-spotifyRouter.get("/redirect", async (req, res) => {
-	if (req.query.error) res.send(req.query.error);
-	else if (!req.query.state) res.send("state mismatch");
-	else {
-		const code = req.query.code;
-
-		console.log("User logged in, requesting Spotify access token");
-
-		try {
-			const response = await axios.post(
-				"https://accounts.spotify.com/api/token",
-				QueryString.stringify({
-					grant_type: "authorization_code",
-					code: code,
-					redirect_uri: REDIRECT_URI,
-				}),
-				{
-					headers: {
-						"content-type": "application/x-www-form-urlencoded",
-						Authorization: `Basic ${Buffer.from(
-							`${CLIENT_ID}:${CLIENT_SECRET}`
-						).toString("base64")}`,
-					},
-				}
-			);
-
-			if (response.status === 200) {
-				const { access_token, refresh_token, expires_in } = response.data;
-				res.cookie("spotify_access_token", access_token, {
-					httpOnly: true,
-					maxAge: expires_in * 1000,
-					secure: process.env.NODE_ENV === "production",
-				});
-				res.cookie("spotify_refresh_token", refresh_token, {
-					httpOnly: true,
-					secure: process.env.NODE_ENV === "production",
-				});
-				res.redirect(
-					`${
-						process.env.NODE_ENV === "production" ? "" : "http://localhost:3000"
-					}/`
-				);
-			} else {
-				res.send("invalid token");
-			}
-		} catch (err) {
-			res.status(502).send("Error getting tokens: " + err);
-		}
+class SpotifyAPIError extends Error {
+	constructor(message, status, details) {
+		super(message);
+		this.name = "SpotifyAPIError";
+		this.status = status;
+		this.details = details;
 	}
-});
+}
 
-spotifyRouter.post("/logout", (req, res) => {
-	console.log("User logging out");
-	res.clearCookie("spotify_access_token");
-	res.clearCookie("spotify_refresh_token");
-	res.end();
-});
-
-spotifyRouter.get("/user", async (req, res) => {
-	console.log("Fetching Spotify user data");
-
-	const cookies = req.headers.cookie;
-	if (!cookies) {
-		return res.status(401).send("Missing access token");
-	}
-
-	const values = cookies.split(";").reduce((res, item) => {
-		const data = item.trim().split("=");
-		return { ...res, [data[0]]: data[1] };
-	}, {});
-
-	if (!values["spotify_access_token"]) {
-		return res.status(401).send("Missing access token");
-	}
+const spotifyRequest = async (req, res, endpoint, options = {}) => {
+	const baseUrl = "https://api.spotify.com/v1";
+	const accessToken = req.accessToken;
 
 	try {
-		const response = await axios.get("https://api.spotify.com/v1/me", {
-			headers: { Authorization: `Bearer ${values["spotify_access_token"]}` },
+		const result = await axios({
+			url: `${baseUrl}${endpoint}`,
+			headers: { Authorization: `Bearer ${accessToken}` },
+			...options,
 		});
-		res.json(response.data);
+		return result.data;
 	} catch (err) {
-		res.status(502).send("Error fetching user data: ", err);
+		const status = err.response?.status;
+		const tokens = getTokenCookies();
+		const refreshToken = tokens.refreshToken;
+
+		if (status === 401 && refreshToken) {
+			console.warn("Access token expired - attempting refresh...");
+
+			const newAccessToken = await refreshSpotifyToken(refreshToken, res);
+			if (!newAccessToken) {
+				throw new SpotifyAPIError(
+					"Failed to refresh Spotify access token",
+					401
+				);
+			}
+
+			try {
+				const retry = await axios({
+					url: `${baseUrl}${endpoint}`,
+					headers: { Authorization: `Bearer ${accessToken}` },
+					...options,
+				});
+				return retry.data;
+			} catch (retryErr) {
+				throw new SpotifyAPIError(
+					"Spotify API request failed after refresh",
+					retryErr.response?.status,
+					retryErr.response?.data
+				);
+			}
+		}
+
+		throw new SpotifyAPIError(
+			"Spotify API request failed",
+			status || 500,
+			err.response?.data || err.message
+		);
+	}
+};
+
+spotifyRouter.use((err, req, res, next) => {
+	if (err instanceof SpotifyAPIError) {
+		console.error("Spotify request error:", err);
+		return res.status(err.status || 500).json({
+			message: err.message,
+			details: err.details,
+		});
+	}
+
+	console.error("Unhandled error:", err);
+	res.status(500).json({ message: "Internal server errro" });
+});
+
+spotifyRouter.get("/me", requireSpotifyAuth(), async (req, res) => {
+	console.log("Fetching Spotify user data");
+
+	try {
+		const user = await spotifyRequest(req, res, "/me");
+		res.json(user);
+	} catch (err) {
+		next(err);
 	}
 });

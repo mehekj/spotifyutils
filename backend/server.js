@@ -3,11 +3,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
 import { spotifyRouter } from "./routes/spotify_api.js";
+import { authRouter } from "./routes/auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+app.use("/auth/", authRouter);
 app.use("/spotify/", spotifyRouter);
 
 app.use(express.static(path.join(__dirname, "../client/build")));
