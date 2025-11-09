@@ -1,10 +1,7 @@
+import { getTokenCookies, refreshSpotifyToken } from "./auth.js";
 import axios from "axios";
-import express from "express";
-import { requireSpotifyAuth, getTokenCookies } from "./auth.js";
 
-export const spotifyRouter = express.Router();
-
-class SpotifyAPIError extends Error {
+export class SpotifyAPIError extends Error {
 	constructor(message, status, details) {
 		super(message);
 		this.name = "SpotifyAPIError";
@@ -13,7 +10,7 @@ class SpotifyAPIError extends Error {
 	}
 }
 
-const spotifyRequest = async (req, res, endpoint, options = {}) => {
+export const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	const baseUrl = "https://api.spotify.com/v1";
 	const accessToken = req.accessToken;
 
@@ -26,8 +23,10 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		return result.data;
 	} catch (err) {
 		const status = err.response?.status;
-		const tokens = getTokenCookies();
+		const tokens = getTokenCookies(req);
 		const refreshToken = tokens.refreshToken;
+
+		console.log(`${baseUrl}${endpoint}`, req, status, tokens, err);
 
 		if (status === 401 && refreshToken) {
 			console.warn("Access token expired - attempting refresh...");
@@ -63,27 +62,3 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		);
 	}
 };
-
-spotifyRouter.use((err, req, res, next) => {
-	if (err instanceof SpotifyAPIError) {
-		console.error("Spotify request error:", err);
-		return res.status(err.status || 500).json({
-			message: err.message,
-			details: err.details,
-		});
-	}
-
-	console.error("Unhandled error:", err);
-	res.status(500).json({ message: "Internal server error" });
-});
-
-spotifyRouter.get("/me", requireSpotifyAuth(), async (req, res) => {
-	console.log("Fetching Spotify user data");
-
-	try {
-		const user = await spotifyRequest(req, res, "/me");
-		res.json(user);
-	} catch (err) {
-		next(err);
-	}
-});

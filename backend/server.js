@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
-import { spotifyRouter } from "./routes/spotify_api.js";
+import { spotifyRouter } from "./routes/spotify.js";
 import { authRouter } from "./routes/auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

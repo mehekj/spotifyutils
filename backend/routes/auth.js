@@ -1,10 +1,13 @@
 import axios from "axios";
 import express from "express";
 import QueryString from "qs";
-
-const REDIRECT_URI = `${process.env.SERVER}/auth/redirect`;
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+import {
+	CLIENT_ID,
+	CLIENT_SECRET,
+	generateRandomString,
+	REDIRECT_URI,
+	setTokenCookies,
+} from "../middleware/auth.js";
 
 export const authRouter = express.Router();
 
@@ -14,106 +17,6 @@ const scopes = [
 	"playlist-read-private",
 	"playlist-modify-private",
 ];
-
-export const getTokenCookies = (req) => {
-	let tokens = { accessToken: null, refreshToken: null };
-
-	const cookies = req.headers.cookie;
-	if (!cookies) {
-		return tokens;
-	}
-
-	const values = cookies.split(";").reduce((res, item) => {
-		const data = item.trim().split("=");
-		return { ...res, [data[0]]: data[1] };
-	}, {});
-
-	if (values["spotify_access_token"]) {
-		tokens.accessToken = values["spotify_access_token"];
-	}
-
-	if (values["spotify_refresh_token"]) {
-		tokens.refreshToken = values["spotify_refresh_token"];
-	}
-
-	return tokens;
-};
-
-const setTokenCookies = (res, accessToken, refreshToken, expiresIn) => {
-	console.log("Updated spotify tokens");
-	res.cookie("spotify_access_token", accessToken, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax",
-		maxAge: expiresIn * 1000,
-	});
-	res.cookie("spotify_refresh_token", refreshToken, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax",
-	});
-};
-
-const refreshSpotifyToken = async (refreshToken, res) => {
-	try {
-		const response = await axios.post(
-			"https://accounts.spotify.com/api/token",
-			QueryString.stringify({
-				grant_type: "authorization_code",
-				refresh_token: refreshToken,
-			}),
-			{
-				headers: {
-					"content-type": "application/x-www-form-urlencoded",
-					Authorization: `Basic ${Buffer.from(
-						`${CLIENT_ID}:${CLIENT_SECRET}`
-					).toString("base64")}`,
-				},
-			}
-		);
-
-		const newAccessToken = response.data.spotify_access_token;
-		const newRefreshToken = response.data.spotify_refresh_token || refreshToken;
-		const expiresIn = response.data.expires_in || 3600;
-		setTokenCookies(res, newAccessToken, newRefreshToken, expiresIn);
-
-		return newAccessToken;
-	} catch (err) {
-		console.error("Failed to refresh token:", err.response?.data || err);
-		return null;
-	}
-};
-
-export const requireSpotifyAuth = () => {
-	return async (req, res, next) => {
-		const tokens = getTokenCookies(req);
-		const accessToken = tokens.accessToken;
-		const refreshToken = tokens.refreshToken;
-
-		if (!refreshToken && !accessToken) {
-			return res.status(401).json({ message: "Login required" });
-		}
-
-		try {
-			if (!accessToken && refreshToken) {
-				const newAccessToken = await refreshSpotifyToken(refreshToken, res);
-				if (!newAccessToken) {
-					return res.status(401).json({ message: "Invalid refresh token" });
-				}
-				req.accessToken = newAccessToken;
-			}
-
-			req.accessToken = accessToken;
-			return next();
-		} catch (err) {
-			console.error("Spotify auth middleware error:", err);
-			return res.status(500).json({ message: "Internal server error" });
-		}
-	};
-};
-
-const generateRandomString = (length) =>
-	Math.random().toString(20).substring(2, length);
 
 authRouter.get("/login", (req, res) => {
 	const state = generateRandomString(16);
@@ -135,20 +38,16 @@ authRouter.get("/login", (req, res) => {
 });
 
 authRouter.get("/redirect", async (req, res) => {
-	if (req.query.error) res.send(req.query.error);
-	else {
-		const code = req.query.code;
 	if (req.query.error) {
 		return res.status(400).json({ message: req.query.error });
 	}
 
 	if (!req.query.state) {
+		return res
+			.status(400)
+			.json({ message: "Authorization code state mismatch" });
+	}
 
-		try {
-			const response = await axios.post(
-				QueryString.stringify({
-					grant_type: "authorization_code",
-					code: code,
 	const code = req.query.code;
 	console.log("User logged in, requesting Spotify access token");
 
