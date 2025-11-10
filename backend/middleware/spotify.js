@@ -42,7 +42,7 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 			try {
 				const retry = await axios({
 					url: `${baseUrl}${endpoint}`,
-					headers: { Authorization: `Bearer ${accessToken}` },
+					headers: { Authorization: `Bearer ${newAccessToken}` },
 					...options,
 				});
 				return retry.data;
