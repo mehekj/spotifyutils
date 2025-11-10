@@ -46,7 +46,7 @@ const Home = () => {
 				</Text>
 			)}
 			{top20.length > 0 && (
-				<JSONTable data={bottom20} keys={["track", "artist", "liked"]} />
+				<JSONTable data={top20} keys={["track", "artist", "liked"]} />
 			)}
 		</VStack>
 	);

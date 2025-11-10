@@ -1,7 +1,11 @@
 import express from "express";
 import { attachSpotifyUser, requireSpotifyAuth } from "../middleware/auth.js";
 import { getUserUpload } from "../middleware/mongo.js";
-import { spotifyDelete, spotifyPut } from "../middleware/spotify.js";
+import {
+	spotifyDelete,
+	spotifyGet,
+	spotifyPut,
+} from "../middleware/spotify.js";
 
 export const spotifyRouter = express.Router();
 
@@ -29,10 +33,23 @@ spotifyRouter.put("/track/like", async (req, res, next) => {
 	}
 });
 
-spotifyRouter.delete("/track/unlike", async (req, res, next) => {
+spotifyRouter.delete("/track/like", async (req, res, next) => {
 	try {
 		await spotifyDelete(req, res, `/me/tracks?ids=${req.query.id}`);
 		res.end();
+	} catch (err) {
+		next(err);
+	}
+});
+
+spotifyRouter.get("/track/like", async (req, res, next) => {
+	try {
+		const response = await spotifyGet(
+			req,
+			res,
+			`/me/tracks/contains?ids=${req.query.id}`
+		);
+		res.json(response);
 	} catch (err) {
 		next(err);
 	}

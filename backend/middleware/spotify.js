@@ -12,7 +12,9 @@ export class SpotifyAPIError extends Error {
 
 const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	const baseUrl = "https://api.spotify.com/v1";
-	const accessToken = req.accessToken;
+	const tokens = getTokenCookies(req);
+	const accessToken = tokens.accessToken;
+	const refreshToken = tokens.refreshToken;
 
 	try {
 		const result = await axios({
@@ -23,10 +25,6 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		return result.data;
 	} catch (err) {
 		const status = err.response?.status;
-		const tokens = getTokenCookies(req);
-		const refreshToken = tokens.refreshToken;
-
-		console.log(`${baseUrl}${endpoint}`, req, status, tokens, err);
 
 		if (status === 401 && refreshToken) {
 			console.warn("Access token expired - attempting refresh...");

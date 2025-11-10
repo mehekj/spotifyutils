@@ -24,20 +24,20 @@ export class MongoAPIError extends Error {
 	}
 }
 
-export const getUserUpload = async (userId) => {
+export const getUserUpload = async (userID) => {
 	try {
-		const result = await users.findOne({ user: userId });
+		const result = await users.findOne({ user: userID });
 		return result;
 	} catch (error) {
 		throw new MongoAPIError("Failed to get user upload", 500, error);
 	}
 };
 
-export const setUserUpload = async (userId) => {
+export const setUserUpload = async (userID) => {
 	try {
 		await users.updateOne(
-			{ user: userId },
-			{ $set: { user: userId, time: Date.now() } },
+			{ user: userID },
+			{ $set: { user: userID, time: Date.now() } },
 			{ upsert: true }
 		);
 	} catch (error) {
@@ -53,9 +53,9 @@ export const deleteStreams = async () => {
 	}
 };
 
-export const deleteUserStreams = async (userId) => {
+export const deleteUserStreams = async (userID) => {
 	try {
-		await streams.deleteMany({ user: userId });
+		await streams.deleteMany({ user: userID });
 	} catch (error) {
 		throw new MongoAPIError("Failed to delete user streams", 500, error);
 	}
@@ -70,13 +70,13 @@ export const insertStreams = async (data) => {
 	}
 };
 
-export const getTop20 = async (userId) => {
+export const getTop20 = async (userID) => {
 	try {
 		const pipeline = [
 			{
 				$match: {
 					$and: [
-						{ user: userId },
+						{ user: userID },
 						{ $expr: { $gte: ["$ms_played", 30000] } },
 						{ $expr: { $ne: ["$spotify_track_uri", null] } },
 					],
@@ -101,13 +101,13 @@ export const getTop20 = async (userId) => {
 	}
 };
 
-export const getBottom20 = async (userId) => {
+export const getBottom20 = async (userID) => {
 	try {
 		const pipeline = [
 			{
 				$match: {
 					$and: [
-						{ user: userId },
+						{ user: userID },
 						{ $expr: { $gte: ["$ms_played", 30000] } },
 						{ $expr: { $ne: ["$spotify_track_uri", null] } },
 					],
@@ -132,12 +132,12 @@ export const getBottom20 = async (userId) => {
 	}
 };
 
-export const trackListens = async (userId, trackId) => {
+export const getTrackStreams = async (userID, trackURI) => {
 	try {
 		const pipeline = [
 			{
 				$match: {
-					$and: [{ user: userId }, { spotify_track_uri: trackId }],
+					$and: [{ user: userID }, { spotify_track_uri: trackURI }],
 				},
 			},
 			{
@@ -150,6 +150,6 @@ export const trackListens = async (userId, trackId) => {
 		const result = await streams.aggregate(pipeline).toArray();
 		return result;
 	} catch (error) {
-		throw new MongoAPIError("Failed to get track listens", 500, error);
+		throw new MongoAPIError("Failed to get track streams", 500, error);
 	}
 };

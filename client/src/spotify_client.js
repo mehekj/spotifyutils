@@ -29,8 +29,19 @@ export const getBottom20 = async () => {
 export const toggleLike = async (trackURI, liked) => {
 	const id = trackURI.split(":")[2];
 	if (liked) {
-		await api.delete(`/spotify/track/unlike?id=${id}`);
+		await api.delete(`/spotify/track/like?id=${id}`);
 	} else {
 		await api.put(`/spotify/track/like?id=${id}`);
 	}
+};
+
+export const getLiked = async (trackURI) => {
+	const id = trackURI.split(":")[2];
+	const response = await api.get(`/spotify/track/like?id=${id}`);
+	return response.data;
+};
+
+export const getTrackStreams = async (trackURI) => {
+	const response = await api.get(`/data/track/streams?uri=${trackURI}`);
+	return response.data;
 };

@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Track from "./pages/Track";
 import { getUserData } from "./spotify_client";
 import { system } from "./theme";
 
@@ -40,6 +41,7 @@ const App = () => {
 							<UserContext.Provider value={{ user: user }}>
 								<Routes>
 									<Route path="/" element={<Home />}></Route>
+									<Route path="/track" element={<Track />}></Route>
 								</Routes>
 							</UserContext.Provider>
 						</BrowserRouter>
