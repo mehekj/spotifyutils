@@ -1,13 +1,14 @@
 import { Heading, Link, Text, VStack } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
-import { getTop20 } from "../spotify_client";
+import { getTop20, getBottom20 } from "../spotify_client";
 import JSONTable from "../components/JSONTable";
 
 const Home = () => {
 	const { user } = useContext(UserContext);
 
-	const [top20, setTop20] = useState([]);
+	const [top20, setTop20] = useState({});
+	const [bottom20, setBottom20] = useState({});
 
 	useEffect(() => {
 		if (user.id && user.lastUpload) {
@@ -16,6 +17,13 @@ const Home = () => {
 				.catch((err) => {
 					if (!err._handled) {
 						console.error("Error fetching user top 20:", err);
+					}
+				});
+			getBottom20()
+				.then(setBottom20)
+				.catch((err) => {
+					if (!err._handled) {
+						console.error("Error fetching user bottom 20:", err);
 					}
 				});
 		}
@@ -38,7 +46,7 @@ const Home = () => {
 				</Text>
 			)}
 			{top20.length > 0 && (
-				<JSONTable data={top20} keys={["track", "artist", "liked"]} />
+				<JSONTable data={bottom20} keys={["track", "artist", "liked"]} />
 			)}
 		</VStack>
 	);

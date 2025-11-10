@@ -101,6 +101,37 @@ export const getTop20 = async (userId) => {
 	}
 };
 
+export const getBottom20 = async (userId) => {
+	try {
+		const pipeline = [
+			{
+				$match: {
+					$and: [
+						{ user: userId },
+						{ $expr: { $gte: ["$ms_played", 30000] } },
+						{ $expr: { $ne: ["$spotify_track_uri", null] } },
+					],
+				},
+			},
+			{
+				$group: {
+					_id: "$spotify_track_uri",
+					track: { $first: "$master_metadata_track_name" },
+					artist: { $first: "$master_metadata_album_artist_name" },
+					count: { $sum: 1 },
+				},
+			},
+			{ $sort: { count: 1 } },
+			{ $limit: 20 },
+		];
+
+		const result = await streams.aggregate(pipeline).toArray();
+		return result;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get bottom 20 tracks", 500, error);
+	}
+};
+
 export const trackListens = async (userId, trackId) => {
 	try {
 		const pipeline = [

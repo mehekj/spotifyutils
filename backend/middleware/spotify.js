@@ -10,7 +10,7 @@ export class SpotifyAPIError extends Error {
 	}
 }
 
-export const spotifyRequest = async (req, res, endpoint, options = {}) => {
+const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	const baseUrl = "https://api.spotify.com/v1";
 	const accessToken = req.accessToken;
 
@@ -63,6 +63,18 @@ export const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	}
 };
 
+export const spotifyGet = (req, res, endpoint, params = {}) =>
+	spotifyRequest(req, res, endpoint, { method: "GET", params });
+
+export const spotifyPost = (req, res, endpoint, data = {}) =>
+	spotifyRequest(req, res, endpoint, { method: "POST", data });
+
+export const spotifyPut = (req, res, endpoint, data = {}) =>
+	spotifyRequest(req, res, endpoint, { method: "PUT", data });
+
+export const spotifyDelete = (req, res, endpoint, data = {}) =>
+	spotifyRequest(req, res, endpoint, { method: "DELETE", data });
+
 export const getUserData = async (req, res) => {
-	return spotifyRequest(req, res, "/me");
+	return spotifyGet(req, res, "/me");
 };

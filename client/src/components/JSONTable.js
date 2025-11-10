@@ -1,11 +1,12 @@
-import { Table, Text, Th } from "@chakra-ui/react";
+import { Table, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-// import LikeButton from "./LikeButton";
+import LikeButton from "./LikeButton";
 
 export default function JSONTable({ data, keys = null }) {
 	const [columns, setColumns] = useState([]);
 
 	useEffect(() => {
+		console.log(data, keys);
 		if (data && keys) {
 			setColumns(Object.keys(data[0]).filter((col) => keys.includes(col)));
 		} else if (data) {
@@ -15,8 +16,8 @@ export default function JSONTable({ data, keys = null }) {
 
 	const cell = (row, key) => {
 		switch (key) {
-			// case "liked":
-			// 	return <LikeButton id={row["_id"]} like={row["liked"]} size={18} />;
+			case "liked":
+				return <LikeButton id={row["_id"]} like={row["liked"]} size={18} />;
 			// case "track":
 			// 	return (
 			// 		<Link href={`/track?id=${row["_id"]}`}>
