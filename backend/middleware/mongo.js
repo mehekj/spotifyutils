@@ -70,7 +70,7 @@ export const insertStreams = async (data) => {
 	}
 };
 
-export const getTop20 = async (userID) => {
+export const getTopTracks = async (userID, limit = 20) => {
 	try {
 		const pipeline = [
 			{
@@ -91,17 +91,17 @@ export const getTop20 = async (userID) => {
 				},
 			},
 			{ $sort: { count: -1 } },
-			{ $limit: 20 },
+			{ $limit: limit },
 		];
 
 		const result = await streams.aggregate(pipeline).toArray();
 		return result;
 	} catch (error) {
-		throw new MongoAPIError("Failed to get top 20 tracks", 500, error);
+		throw new MongoAPIError(`Failed to get top ${limit} tracks`, 500, error);
 	}
 };
 
-export const getBottom20 = async (userID) => {
+export const getBottomTracks = async (userID, limit = 20) => {
 	try {
 		const pipeline = [
 			{
@@ -122,13 +122,13 @@ export const getBottom20 = async (userID) => {
 				},
 			},
 			{ $sort: { count: 1 } },
-			{ $limit: 20 },
+			{ $limit: limit },
 		];
 
 		const result = await streams.aggregate(pipeline).toArray();
 		return result;
 	} catch (error) {
-		throw new MongoAPIError("Failed to get bottom 20 tracks", 500, error);
+		throw new MongoAPIError(`Failed to get bottom ${limit} tracks`, 500, error);
 	}
 };
 

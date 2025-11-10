@@ -12,36 +12,40 @@ export const logout = async () => {
 };
 
 export const getUserData = async () => {
-	const response = await api.get("/spotify/me");
+	const [userResponse, uploadsResponse] = await Promise.all([
+		api.get("/users/me"),
+		api.get("/users/me/uploads/last"),
+	]);
+	return {
+		...userResponse.data,
+		lastUpload: uploadsResponse.data.lastUpload,
+	};
+};
+
+export const getTopTracks = async (limit = 20) => {
+	const response = await api.get(`/tracks/top?limit=${limit}`);
 	return response.data;
 };
 
-export const getTop20 = async () => {
-	const response = await api.get("/data/top20");
-	return response.data;
-};
-
-export const getBottom20 = async () => {
-	const response = await api.get("/data/bottom20");
+export const getBottomTracks = async (limit = 20) => {
+	const response = await api.get(`/tracks/bottom?limit=${limit}`);
 	return response.data;
 };
 
 export const toggleLike = async (trackURI, liked) => {
-	const id = trackURI.split(":")[2];
 	if (liked) {
-		await api.delete(`/spotify/track/like?id=${id}`);
+		await api.delete(`/tracks/${trackURI}/like`);
 	} else {
-		await api.put(`/spotify/track/like?id=${id}`);
+		await api.put(`/tracks/${trackURI}/like`);
 	}
 };
 
 export const getLiked = async (trackURI) => {
-	const id = trackURI.split(":")[2];
-	const response = await api.get(`/spotify/track/like?id=${id}`);
+	const response = await api.get(`/tracks/${trackURI}/like`);
 	return response.data;
 };
 
 export const getTrackStreams = async (trackURI) => {
-	const response = await api.get(`/data/track/streams?uri=${trackURI}`);
+	const response = await api.get(`/tracks/${trackURI}/streams`);
 	return response.data;
 };
