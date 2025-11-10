@@ -96,7 +96,6 @@ export const requireSpotifyAuth = async (req, res, next) => {
 			req.accessToken = newAccessToken;
 		}
 
-		req.accessToken = accessToken;
 		return next();
 	} catch (err) {
 		console.error("Spotify auth middleware error:", err);
