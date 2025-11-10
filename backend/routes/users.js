@@ -1,6 +1,6 @@
 import express from "express";
-import { attachSpotifyUser, requireSpotifyAuth } from "../middleware/auth.js";
-import { getUserUpload } from "../middleware/mongo.js";
+import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
+import { getUserUpload } from "../utils/mongo.js";
 
 export const usersRouter = express.Router();
 

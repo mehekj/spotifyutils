@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { toggleLike } from "../spotify_client";
+import { tracks } from "../api";
 import { useState } from "react";
 
 export default function LikeButton({ id, like, size }) {
@@ -10,7 +10,7 @@ export default function LikeButton({ id, like, size }) {
 		<Box
 			onPointerDown={async (e) => {
 				e.stopPropagation();
-				await toggleLike(id, liked);
+				await tracks.toggleLike(id, liked);
 				setLiked(!liked);
 			}}
 			cursor={"pointer"}

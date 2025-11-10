@@ -1,15 +1,11 @@
 import express from "express";
-import { requireSpotifyAuth, attachSpotifyUser } from "../middleware/auth.js";
+import { requireSpotifyAuth, attachSpotifyUser } from "../utils/auth.js";
 import {
 	getTopTracks,
 	getBottomTracks,
 	getTrackStreams,
-} from "../middleware/mongo.js";
-import {
-	spotifyDelete,
-	spotifyGet,
-	spotifyPut,
-} from "../middleware/spotify.js";
+} from "../utils/mongo.js";
+import { spotifyDelete, spotifyGet, spotifyPut } from "../utils/spotify.js";
 
 export const tracksRouter = express.Router();
 

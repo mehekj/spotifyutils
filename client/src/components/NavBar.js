@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { FaBars, FaHeart } from "react-icons/fa";
-import { logout } from "../spotify_client";
+import { auth } from "../api";
 
 const NavBar = () => {
 	const [isOpen, setIsOpen] = React.useState(false);
@@ -55,7 +55,7 @@ const NavBar = () => {
 							upload
 						</Text>
 					</Link>
-					<Button onPointerDown={logout}>log out</Button>
+					<Button onPointerDown={auth.logout}>log out</Button>
 				</Stack>
 			</Box>
 		</Flex>

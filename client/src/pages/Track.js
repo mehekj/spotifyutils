@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../App";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
-import { getLiked, getTrackStreams } from "../spotify_client";
+import { tracks } from "../api";
 
 export default function TrackEvent() {
 	const { user } = useContext(UserContext);
@@ -17,8 +17,8 @@ export default function TrackEvent() {
 			if (!user.id || !searchParams.get("uri")) return;
 			try {
 				const [streamsRes, likedRes] = await Promise.all([
-					getTrackStreams(searchParams.get("uri")),
-					getLiked(searchParams.get("uri")),
+					tracks.getStreams(searchParams.get("uri")),
+					tracks.isLiked(searchParams.get("uri")),
 				]);
 
 				setTrackStreams(streamsRes);

@@ -1,7 +1,7 @@
 import { Heading, Link, Text, VStack } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
-import { getTopTracks, getBottomTracks } from "../spotify_client";
+import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 
 const Home = () => {
@@ -12,14 +12,14 @@ const Home = () => {
 
 	useEffect(() => {
 		if (user.id && user.lastUpload) {
-			getTopTracks(20)
+			tracks.getTop(20)
 				.then(setTop20)
 				.catch((err) => {
 					if (!err._handled) {
 						console.error("Error fetching user top tracks:", err);
 					}
 				});
-			getBottomTracks(20)
+			tracks.getBottom(20)
 				.then(setBottom20)
 				.catch((err) => {
 					if (!err._handled) {

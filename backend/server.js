@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
 import { MongoAPIError } from "mongodb";
-import { SpotifyAPIError } from "./middleware/spotify.js";
+import { SpotifyAPIError } from "./utils/spotify.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 import { tracksRouter } from "./routes/tracks.js";

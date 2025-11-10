@@ -6,7 +6,7 @@ import {
 	Text,
 	VStack,
 } from "@chakra-ui/react";
-import { login } from "../spotify_client";
+import { auth } from "../api";
 
 const Login = () => {
 	return (
@@ -16,7 +16,7 @@ const Login = () => {
 					welcome to spotutils
 				</Highlight>
 			</Heading>
-			<Link onPointerDown={login} variant={"subtle"}>
+			<Link onPointerDown={auth.login} variant={"subtle"}>
 				<Button variant={"subtle"}>get started</Button>
 			</Link>
 			<Text>developed by Mehek Jethani</Text>

@@ -7,7 +7,7 @@ import {
 	generateRandomString,
 	REDIRECT_URI,
 	setTokenCookies,
-} from "../middleware/auth.js";
+} from "../utils/auth.js";
 
 export const authRouter = express.Router();
 
