@@ -6,12 +6,17 @@ export const login = async () => {
 	window.location.href = `${baseUrl}/auth/login`;
 };
 
+export const logout = async () => {
+	await api.post("/auth/logout");
+	window.location.reload();
+};
+
 export const getUserData = async () => {
 	const response = await api.get("/spotify/me");
 	return response.data;
 };
 
-export const logout = async () => {
-	await api.post("/auth/logout");
-	window.location.reload();
+export const getTop20 = async () => {
+	const response = await api.get("/data/top20");
+	return response.data;
 };

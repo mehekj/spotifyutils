@@ -1,10 +1,13 @@
 import axios from "axios";
-import express from "express";
 import QueryString from "qs";
+import { getUserData } from "./spotify.js";
 
 export const REDIRECT_URI = `${process.env.SERVER}/auth/redirect`;
 export const CLIENT_ID = process.env.CLIENT_ID;
 export const CLIENT_SECRET = process.env.CLIENT_SECRET;
+
+export const generateRandomString = (length) =>
+	Math.random().toString(20).substring(2, length);
 
 export const getTokenCookies = (req) => {
 	let tokens = { accessToken: null, refreshToken: null };
@@ -75,33 +78,46 @@ export const refreshSpotifyToken = async (refreshToken, res) => {
 	}
 };
 
-export const requireSpotifyAuth = () => {
-	return async (req, res, next) => {
-		const tokens = getTokenCookies(req);
-		const accessToken = tokens.accessToken;
-		const refreshToken = tokens.refreshToken;
+export const requireSpotifyAuth = async (req, res, next) => {
+	const tokens = getTokenCookies(req);
+	const accessToken = tokens.accessToken;
+	const refreshToken = tokens.refreshToken;
 
-		if (!refreshToken && !accessToken) {
-			return res.status(401).json({ message: "Login required" });
-		}
+	if (!refreshToken && !accessToken) {
+		return res.status(401).json({ message: "Login required" });
+	}
 
-		try {
-			if (!accessToken && refreshToken) {
-				const newAccessToken = await refreshSpotifyToken(refreshToken, res);
-				if (!newAccessToken) {
-					return res.status(401).json({ message: "Invalid refresh token" });
-				}
-				req.accessToken = newAccessToken;
+	try {
+		if (!accessToken && refreshToken) {
+			const newAccessToken = await refreshSpotifyToken(refreshToken, res);
+			if (!newAccessToken) {
+				return res.status(401).json({ message: "Invalid refresh token" });
 			}
-
-			req.accessToken = accessToken;
-			return next();
-		} catch (err) {
-			console.error("Spotify auth middleware error:", err);
-			return res.status(500).json({ message: "Internal server error" });
+			req.accessToken = newAccessToken;
 		}
-	};
+
+		req.accessToken = accessToken;
+		return next();
+	} catch (err) {
+		console.error("Spotify auth middleware error:", err);
+		return res.status(500).json({ message: "Internal server error" });
+	}
 };
 
-export const generateRandomString = (length) =>
-	Math.random().toString(20).substring(2, length);
+export const attachSpotifyUser = async (req, res, next) => {
+	try {
+		const user = await getUserData(req, res);
+		if (!user || !user.id) {
+			return res
+				.status(401)
+				.json({ message: "Could not retrieve Spotify user info" });
+		}
+		req.user = user;
+		return next();
+	} catch (err) {
+		console.error("Error getting Spotify user:", err.message);
+		return res
+			.status(500)
+			.json({ message: "Failed to fetch Spotify user profile" });
+	}
+};

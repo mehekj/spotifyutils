@@ -62,3 +62,7 @@ export const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		);
 	}
 };
+
+export const getUserData = async (req, res) => {
+	return spotifyRequest(req, res, "/me");
+};

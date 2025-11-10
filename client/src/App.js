@@ -13,19 +13,13 @@ const App = () => {
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const res = await getUserData();
-				console.log(res);
-				setUser(res);
-			} catch (err) {
+		getUserData()
+			.then(setUser)
+			.catch((err) => {
 				if (!err._handled) {
 					console.error("Error fetching user data:", err);
 				}
-			}
-		};
-
-		fetchUser().catch((err) => console.error(err));
+			});
 	}, []);
 
 	return (
