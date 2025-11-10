@@ -6,10 +6,9 @@ export default function JSONTable({ data, keys = null }) {
 	const [columns, setColumns] = useState([]);
 
 	useEffect(() => {
-		console.log(data, keys);
-		if (data && keys) {
+		if (keys && data && data.length > 0) {
 			setColumns(Object.keys(data[0]).filter((col) => keys.includes(col)));
-		} else if (data) {
+		} else if (data && data.length > 0) {
 			setColumns(Object.keys(data[0]));
 		}
 	}, [data, keys]);
@@ -39,13 +38,15 @@ export default function JSONTable({ data, keys = null }) {
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{[...data].map((row, i) => (
-					<Table.Row key={`row${i}`}>
-						{columns.map((key, j) => (
-							<Table.Cell key={`cell${j}`}>{cell(row, key, j)}</Table.Cell>
-						))}
-					</Table.Row>
-				))}
+				{data &&
+					data.length > 0 &&
+					[...data].map((row, i) => (
+						<Table.Row key={`row${i}`}>
+							{columns.map((key, j) => (
+								<Table.Cell key={`cell${j}`}>{cell(row, key, j)}</Table.Cell>
+							))}
+						</Table.Row>
+					))}
 			</Table.Body>
 		</Table.Root>
 	);

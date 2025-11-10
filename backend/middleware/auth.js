@@ -53,7 +53,7 @@ export const refreshSpotifyToken = async (refreshToken, res) => {
 		const response = await axios.post(
 			"https://accounts.spotify.com/api/token",
 			QueryString.stringify({
-				grant_type: "authorization_code",
+				grant_type: "refresh_token",
 				refresh_token: refreshToken,
 			}),
 			{
@@ -66,8 +66,8 @@ export const refreshSpotifyToken = async (refreshToken, res) => {
 			}
 		);
 
-		const newAccessToken = response.data.spotify_access_token;
-		const newRefreshToken = response.data.spotify_refresh_token || refreshToken;
+		const newAccessToken = response.data.access_token;
+		const newRefreshToken = response.data.refresh_token || refreshToken;
 		const expiresIn = response.data.expires_in || 3600;
 		setTokenCookies(res, newAccessToken, newRefreshToken, expiresIn);
 
