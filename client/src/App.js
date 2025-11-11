@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
 import { system } from "./theme";
+import Upload from "./pages/Upload";
 
 export const UserContext = React.createContext(null);
 
@@ -43,6 +44,7 @@ const App = () => {
 								<Routes>
 									<Route path="/" element={<Home />}></Route>
 									<Route path="/track" element={<Track />}></Route>
+									<Route path="/upload" element={<Upload />}></Route>
 								</Routes>
 							</UserContext.Provider>
 						</BrowserRouter>

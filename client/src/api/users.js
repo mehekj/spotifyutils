@@ -12,4 +12,21 @@ export const users = {
 			lastUpload: uploadsResponse.data.lastUpload,
 		};
 	},
+
+	setLastUpload: async (uploadTime) => {
+		await api.put(`/users/me/uploads/last?time=${uploadTime}`);
+	},
+
+	uploadFileChunk: async (formData) => {
+		await api({
+			method: "post",
+			url: "/users/me/data",
+			data: formData,
+			headers: { "Content-Type": "multipart/form-data" },
+		});
+	},
+
+	deleteOldUpload: async (uploadTime) => {
+		await api.delete(`/users/me/data?time=${uploadTime}`);
+	},
 };

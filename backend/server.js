@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
-import { MongoAPIError } from "mongodb";
+import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
@@ -23,6 +23,14 @@ app.use((err, req, res, next) => {
 
 	if (err instanceof MongoAPIError) {
 		console.error("MongoDB request error:", err);
+		return res.status(err.status || 500).json({
+			message: err.message,
+			details: err.details,
+		});
+	}
+
+	if (err instanceof MulterAPIError) {
+		console.error("Multer request error:", err);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
