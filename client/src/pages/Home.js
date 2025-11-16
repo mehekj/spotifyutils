@@ -5,21 +5,23 @@ import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 
 const Home = () => {
-	const { user } = useContext(UserContext);
+	const user = useContext(UserContext);
 
 	const [top20, setTop20] = useState({});
 	const [bottom20, setBottom20] = useState({});
 
 	useEffect(() => {
 		if (user.id && user.lastUpload) {
-			tracks.getTop(20)
+			tracks
+				.getTop(20)
 				.then(setTop20)
 				.catch((err) => {
 					if (!err._handled) {
 						console.error("Error fetching user top tracks:", err);
 					}
 				});
-			tracks.getBottom(20)
+			tracks
+				.getBottom(20)
 				.then(setBottom20)
 				.catch((err) => {
 					if (!err._handled) {

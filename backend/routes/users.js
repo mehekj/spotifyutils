@@ -4,6 +4,7 @@ import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import {
 	deleteStreams,
 	deleteUserStreams,
+	deleteUsers,
 	getUserUpload,
 	setUserUpload,
 } from "../utils/mongo.js";
@@ -38,7 +39,7 @@ usersRouter.get("/me/uploads/last", async (req, res, next) => {
 
 usersRouter.put("/me/uploads/last", async (req, res, next) => {
 	try {
-		await setUserUpload(req.user.id, req.query.time);
+		await setUserUpload(req.user.id, Number(req.query.time));
 		res.end();
 	} catch (err) {
 		next(err);
@@ -47,14 +48,12 @@ usersRouter.put("/me/uploads/last", async (req, res, next) => {
 
 usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
 	try {
-		console.log(req.file);
-		console.log(req.body);
 		const chunk = req.file.buffer;
 		const chunkNum = Number(req.body.chunkNum);
 		const totalChunks = Number(req.body.totalChunks);
-		const fileNum = req.body.fileNum;
+		const fileNum = Number(req.body.fileNum);
 		const userID = req.user.id;
-		const uploadTime = req.body.uploadTime;
+		const uploadTime = Number(req.body.uploadTime);
 
 		await uploadChunk(
 			chunk,
@@ -72,7 +71,7 @@ usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
 
 usersRouter.delete("/me/data", async (req, res, next) => {
 	try {
-		await deleteUserStreams(req.user.id, req.query.time);
+		await deleteUserStreams(req.user.id, Number(req.query.time));
 		res.end();
 	} catch (err) {
 		next(err);
@@ -85,6 +84,7 @@ usersRouter.get("/nuke", async (req, res, next) => {
 		console.log("self destruct button curse you perry the platypus");
 		try {
 			await deleteStreams();
+			await deleteUsers();
 			res.end();
 		} catch (err) {
 			next(err);

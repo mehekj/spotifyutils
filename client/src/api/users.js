@@ -9,7 +9,7 @@ export const users = {
 
 		return {
 			...userResponse.data,
-			lastUpload: uploadsResponse.data.lastUpload,
+			lastUpload: uploadsResponse.data.lastUpload ?? null,
 		};
 	},
 

@@ -27,7 +27,11 @@ export class MongoAPIError extends Error {
 export const getUserUpload = async (userID) => {
 	try {
 		const result = await users.findOne({ user: userID });
-		return result.uploadTime;
+		if (result) {
+			return result.uploadTime;
+		} else {
+			return null;
+		}
 	} catch (error) {
 		throw new MongoAPIError("Failed to get user upload", 500, error);
 	}
@@ -55,9 +59,17 @@ export const deleteStreams = async () => {
 
 export const deleteUserStreams = async (userID, uploadTime) => {
 	try {
-		await streams.deleteMany({ user: userID, uploadTime: uploadTime });
+		await streams.deleteMany({ user: userID, uploadTime: { $ne: uploadTime } });
 	} catch (error) {
 		throw new MongoAPIError("Failed to delete user streams", 500, error);
+	}
+};
+
+export const deleteUsers = async () => {
+	try {
+		await users.deleteMany({});
+	} catch (error) {
+		throw new MongoAPIError("Failed to delete users", 500, error);
 	}
 };
 

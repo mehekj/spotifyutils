@@ -14,7 +14,7 @@ const app = express();
 
 app.use((err, req, res, next) => {
 	if (err instanceof SpotifyAPIError) {
-		console.error("Spotify request error:", err);
+		console.error("Spotify request error:", err.details);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof MongoAPIError) {
-		console.error("MongoDB request error:", err);
+		console.error("MongoDB request error:", err.details);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -30,7 +30,7 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof MulterAPIError) {
-		console.error("Multer request error:", err);
+		console.error("Multer request error:", err.details);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -52,3 +52,6 @@ const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// remove nuke
+// clean up upload code

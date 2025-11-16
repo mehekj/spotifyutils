@@ -13,7 +13,7 @@ import { UserContext } from "../App";
 import { users } from "../api";
 
 const Upload = () => {
-	const { user } = useContext(UserContext);
+	const user = useContext(UserContext);
 	const [files, setFiles] = useState([]);
 	const [progress, setProgress] = useState(null);
 	const [currFile, setCurrFile] = useState(null);
@@ -33,6 +33,12 @@ const Upload = () => {
 		let chunkNum = 0;
 		let start = 0;
 		while (start < fileSize) {
+			console.log(
+				`Uploading chunk ${chunkNum + 1}/${totalChunks} of file ${
+					fileNum + 1
+				}/${files.length}`
+			);
+
 			const end = start + chunkSize;
 			const chunk = file.slice(start, end);
 
@@ -51,12 +57,7 @@ const Upload = () => {
 			const fileProgress = fileNum / files.length;
 			const fileChunkProgress = chunkNum / totalChunks / files.length;
 
-			console.log((fileProgress + fileChunkProgress) * 100);
-			for (let pair of formData.entries()) {
-				console.log(pair[0], pair[1]);
-			}
-
-			setProgress((fileProgress + fileChunkProgress) * 100);
+			setProgress(Math.ceil((fileProgress + fileChunkProgress) * 100));
 		}
 	};
 
@@ -79,7 +80,6 @@ const Upload = () => {
 			}
 		}
 
-		const oldUploadTime = user.lastUpload;
 		const newUploadTime = Date.now();
 
 		setProgress(0);
@@ -88,7 +88,7 @@ const Upload = () => {
 		}
 
 		users.setLastUpload(newUploadTime);
-		users.deleteOldUpload(oldUploadTime);
+		users.deleteOldUpload(newUploadTime);
 	};
 
 	return (

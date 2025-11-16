@@ -40,7 +40,7 @@ const App = () => {
 					<>
 						<NavBar />
 						<BrowserRouter>
-							<UserContext.Provider value={{ user: user }}>
+							<UserContext.Provider value={user}>
 								<Routes>
 									<Route path="/" element={<Home />}></Route>
 									<Route path="/track" element={<Track />}></Route>
