@@ -59,7 +59,7 @@ const mergeAndStoreChunks = async (
 		}
 		await Promise.all(rmPromises);
 	} catch (err) {
-		throw new MulterAPIError("Failed to merge and store file chunks", 500, err);
+		throw err;
 	}
 };
 
@@ -98,10 +98,6 @@ export const uploadChunk = async (
 			console.log(`File ${fileName} merged and stored successfully`);
 		}
 	} catch (err) {
-		if (err instanceof MulterAPIError) {
-			throw err;
-		}
-
 		throw new MulterAPIError(
 			`Failed to upload chunk ${chunkNum + 1} of ${totalChunks}`,
 			500,
