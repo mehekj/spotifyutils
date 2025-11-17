@@ -45,7 +45,7 @@ app.use("/auth/", authRouter);
 app.use("/users/", usersRouter);
 app.use("/tracks/", tracksRouter);
 
-const buildPath = path.join(__dirname, "..", "client", "build");
+const buildPath = path.join(__dirname, "..", "client", "dist");
 app.use(express.static(buildPath));
 
 app.get(/.*/, (req, res) => {
