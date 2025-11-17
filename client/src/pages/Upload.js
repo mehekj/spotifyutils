@@ -94,6 +94,8 @@ const Upload = () => {
 			users.deleteOldUpload(newUploadTime),
 		]);
 		setProgress(100);
+
+		user.lastUpload = newUploadTime;
 	};
 
 	return (
