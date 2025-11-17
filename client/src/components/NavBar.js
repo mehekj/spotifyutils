@@ -4,10 +4,10 @@ import {
 	Flex,
 	Heading,
 	Highlight,
-	Link,
 	Stack,
 	Text,
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import React from "react";
 import { FaBars, FaHeart } from "react-icons/fa";
 import { auth } from "../api";
@@ -19,7 +19,7 @@ const NavBar = () => {
 
 	return (
 		<Flex as="nav" justify="space-between" wrap="wrap" w="100%" mb={8} py={8}>
-			<Link href={"/"} _hover={{ textDecoration: "none" }}>
+			<Link to={"/"} _hover={{ textDecoration: "none" }}>
 				<Heading size={"lg"} color={"white"}>
 					<Highlight query={"spot"} styles={{ color: "spot.100" }}>
 						spotutils
@@ -45,12 +45,12 @@ const NavBar = () => {
 					justify={["center", "center", "flex-end", "flex-end"]}
 					direction={["column", "column", "row", "row"]}
 				>
-					<Link href={"/"}>
+					<Link to={"/"}>
 						<Text display="block" fontWeight={"bold"}>
 							home
 						</Text>
 					</Link>
-					<Link href={"/upload"}>
+					<Link to={"/upload"}>
 						<Text display="block" fontWeight={"bold"}>
 							upload
 						</Text>

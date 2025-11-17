@@ -1,4 +1,5 @@
-import { Table, Text, Link } from "@chakra-ui/react";
+import { Table, Text } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import LikeButton from "./LikeButton";
 
@@ -19,7 +20,7 @@ export default function JSONTable({ data, keys = null }) {
 				return <LikeButton id={row["_id"]} like={row["liked"]} size={18} />;
 			case "track":
 				return (
-					<Link href={`/track?uri=${row["_id"]}`}>
+					<Link to={`/track?uri=${row["_id"]}`}>
 						<Text>{row[key].toString()}</Text>
 					</Link>
 				);

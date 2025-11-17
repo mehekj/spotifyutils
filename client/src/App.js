@@ -26,20 +26,20 @@ const App = () => {
 	}, []);
 
 	return (
-		<ChakraProvider value={system}>
-			<Container
-				maxW={"container.xl"}
-				bg={"body"}
-				color={"text"}
-				minW={"100vw"}
-				minH={"100vh"}
-				p={0}
-				m={0}
-			>
-				{user ? (
-					<>
-						<NavBar />
-						<BrowserRouter>
+		<BrowserRouter>
+			<ChakraProvider value={system}>
+				<Container
+					maxW={"container.xl"}
+					bg={"body"}
+					color={"text"}
+					minW={"100vw"}
+					minH={"100vh"}
+					p={0}
+					m={0}
+				>
+					{user ? (
+						<>
+							<NavBar />
 							<UserContext.Provider value={user}>
 								<Routes>
 									<Route path="/" element={<Home />}></Route>
@@ -47,13 +47,13 @@ const App = () => {
 									<Route path="/upload" element={<Upload />}></Route>
 								</Routes>
 							</UserContext.Provider>
-						</BrowserRouter>
-					</>
-				) : (
-					<Login />
-				)}
-			</Container>
-		</ChakraProvider>
+						</>
+					) : (
+						<Login />
+					)}
+				</Container>
+			</ChakraProvider>
+		</BrowserRouter>
 	);
 };
 
