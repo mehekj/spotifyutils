@@ -45,7 +45,12 @@ app.use("/auth/", authRouter);
 app.use("/users/", usersRouter);
 app.use("/tracks/", tracksRouter);
 
-app.use(express.static(path.join(__dirname, "../client/build")));
+const buildPath = path.join(__dirname, "..", "client", "build");
+app.use(express.static(buildPath));
+
+app.get(/.*/, (req, res) => {
+	res.sendFile(path.join(buildPath, "index.html"));
+});
 
 const PORT = process.env.PORT || 5050;
 
