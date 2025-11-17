@@ -57,7 +57,9 @@ const Upload = () => {
 			const fileProgress = fileNum / files.length;
 			const fileChunkProgress = chunkNum / totalChunks / files.length;
 
-			setProgress(Math.ceil((fileProgress + fileChunkProgress) * 100));
+			setProgress(
+				Math.min(Math.floor((fileProgress + fileChunkProgress) * 100), 99)
+			);
 		}
 	};
 
@@ -87,8 +89,11 @@ const Upload = () => {
 			await uploadFile(i, newUploadTime);
 		}
 
-		users.setLastUpload(newUploadTime);
-		users.deleteOldUpload(newUploadTime);
+		await Promise.all([
+			users.setLastUpload(newUploadTime),
+			users.deleteOldUpload(newUploadTime),
+		]);
+		setProgress(100);
 	};
 
 	return (

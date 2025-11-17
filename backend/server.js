@@ -29,8 +29,8 @@ app.use((err, req, res, next) => {
 		});
 	}
 
-	if (err instanceof MulterAPIError) {
-		console.error("Multer request error:", err.details);
+	if (err instanceof FilesAPIError) {
+		console.error("Files request error:", err.details);
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -57,6 +57,3 @@ const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-// remove nuke
-// clean up upload code

@@ -55,3 +55,5 @@ const Home = () => {
 };
 
 export default Home;
+
+// TODO: last upload doesn't update once you've uploaded data

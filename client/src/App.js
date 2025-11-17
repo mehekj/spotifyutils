@@ -13,6 +13,7 @@ export const UserContext = React.createContext(null);
 
 const App = () => {
 	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		users
@@ -22,7 +23,8 @@ const App = () => {
 				if (!err._handled) {
 					console.error("Error fetching user data:", err);
 				}
-			});
+			})
+			.then(setLoading(false));
 	}, []);
 
 	return (
@@ -37,7 +39,9 @@ const App = () => {
 					p={0}
 					m={0}
 				>
-					{user ? (
+					{loading ? (
+						<p>loading</p>
+					) : user ? (
 						<>
 							<NavBar />
 							<UserContext.Provider value={user}>

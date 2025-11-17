@@ -8,7 +8,7 @@ import {
 	getUserUpload,
 	setUserUpload,
 } from "../utils/mongo.js";
-import { uploadChunk } from "../utils/multer.js";
+import { uploadChunk } from "../utils/files.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
