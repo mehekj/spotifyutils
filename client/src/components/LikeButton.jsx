@@ -1,7 +1,7 @@
-import { Box } from "@chakra-ui/react";
+import { Box } from "@mantine/core";
+import { useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { tracks } from "../api";
-import { useState } from "react";
 
 export default function LikeButton({ id, like, size }) {
 	const [liked, setLiked] = useState(like);

@@ -1,10 +1,10 @@
-import { HStack, Heading, Text, VStack } from "@chakra-ui/react";
+import { Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { tracks } from "../api";
 import { UserContext } from "../App";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
-import { tracks } from "../api";
 
 export default function TrackEvent() {
 	const user = useContext(UserContext);
@@ -34,14 +34,12 @@ export default function TrackEvent() {
 	return (
 		<>
 			{trackStreams !== null && (
-				<VStack align={"flex-start"} spacing={5}>
-					<HStack align={"baseline"} spacing={6}>
-						<Heading size={"2xl"} mb={3}>
-							{trackStreams[0]["master_metadata_track_name"]}
-						</Heading>
+				<Stack>
+					<Stack>
+						<Title>{trackStreams[0]["master_metadata_track_name"]}</Title>
 						<Text>{trackStreams[0]["master_metadata_album_artist_name"]}</Text>
-						<LikeButton id={searchParams.get("uri")} like={liked} size={24} />
-					</HStack>
+						<LikeButton id={searchParams.get("uri")} like={liked} />
+					</Stack>
 					<JSONTable
 						data={trackStreams}
 						keys={[
@@ -57,7 +55,7 @@ export default function TrackEvent() {
 							"incognito_mode",
 						]}
 					/>
-				</VStack>
+				</Stack>
 			)}
 		</>
 	);

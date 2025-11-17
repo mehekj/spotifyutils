@@ -1,17 +1,18 @@
-import { ChakraProvider, Container } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { Container, Loader, MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dropzone/styles.css";
+import { createContext, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { users } from "./api";
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
-import { system } from "./theme";
 import Upload from "./pages/Upload";
 
-export const UserContext = React.createContext(null);
+export const UserContext = createContext(null);
 
-const App = () => {
+export default function App() {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
@@ -28,19 +29,11 @@ const App = () => {
 	}, []);
 
 	return (
-		<BrowserRouter>
-			<ChakraProvider value={system}>
-				<Container
-					maxW={"container.xl"}
-					bg={"body"}
-					color={"text"}
-					minW={"100vw"}
-					minH={"100vh"}
-					p={0}
-					m={0}
-				>
+		<MantineProvider>
+			<Container>
+				<BrowserRouter>
 					{loading ? (
-						<p>loading</p>
+						<Loader />
 					) : user ? (
 						<>
 							<NavBar />
@@ -55,10 +48,8 @@ const App = () => {
 					) : (
 						<Login />
 					)}
-				</Container>
-			</ChakraProvider>
-		</BrowserRouter>
+				</BrowserRouter>
+			</Container>
+		</MantineProvider>
 	);
-};
-
-export default App;
+}

@@ -1,6 +1,6 @@
-import { Table, Text } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Table, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import LikeButton from "./LikeButton";
 
 export default function JSONTable({ data, keys = null }) {
@@ -17,7 +17,7 @@ export default function JSONTable({ data, keys = null }) {
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":
-				return <LikeButton id={row["_id"]} like={row["liked"]} size={18} />;
+				return <LikeButton id={row["_id"]} like={row["liked"]} />;
 			case "track":
 				return (
 					<Link to={`/track?uri=${row["_id"]}`}>
@@ -30,25 +30,27 @@ export default function JSONTable({ data, keys = null }) {
 	};
 
 	return (
-		<Table.Root w={"100%"} variant={"outline"} colorPalette={"green"}>
-			<Table.Header>
-				<Table.Row>
+		<Table>
+			<Table.Thead>
+				<Table.Tr>
 					{columns.map((col, i) => (
-						<Table.ColumnHeader key={`col${i}`}>{col}</Table.ColumnHeader>
+						<Table.Th key={`col${i}`}>{col}</Table.Th>
 					))}
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
+				</Table.Tr>
+			</Table.Thead>
+			<Table.Tbody>
 				{data &&
 					data.length > 0 &&
 					[...data].map((row, i) => (
-						<Table.Row key={`row${i}`}>
+						<Table.Tr key={`row${i}`}>
 							{columns.map((key, j) => (
-								<Table.Cell key={`cell${j}`}>{cell(row, key, j)}</Table.Cell>
+								<Table.Td key={`cell${j}`}>{cell(row, key, j)}</Table.Td>
 							))}
-						</Table.Row>
+						</Table.Tr>
 					))}
-			</Table.Body>
-		</Table.Root>
+			</Table.Tbody>
+		</Table>
 	);
 }
+
+//TODO: change track urls to include uri instead of using query

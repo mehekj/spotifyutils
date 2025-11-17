@@ -1,13 +1,5 @@
-import {
-	Box,
-	Button,
-	Heading,
-	Input,
-	Progress,
-	Stack,
-	Text,
-	VStack,
-} from "@chakra-ui/react";
+import { Box, Button, Progress, Stack, Text, Title } from "@mantine/core";
+import { Dropzone } from "@mantine/dropzone";
 import { useContext, useState } from "react";
 import { UserContext } from "../App";
 import { users } from "../api";
@@ -15,12 +7,8 @@ import { users } from "../api";
 const Upload = () => {
 	const user = useContext(UserContext);
 	const [files, setFiles] = useState([]);
-	const [progress, setProgress] = useState(null);
+	const [progress, setProgress] = useState(-1);
 	const [currFile, setCurrFile] = useState(null);
-
-	const onFileChange = (e) => {
-		setFiles(e.target.files);
-	};
 
 	const uploadFile = async (fileNum, uploadTime) => {
 		const file = files[fileNum];
@@ -99,74 +87,53 @@ const Upload = () => {
 	};
 
 	return (
-		<VStack align={"flex-start"} spacing={5}>
-			<Heading size={"2xl"} mb={3}>
-				Upload
-			</Heading>
-			{progress === null ? (
-				<VStack align={"flex-start"} spacing={5} w={"100%"}>
-					<Box
-						borderColor={"whiteAlpha.500"}
-						borderStyle={"dashed"}
-						borderWidth={3}
-						_hover={{ bg: "whiteAlpha.500", borderColor: "transparent" }}
-						rounded={"md"}
-						transition={"all 150ms ease-in-out"}
-						w={"100%"}
-					>
-						<Box position={"relative"} h={"100%"} w={"100%"}>
+		<Stack>
+			<Title>Upload</Title>
+			{progress < 0 ? (
+				<Stack>
+					<Box>
+						<Dropzone
+							onDrop={setFiles}
+							onReject={(files) => console.error("rejected files", files)}
+							maxSize={13 * 1024 * 1024}
+							accept={{ json: [".json"] }}
+						>
 							{files.length > 0 ? (
-								<Stack p={8} textAlign={"center"}>
-									<Heading fontSize={"lg"}>
+								<Stack>
+									<Title>
 										{files.length} file{files.length > 1 ? "s" : ""} selected
-									</Heading>
-									<Text fontWeight={"light"}>
+									</Title>
+									<Text>
 										{[...files].map(
 											(file, i) => (i !== 0 ? ", " : "") + file.name
 										)}
 									</Text>
 								</Stack>
 							) : (
-								<Stack p={8} textAlign={"center"}>
-									<Heading fontSize={"lg"}>Drop JSON files here</Heading>
-									<Text fontWeight={"light"}>or click to upload</Text>
+								<Stack>
+									<Title>Drop JSON files here</Title>
+									<Text>or click to upload</Text>
 								</Stack>
 							)}
-							<Input
-								type={"file"}
-								height={"100%"}
-								width={"100%"}
-								position={"absolute"}
-								top={0}
-								left={0}
-								opacity={0}
-								aria-hidden={"true"}
-								accept={".json"}
-								multiple={true}
-								onChange={onFileChange}
-								cursor={"pointer"}
-							/>
-						</Box>
+						</Dropzone>
 					</Box>
 					<Button onPointerDown={onFileSubmit}>upload</Button>
-				</VStack>
+				</Stack>
 			) : (
-				<VStack spacing={5} w={"100%"}>
+				<Stack>
 					<Text>
-						{progress === null
-							? "deleting old data"
-							: progress < 100
+						{progress === 100
+							? "finished upload"
+							: progress === 99
+							? "wiping old data"
+							: progress >= 0
 							? `uploading ${currFile.name}`
-							: "finished upload"}
+							: ""}
 					</Text>
-					{progress < 100 && (
-						<Text color={"red"} fontWeight={"bold"}>
-							DO NOT REFRESH THE PAGE {progress}
-						</Text>
-					)}
-				</VStack>
+					{progress >= 0 && <Progress value={progress} />}
+				</Stack>
 			)}
-		</VStack>
+		</Stack>
 	);
 };
 

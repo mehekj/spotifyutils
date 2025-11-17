@@ -1,5 +1,6 @@
-import { Heading, Link, Text, VStack } from "@chakra-ui/react";
+import { Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { UserContext } from "../App";
 import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
@@ -32,10 +33,8 @@ const Home = () => {
 	}, [user]);
 
 	return (
-		<VStack align={"flex-start"} spacing={5}>
-			<Heading size={"2xl"}>
-				Welcome{user.display_name ? " " + user.display_name : ""}!
-			</Heading>
+		<Stack>
+			<Title>Welcome{user.display_name ? " " + user.display_name : ""}!</Title>
 			{user.lastUpload ? (
 				<Text>
 					Your last data upload:{" "}
@@ -44,16 +43,14 @@ const Home = () => {
 			) : (
 				<Text>
 					Looks like you haven't uploaded any data yet. Add your files{" "}
-					<Link href="/upload">here</Link>.
+					<Link to="/upload">here</Link>.
 				</Text>
 			)}
 			{top20.length > 0 && (
 				<JSONTable data={top20} keys={["track", "artist", "liked"]} />
 			)}
-		</VStack>
+		</Stack>
 	);
 };
 
 export default Home;
-
-// TODO: last upload doesn't update once you've uploaded data
