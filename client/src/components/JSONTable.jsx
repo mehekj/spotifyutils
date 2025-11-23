@@ -1,17 +1,14 @@
 import { Table, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import LikeButton from "./LikeButton";
 
 export default function JSONTable({ data, keys = null }) {
-	const [columns, setColumns] = useState([]);
-
-	useEffect(() => {
-		if (keys && data && data.length > 0) {
-			setColumns(Object.keys(data[0]).filter((col) => keys.includes(col)));
-		} else if (data && data.length > 0) {
-			setColumns(Object.keys(data[0]));
-		}
+	const columns = useMemo(() => {
+		if (!data || data.length === 0) return [];
+		return keys
+			? Object.keys(data[0]).filter((col) => keys.includes(col))
+			: Object.keys(data[0]);
 	}, [data, keys]);
 
 	const cell = (row, key) => {
@@ -52,5 +49,3 @@ export default function JSONTable({ data, keys = null }) {
 		</Table>
 	);
 }
-
-//TODO: change track urls to include uri instead of using query
