@@ -1,6 +1,5 @@
-import { Table, Text } from "@mantine/core";
+import { Anchor, Table, Text } from "@mantine/core";
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
 import LikeButton from "./LikeButton";
 
 export default function JSONTable({ data, keys = null }) {
@@ -17,9 +16,7 @@ export default function JSONTable({ data, keys = null }) {
 				return <LikeButton id={row["_id"]} like={row["liked"]} />;
 			case "track":
 				return (
-					<Link to={`/track?uri=${row["_id"]}`}>
-						<Text>{row[key].toString()}</Text>
-					</Link>
+					<Anchor to={`/track?uri=${row["_id"]}`}>{row[key].toString()}</Anchor>
 				);
 			default:
 				return <Text>{String(row[key])}</Text>;
@@ -27,7 +24,7 @@ export default function JSONTable({ data, keys = null }) {
 	};
 
 	return (
-		<Table>
+		<Table tabularNums>
 			<Table.Thead>
 				<Table.Tr>
 					{columns.map((col, i) => (

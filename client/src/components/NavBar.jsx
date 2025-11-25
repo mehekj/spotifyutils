@@ -1,33 +1,58 @@
-import { Button, Flex, Stack, Text, Title } from "@mantine/core";
-import React from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { useDisclosure } from "@mantine/hooks";
+import {
+	Container,
+	Flex,
+	Title,
+	Text,
+	Burger,
+	Button,
+	Anchor,
+	Paper,
+	Stack,
+	Drawer,
+	Collapse,
+} from "@mantine/core";
 import { Link } from "react-router-dom";
 import { auth } from "../api";
 
-const NavBar = () => {
-	const [isOpen, setIsOpen] = React.useState(false);
+export default function Navbar() {
+	const [opened, { toggle, close }] = useDisclosure(false);
 
-	const toggle = () => setIsOpen(!isOpen);
+	const links = (
+		<>
+			<Anchor component={Link} to="/" onClick={close} fw="bold">
+				home
+			</Anchor>
+			<Anchor component={Link} to="/upload" onClick={close} fw="bold">
+				upload
+			</Anchor>
+			<Button onPointerDown={auth.logout} variant="light" fw="bold">
+				log out
+			</Button>
+		</>
+	);
 
 	return (
-		<Flex as="nav">
-			<Link to={"/"}>
-				<Title>spotutils</Title>
-			</Link>
-			<Button onPointerDown={toggle}>
-				{isOpen ? <FaTimes boxSize={5} /> : <FaBars boxSize={7} />}
-			</Button>
-			<Stack>
-				<Link to={"/"}>
-					<Text>home</Text>
-				</Link>
-				<Link to={"/upload"}>
-					<Text>upload</Text>
-				</Link>
-				<Button onPointerDown={auth.logout}>log out</Button>
-			</Stack>
-		</Flex>
-	);
-};
+		<Container component="nav" size="xl">
+			<Flex align="baseline" justify="space-between" py="md">
+				<Title component={Link} to="/" order={3} td="none" c="white">
+					<Text span inherit c="spotify.6">
+						spot
+					</Text>
+					utils
+				</Title>
 
-export default NavBar;
+				<Flex gap="lg" visibleFrom="sm" mb="lg" align="baseline">
+					{links}
+				</Flex>
+
+				<Burger opened={opened} onClick={toggle} hiddenFrom="sm" />
+			</Flex>
+			<Collapse hiddenFrom="sm" in={opened}>
+				<Stack gap="md" mt="md" align="center" py="md" mb="lg">
+					{links}
+				</Stack>
+			</Collapse>
+		</Container>
+	);
+}

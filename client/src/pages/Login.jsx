@@ -1,13 +1,21 @@
-import { Button, Stack, Text, Title } from "@mantine/core";
+import { Button, Flex, Text, Title, Highlight } from "@mantine/core";
 import { auth } from "../api";
 
 const Login = () => {
 	return (
-		<Stack>
-			<Title>spotutils</Title>
-			<Button onPointerDown={auth.login}>get started</Button>
-			<Text>developed by Mehek Jethani</Text>
-		</Stack>
+		<Flex direction="column" align="center" justify="center" gap="lg" h="100vh">
+			<Title>
+				welcome to{" "}
+				<Text span inherit c="spotify.6">
+					spot
+				</Text>
+				utils
+			</Title>
+			<Button variant="outline" onPointerDown={auth.login}>
+				get started
+			</Button>
+			<Text ta="center">developed by Mehek Jethani</Text>
+		</Flex>
 	);
 };
 

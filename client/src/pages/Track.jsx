@@ -1,4 +1,4 @@
-import { Stack, Text, Title } from "@mantine/core";
+import { Stack, Text, Title, Container, Group } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tracks } from "../api";
@@ -34,28 +34,30 @@ export default function TrackEvent() {
 	return (
 		<>
 			{trackStreams !== null && (
-				<Stack>
-					<Stack>
-						<Title>{trackStreams[0]["master_metadata_track_name"]}</Title>
-						<Text>{trackStreams[0]["master_metadata_album_artist_name"]}</Text>
-						<LikeButton id={searchParams.get("uri")} like={liked} />
+				<Container size="xl">
+					<Stack gap="lg">
+						<Group align="baseline">
+							<Title>{trackStreams[0]["master_metadata_track_name"]}</Title>
+							<Text>
+								{trackStreams[0]["master_metadata_album_artist_name"]}
+							</Text>
+							<LikeButton id={searchParams.get("uri")} like={liked} />
+						</Group>
+						<JSONTable
+							data={trackStreams}
+							keys={[
+								"ts",
+								"platform",
+								"ms_played",
+								"conn_country",
+								"shuffle",
+								"skipped",
+								"offline",
+								"incognito_mode",
+							]}
+						/>
 					</Stack>
-					<JSONTable
-						data={trackStreams}
-						keys={[
-							"ts",
-							"platform",
-							"ms_played",
-							"conn_country",
-							"reason_start",
-							"reason_end",
-							"shuffle",
-							"skipped",
-							"offline",
-							"incognito_mode",
-						]}
-					/>
-				</Stack>
+				</Container>
 			)}
 		</>
 	);

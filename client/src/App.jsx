@@ -1,6 +1,4 @@
-import { Container, Loader, MantineProvider } from "@mantine/core";
-import "@mantine/core/styles.css";
-import "@mantine/dropzone/styles.css";
+import { AppShell, Loader, MantineProvider } from "@mantine/core";
 import { createContext, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { users } from "./api";
@@ -9,6 +7,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
 import Upload from "./pages/Upload";
+import { theme } from "./theme";
+import "./styles.css";
 
 export const UserContext = createContext(null);
 
@@ -29,27 +29,40 @@ export default function App() {
 	}, []);
 
 	return (
-		<MantineProvider>
-			<Container>
-				<BrowserRouter>
-					{loading ? (
-						<Loader />
-					) : user ? (
-						<>
-							<NavBar />
-							<UserContext.Provider value={user}>
-								<Routes>
-									<Route path="/" element={<Home />}></Route>
-									<Route path="/track" element={<Track />}></Route>
-									<Route path="/upload" element={<Upload />}></Route>
-								</Routes>
-							</UserContext.Provider>
-						</>
-					) : (
-						<Login />
-					)}
-				</BrowserRouter>
-			</Container>
+		<MantineProvider
+			theme={theme}
+			defaultColorScheme="dark"
+			cssVariablesResolver={(theme) => ({
+				dark: {
+					"--mantine-color-body": theme.colors.dark[9],
+					"--mantine-color-text": theme.white,
+					"--mantine-color-bright": theme.white,
+				},
+				variables: {
+					"--mantine-primary-color-filled": theme.colors.spotify[6],
+					"--mantine-primary-color-filled-hover": theme.colors.spotify[5],
+				},
+			})}
+		>
+			<BrowserRouter>
+				{loading ? (
+					<Loader />
+				) : user ? (
+					<>
+						<NavBar />
+
+						<UserContext.Provider value={user}>
+							<Routes>
+								<Route path="/" element={<Home />}></Route>
+								<Route path="/track" element={<Track />}></Route>
+								<Route path="/upload" element={<Upload />}></Route>
+							</Routes>
+						</UserContext.Provider>
+					</>
+				) : (
+					<Login />
+				)}
+			</BrowserRouter>
 		</MantineProvider>
 	);
 }

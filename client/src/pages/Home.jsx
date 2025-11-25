@@ -1,4 +1,4 @@
-import { Stack, Text, Title } from "@mantine/core";
+import { Stack, Text, Title, Container, Anchor } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
@@ -33,23 +33,27 @@ const Home = () => {
 	}, [user]);
 
 	return (
-		<Stack>
-			<Title>Welcome{user.display_name ? " " + user.display_name : ""}!</Title>
-			{user.lastUpload ? (
-				<Text>
-					Your last data upload:{" "}
-					{user.lastUpload && new Date(user.lastUpload).toLocaleString()}
-				</Text>
-			) : (
-				<Text>
-					Looks like you haven't uploaded any data yet. Add your files{" "}
-					<Link to="/upload">here</Link>.
-				</Text>
-			)}
-			{top20.length > 0 && (
-				<JSONTable data={top20} keys={["track", "artist", "liked"]} />
-			)}
-		</Stack>
+		<Container size="xl">
+			<Stack gap="lg">
+				<Title>
+					Welcome{user.display_name ? " " + user.display_name : ""}!
+				</Title>
+				{user.lastUpload ? (
+					<Text>
+						Your last data upload:{" "}
+						{user.lastUpload && new Date(user.lastUpload).toLocaleString()}
+					</Text>
+				) : (
+					<Text>
+						Looks like you haven't uploaded any data yet. Add your files{" "}
+						<Anchor to="/upload">here</Anchor>.
+					</Text>
+				)}
+				{top20.length > 0 && (
+					<JSONTable data={top20} keys={["track", "artist", "liked"]} />
+				)}
+			</Stack>
+		</Container>
 	);
 };
 
