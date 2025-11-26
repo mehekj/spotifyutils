@@ -1,16 +1,17 @@
 import {
-	LoadingOverlay,
-	Container,
+	Alert,
 	Button,
+	Container,
+	LoadingOverlay,
 	Progress,
 	Stack,
 	Text,
-	Tooltip,
 	Title,
-	Alert,
+	Tooltip,
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useContext, useState } from "react";
+import { FaExclamationCircle, FaRegCheckCircle } from "react-icons/fa";
 import { UserContext } from "../UserContext";
 import { users } from "../api";
 import useConfirm from "../components/ConfirmDialog";
@@ -20,6 +21,7 @@ const Upload = () => {
 	const [files, setFiles] = useState([]);
 	const [progress, setProgress] = useState(-1);
 	const [currFile, setCurrFile] = useState(null);
+	const [completedTime, setCompletedTime] = useState(-1);
 	const { confirm, ConfirmModal } = useConfirm();
 
 	const inProgress = () => {
@@ -96,11 +98,12 @@ const Upload = () => {
 			users.setLastUpload(newUploadTime),
 			users.deleteOldUpload(newUploadTime),
 		]);
-		setProgress(100);
 
 		updateUser({ lastUpload: newUploadTime });
 
 		setFiles([]);
+		setCompletedTime(Date.now());
+		setProgress(100);
 	};
 
 	return (
@@ -153,7 +156,12 @@ const Upload = () => {
 				</Stack>
 				{inProgress() && (
 					<Stack>
-						<Alert color="red" variant="light" title="DO NOT REFRESH THE PAGE">
+						<Alert
+							color="red"
+							variant="light"
+							title="DO NOT REFRESH THE PAGE"
+							icon={<FaExclamationCircle />}
+						>
 							your upload will not complete
 						</Alert>
 						<Progress value={progress} />
@@ -167,6 +175,17 @@ const Upload = () => {
 								: ""}
 						</Text>
 					</Stack>
+				)}
+				{progress === 100 && (
+					<Alert
+						variant="light"
+						title="Upload completed!"
+						icon={<FaRegCheckCircle />}
+						withCloseButton={true}
+						onClose={() => setProgress(-1)}
+					>
+						{new Date(completedTime).toLocaleString()}
+					</Alert>
 				)}
 			</Stack>
 			{ConfirmModal}
