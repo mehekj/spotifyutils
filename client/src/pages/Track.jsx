@@ -59,10 +59,11 @@ export default function TrackEvent() {
 						<Image
 							src={trackInfo.album.images[1].url}
 							maw={trackInfo.album.images[1].width}
+							mr="xl"
 						/>
 						<Stack>
 							<Group>
-								<Title mr="lg" size={48}>
+								<Title mr="sm" size={48}>
 									{trackInfo.name}
 								</Title>
 								<LikeButton
