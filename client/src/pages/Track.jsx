@@ -1,10 +1,10 @@
-import { Stack, Text, Title, Container, Group } from "@mantine/core";
+import { Container, Group, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tracks } from "../api";
-import { UserContext } from "../App";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
+import { UserContext } from "../UserContext";
 
 export default function TrackEvent() {
 	const user = useContext(UserContext);

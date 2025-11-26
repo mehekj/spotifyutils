@@ -1,7 +1,7 @@
 import { Box, Button, Progress, Stack, Text, Title } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useContext, useState } from "react";
-import { UserContext } from "../App";
+import { UserContext } from "../UserContext";
 import { users } from "../api";
 
 const Upload = () => {
@@ -96,7 +96,7 @@ const Upload = () => {
 							onDrop={setFiles}
 							onReject={(files) => console.error("rejected files", files)}
 							maxSize={13 * 1024 * 1024}
-							accept={{ json: [".json"] }}
+							accept={["application/json"]}
 						>
 							{files.length > 0 ? (
 								<Stack>

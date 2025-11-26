@@ -1,17 +1,15 @@
-import { useDisclosure } from "@mantine/hooks";
 import {
-	Container,
-	Flex,
-	Title,
-	Text,
+	Anchor,
 	Burger,
 	Button,
-	Anchor,
-	Paper,
-	Stack,
-	Drawer,
 	Collapse,
+	Container,
+	Flex,
+	Stack,
+	Text,
+	Title,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { Link } from "react-router-dom";
 import { auth } from "../api";
 

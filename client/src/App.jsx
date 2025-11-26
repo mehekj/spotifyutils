@@ -1,5 +1,5 @@
-import { AppShell, Loader, MantineProvider } from "@mantine/core";
-import { createContext, useEffect, useState } from "react";
+import { Loader, MantineProvider } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { users } from "./api";
 import NavBar from "./components/NavBar";
@@ -7,10 +7,9 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
 import Upload from "./pages/Upload";
-import { theme } from "./theme";
 import "./styles.css";
-
-export const UserContext = createContext(null);
+import { theme } from "./theme";
+import { UserContext } from "./UserContext";
 
 export default function App() {
 	const [user, setUser] = useState(null);
@@ -25,7 +24,7 @@ export default function App() {
 					console.error("Error fetching user data:", err);
 				}
 			})
-			.then(setLoading(false));
+			.then(() => setLoading(false));
 	}, []);
 
 	return (

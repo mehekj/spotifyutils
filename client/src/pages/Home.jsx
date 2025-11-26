@@ -1,7 +1,6 @@
-import { Stack, Text, Title, Container, Anchor } from "@mantine/core";
+import { Anchor, Container, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { UserContext } from "../App";
+import { UserContext } from "../UserContext";
 import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 
@@ -9,7 +8,7 @@ const Home = () => {
 	const user = useContext(UserContext);
 
 	const [top20, setTop20] = useState({});
-	const [bottom20, setBottom20] = useState({});
+	// const [bottom20, setBottom20] = useState({});
 
 	useEffect(() => {
 		if (user.id && user.lastUpload) {
@@ -21,14 +20,14 @@ const Home = () => {
 						console.error("Error fetching user top tracks:", err);
 					}
 				});
-			tracks
-				.getBottom(20)
-				.then(setBottom20)
-				.catch((err) => {
-					if (!err._handled) {
-						console.error("Error fetching user bottom tracks:", err);
-					}
-				});
+			// tracks
+			// 	.getBottom(20)
+			// 	.then(setBottom20)
+			// 	.catch((err) => {
+			// 		if (!err._handled) {
+			// 			console.error("Error fetching user bottom tracks:", err);
+			// 		}
+			// 	});
 		}
 	}, [user]);
 

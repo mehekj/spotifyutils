@@ -1,4 +1,4 @@
-import { Button, Flex, Text, Title, Highlight } from "@mantine/core";
+import { Button, Flex, Text, Title } from "@mantine/core";
 import { auth } from "../api";
 
 const Login = () => {
