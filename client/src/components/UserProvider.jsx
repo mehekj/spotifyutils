@@ -16,8 +16,12 @@ export default function UserProvider({ children }) {
 			.finally(() => setLoading(false));
 	}, []);
 
+	const updateUser = (updates) => {
+		setUser((prev) => ({ ...prev, ...updates }));
+	};
+
 	return (
-		<UserContext.Provider value={{ user, loading, setUser }}>
+		<UserContext.Provider value={{ user, loading, updateUser }}>
 			{children}
 		</UserContext.Provider>
 	);
