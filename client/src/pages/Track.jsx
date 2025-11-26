@@ -7,7 +7,7 @@ import LikeButton from "../components/LikeButton";
 import { UserContext } from "../UserContext";
 
 export default function TrackEvent() {
-	const user = useContext(UserContext);
+	const { user } = useContext(UserContext);
 	const [searchParams] = useSearchParams();
 	const [trackStreams, setTrackStreams] = useState(null);
 	const [liked, setLiked] = useState(false);

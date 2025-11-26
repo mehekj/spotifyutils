@@ -5,7 +5,7 @@ import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 
 const Home = () => {
-	const user = useContext(UserContext);
+	const { user } = useContext(UserContext);
 
 	const [top20, setTop20] = useState({});
 	// const [bottom20, setBottom20] = useState({});

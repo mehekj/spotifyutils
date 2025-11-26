@@ -1,32 +1,35 @@
 import { Loader, MantineProvider } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { users } from "./api";
+import { UserContext } from "./UserContext";
+import UserProvider from "./components/UserProvider";
+
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
 import Upload from "./pages/Upload";
-import "./styles.css";
 import { theme } from "./theme";
-import { UserContext } from "./UserContext";
+
+function AppContent() {
+	const { user, loading } = useContext(UserContext);
+
+	if (loading) return <Loader />;
+	if (!user) return <Login />;
+
+	return (
+		<>
+			<NavBar />
+			<Routes>
+				<Route path="/" element={<Home />} />
+				<Route path="/track" element={<Track />} />
+				<Route path="/upload" element={<Upload />} />
+			</Routes>
+		</>
+	);
+}
 
 export default function App() {
-	const [user, setUser] = useState(null);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		users
-			.getCurrentUser()
-			.then(setUser)
-			.catch((err) => {
-				if (!err._handled) {
-					console.error("Error fetching user data:", err);
-				}
-			})
-			.then(() => setLoading(false));
-	}, []);
-
 	return (
 		<MantineProvider
 			theme={theme}
@@ -44,23 +47,9 @@ export default function App() {
 			})}
 		>
 			<BrowserRouter>
-				{loading ? (
-					<Loader />
-				) : user ? (
-					<>
-						<NavBar />
-
-						<UserContext.Provider value={user}>
-							<Routes>
-								<Route path="/" element={<Home />}></Route>
-								<Route path="/track" element={<Track />}></Route>
-								<Route path="/upload" element={<Upload />}></Route>
-							</Routes>
-						</UserContext.Provider>
-					</>
-				) : (
-					<Login />
-				)}
+				<UserProvider>
+					<AppContent />
+				</UserProvider>
 			</BrowserRouter>
 		</MantineProvider>
 	);

@@ -5,7 +5,7 @@ import { UserContext } from "../UserContext";
 import { users } from "../api";
 
 const Upload = () => {
-	const user = useContext(UserContext);
+	const { user } = useContext(UserContext);
 	const [files, setFiles] = useState([]);
 	const [progress, setProgress] = useState(-1);
 	const [currFile, setCurrFile] = useState(null);
