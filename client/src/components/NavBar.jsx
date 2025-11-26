@@ -18,10 +18,24 @@ export default function Navbar() {
 
 	const links = (
 		<>
-			<Anchor component={Link} to="/" onClick={close} fw="bold">
+			<Anchor
+				component={Link}
+				to="/"
+				onClick={close}
+				fw="bold"
+				underline="none"
+				classNames={{ root: "hover-green" }}
+			>
 				home
 			</Anchor>
-			<Anchor component={Link} to="/upload" onClick={close} fw="bold">
+			<Anchor
+				component={Link}
+				to="/upload"
+				onClick={close}
+				fw="bold"
+				underline="none"
+				classNames={{ root: "hover-green" }}
+			>
 				upload
 			</Anchor>
 			<Button onPointerDown={auth.logout} variant="light" fw="bold">
@@ -34,7 +48,7 @@ export default function Navbar() {
 		<Container component="nav" size="xl">
 			<Flex align="baseline" justify="space-between" py="md">
 				<Title component={Link} to="/" order={3} td="none" c="white">
-					<Text span inherit c="spotify.6">
+					<Text span inherit c="spotify.5">
 						spot
 					</Text>
 					utils

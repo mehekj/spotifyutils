@@ -6,7 +6,7 @@ const Login = () => {
 		<Flex direction="column" align="center" justify="center" gap="lg" h="100vh">
 			<Title>
 				welcome to{" "}
-				<Text span inherit c="spotify.6">
+				<Text span inherit c="spotify.5">
 					spot
 				</Text>
 				utils

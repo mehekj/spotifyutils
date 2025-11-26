@@ -41,8 +41,8 @@ export default function App() {
 					"--mantine-color-bright": theme.white,
 				},
 				variables: {
-					"--mantine-primary-color-filled": theme.colors.spotify[6],
-					"--mantine-primary-color-filled-hover": theme.colors.spotify[5],
+					"--mantine-primary-color-filled": theme.colors.spotify[5],
+					"--mantine-primary-color-filled-hover": theme.colors.spotify[4],
 				},
 			})}
 		>

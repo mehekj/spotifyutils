@@ -1,14 +1,30 @@
-import { Box, Button, Progress, Stack, Text, Title } from "@mantine/core";
+import {
+	LoadingOverlay,
+	Container,
+	Button,
+	Progress,
+	Stack,
+	Text,
+	Tooltip,
+	Title,
+	Alert,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useContext, useState } from "react";
 import { UserContext } from "../UserContext";
 import { users } from "../api";
+import useConfirm from "../components/ConfirmDialog";
 
 const Upload = () => {
 	const { user, updateUser } = useContext(UserContext);
 	const [files, setFiles] = useState([]);
 	const [progress, setProgress] = useState(-1);
 	const [currFile, setCurrFile] = useState(null);
+	const { confirm, ConfirmModal } = useConfirm();
+
+	const inProgress = () => {
+		return progress >= 0 && progress < 100;
+	};
 
 	const uploadFile = async (fileNum, uploadTime) => {
 		const file = files[fileNum];
@@ -65,9 +81,8 @@ const Upload = () => {
 				"Are you sure you would like to proceed? This will delete your previously uploaded data from " +
 				new Date(user.lastUpload).toLocaleString();
 
-			if (!window.confirm(confirmMsg)) {
-				return;
-			}
+			const result = await confirm(confirmMsg);
+			if (!result) return;
 		}
 
 		const newUploadTime = Date.now();
@@ -84,56 +99,78 @@ const Upload = () => {
 		setProgress(100);
 
 		updateUser({ lastUpload: newUploadTime });
+
+		setFiles([]);
 	};
 
 	return (
-		<Stack>
-			<Title>Upload</Title>
-			{progress < 0 ? (
-				<Stack>
-					<Box>
-						<Dropzone
-							onDrop={setFiles}
-							onReject={(files) => console.error("rejected files", files)}
-							maxSize={13 * 1024 * 1024}
-							accept={["application/json"]}
+		<Container size="xl">
+			<Stack gap="lg">
+				<Title>Upload</Title>
+				<Stack justify="center">
+					<Dropzone
+						onDrop={setFiles}
+						onReject={(files) => console.error("rejected files", files)}
+						maxSize={13 * 1024 * 1024}
+						accept={["application/json"]}
+					>
+						<LoadingOverlay
+							visible={inProgress()}
+							zIndex={100}
+							overlayProps={{ blur: 2 }}
+						/>
+						{files.length > 0 ? (
+							<Stack align="center">
+								<Title order={2}>
+									{files.length} file{files.length > 1 ? "s" : ""} selected
+								</Title>
+								<Text ta="center">
+									{[...files].map(
+										(file, i) => (i !== 0 ? ", " : "") + file.name
+									)}
+								</Text>
+							</Stack>
+						) : (
+							<Stack align="center">
+								<Title order={2}>Drop JSON files here</Title>
+								<Text>or click to upload</Text>
+							</Stack>
+						)}
+					</Dropzone>
+					<Tooltip
+						arrowPosition="bottom"
+						label="select files to upload"
+						disabled={files.length > 0}
+					>
+						<Button
+							onPointerDown={onFileSubmit}
+							disabled={files.length === 0}
+							loading={inProgress()}
 						>
-							{files.length > 0 ? (
-								<Stack>
-									<Title>
-										{files.length} file{files.length > 1 ? "s" : ""} selected
-									</Title>
-									<Text>
-										{[...files].map(
-											(file, i) => (i !== 0 ? ", " : "") + file.name
-										)}
-									</Text>
-								</Stack>
-							) : (
-								<Stack>
-									<Title>Drop JSON files here</Title>
-									<Text>or click to upload</Text>
-								</Stack>
-							)}
-						</Dropzone>
-					</Box>
-					<Button onPointerDown={onFileSubmit}>upload</Button>
+							upload
+						</Button>
+					</Tooltip>
 				</Stack>
-			) : (
-				<Stack>
-					<Text>
-						{progress === 100
-							? "finished upload"
-							: progress === 99
-							? "wiping old data"
-							: progress >= 0
-							? `uploading ${currFile.name}`
-							: ""}
-					</Text>
-					{progress >= 0 && <Progress value={progress} />}
-				</Stack>
-			)}
-		</Stack>
+				{inProgress() && (
+					<Stack>
+						<Alert color="red" variant="light" title="DO NOT REFRESH THE PAGE">
+							your upload will not complete
+						</Alert>
+						<Progress value={progress} />
+						<Text ta="center">
+							{progress === 100
+								? "finished upload"
+								: progress === 99
+								? "wiping old data"
+								: progress >= 0
+								? `uploading ${currFile.name}`
+								: ""}
+						</Text>
+					</Stack>
+				)}
+			</Stack>
+			{ConfirmModal}
+		</Container>
 	);
 };
 

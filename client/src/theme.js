@@ -1,7 +1,8 @@
-import { Anchor, createTheme } from "@mantine/core";
+import { ActionIcon, Anchor, createTheme } from "@mantine/core";
 
 import "@mantine/core/styles.css";
 import "@mantine/dropzone/styles.css";
+import "./styles.css";
 import { Link } from "react-router-dom";
 
 export const theme = createTheme({
@@ -32,13 +33,15 @@ export const theme = createTheme({
 			"#0b0c10", // 9
 		],
 	},
+	autoContrast: true,
 	fontFamily: "Inter, system-ui, sans-serif",
 	components: {
 		Anchor: Anchor.extend({
 			defaultProps: {
 				component: Link,
-				underline: "never",
+				underline: "none",
 				c: "white",
+				classNames: { root: "hover-green" },
 			},
 		}),
 	},
