@@ -120,7 +120,7 @@ const Upload = () => {
 						<LoadingOverlay
 							visible={inProgress()}
 							zIndex={100}
-							overlayProps={{ blur: 2 }}
+							overlayProps={{ blur: 1 }}
 						/>
 						{files.length > 0 ? (
 							<Stack align="center">

@@ -28,4 +28,9 @@ export const tracks = {
 		const response = await api.get(`/tracks/${trackURI}/like`);
 		return response.data;
 	},
+
+	getTrackInfo: async (trackURI) => {
+		const response = await api.get(`/tracks/${trackURI}/info`);
+		return response.data;
+	},
 };

@@ -1,4 +1,4 @@
-import { ActionIcon, Anchor, createTheme } from "@mantine/core";
+import { ActionIcon, Anchor, createTheme, Image } from "@mantine/core";
 
 import "@mantine/core/styles.css";
 import "@mantine/dropzone/styles.css";
@@ -42,6 +42,11 @@ export const theme = createTheme({
 				underline: "none",
 				c: "white",
 				classNames: { root: "hover-green" },
+			},
+		}),
+		Image: Image.extend({
+			defaultProps: {
+				radius: "sm",
 			},
 		}),
 	},

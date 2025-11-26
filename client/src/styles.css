@@ -5,7 +5,7 @@ svg {
 		border-color 200ms ease;
 }
 
-.hover-green.action-icon {
+.hover-green {
 	svg {
 		stroke: currentColor;
 		fill: currentColor;

@@ -1,28 +1,46 @@
-import { Container, Group, Stack, Text, Title } from "@mantine/core";
+import {
+	Container,
+	Group,
+	Image,
+	Loader,
+	Skeleton,
+	Stack,
+	Text,
+	Title,
+} from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
 import { UserContext } from "../UserContext";
+import LoadingPage from "../components/LoadingPage";
 
 export default function TrackEvent() {
 	const { user } = useContext(UserContext);
 	const [searchParams] = useSearchParams();
 	const [trackStreams, setTrackStreams] = useState(null);
 	const [liked, setLiked] = useState(false);
+	const [trackInfo, setTrackInfo] = useState(null);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			if (!user.id || !searchParams.get("uri")) return;
+			const uri = searchParams.get("uri");
+			if (!user.id || !uri) return;
+
 			try {
-				const [streamsRes, likedRes] = await Promise.all([
-					tracks.getStreams(searchParams.get("uri")),
-					tracks.isLiked(searchParams.get("uri")),
+				setLoading(true);
+				const [streamsRes, likedRes, infoRes] = await Promise.all([
+					tracks.getStreams(uri),
+					tracks.isLiked(uri),
+					tracks.getTrackInfo(uri),
 				]);
 
 				setTrackStreams(streamsRes);
 				setLiked(likedRes[0]);
+				setTrackInfo(infoRes);
+				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch track data:", error);
 			}
@@ -31,34 +49,52 @@ export default function TrackEvent() {
 		fetchData();
 	}, [searchParams, user.id]);
 
+	if (loading) return <LoadingPage />;
+
 	return (
-		<>
-			{trackStreams !== null && (
-				<Container size="xl">
-					<Stack gap="lg">
-						<Group align="baseline">
-							<Title>{trackStreams[0]["master_metadata_track_name"]}</Title>
-							<Text>
-								{trackStreams[0]["master_metadata_album_artist_name"]}
-							</Text>
-							<LikeButton id={searchParams.get("uri")} like={liked} />
-						</Group>
-						<JSONTable
-							data={trackStreams}
-							keys={[
-								"ts",
-								"platform",
-								"ms_played",
-								"conn_country",
-								"shuffle",
-								"skipped",
-								"offline",
-								"incognito_mode",
-							]}
+		<Container size="xl">
+			<Stack gap="xl">
+				{trackInfo !== null && (
+					<Group align="end" my="xl" grow preventGrowOverflow={false}>
+						<Image
+							src={trackInfo.album.images[1].url}
+							maw={trackInfo.album.images[1].width}
 						/>
-					</Stack>
-				</Container>
-			)}
-		</>
+						<Stack>
+							<Group>
+								<Title mr="lg" size={48}>
+									{trackInfo.name}
+								</Title>
+								<LikeButton
+									id={searchParams.get("uri")}
+									like={liked}
+									size={64}
+								/>
+							</Group>
+							<Group align="baseline">
+								<Text fz={20} ta="center">
+									{trackInfo.artists.map((artist) => artist.name).join(", ")}
+								</Text>
+							</Group>
+						</Stack>
+					</Group>
+				)}
+				{trackStreams !== null && (
+					<JSONTable
+						data={trackStreams}
+						keys={[
+							"ts",
+							"platform",
+							"ms_played",
+							"conn_country",
+							"shuffle",
+							"skipped",
+							"offline",
+							"incognito_mode",
+						]}
+					/>
+				)}
+			</Stack>
+		</Container>
 	);
 }

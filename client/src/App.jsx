@@ -10,11 +10,12 @@ import Login from "./pages/Login";
 import Track from "./pages/Track";
 import Upload from "./pages/Upload";
 import { theme } from "./theme";
+import LoadingPage from "./components/LoadingPage";
 
 function AppContent() {
 	const { user, loading } = useContext(UserContext);
 
-	if (loading) return <Loader />;
+	if (loading) return <LoadingPage />;
 	if (!user) return <Login />;
 
 	return (

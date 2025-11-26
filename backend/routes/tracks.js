@@ -103,3 +103,13 @@ tracksRouter.get("/:uri/like", async (req, res, next) => {
 		next(err);
 	}
 });
+
+tracksRouter.get("/:uri/info", async (req, res, next) => {
+	try {
+		const id = req.params.uri.split(":")[2];
+		const response = await spotifyGet(req, res, `/tracks/${id}`);
+		res.json(response);
+	} catch (err) {
+		next(err);
+	}
+});
