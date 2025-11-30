@@ -8,13 +8,25 @@ import {
 	Stack,
 	Text,
 	Title,
+	Group,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link } from "react-router-dom";
 import { auth } from "../api";
+import Logo from "./Logo";
+import { useState } from "react";
 
 export default function Navbar() {
 	const [opened, { toggle, close }] = useDisclosure(false);
+	const [animateLogo, setAnimateLogo] = useState(false);
+
+	const enableLogoAnimate = () => {
+		setAnimateLogo(true);
+	};
+
+	const disableLogoAnimate = () => {
+		setAnimateLogo(false);
+	};
 
 	const links = (
 		<>
@@ -47,11 +59,21 @@ export default function Navbar() {
 	return (
 		<Container component="nav" size="xl">
 			<Flex align="baseline" justify="space-between" py="md">
-				<Title component={Link} to="/" order={3} td="none" c="white">
+				<Title
+					component={Link}
+					to="/"
+					order={3}
+					td="none"
+					c="white"
+					display="flex"
+					onMouseEnter={enableLogoAnimate}
+					onMouseLeave={disableLogoAnimate}
+				>
+					<Logo size={90} animate={animateLogo} />
+					decod
 					<Text span inherit c="spotify.5">
-						spot
+						ify
 					</Text>
-					utils
 				</Title>
 
 				<Flex gap="lg" visibleFrom="sm" mb="lg" align="baseline">
