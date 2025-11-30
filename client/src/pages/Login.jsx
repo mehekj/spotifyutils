@@ -12,10 +12,10 @@ const Login = () => {
 					ify
 				</Text>
 			</Title>
+			<Text ta="center">your spotify data, decoded</Text>
 			<Button variant="outline" onPointerDown={auth.login}>
 				get started
 			</Button>
-			<Text ta="center">developed by Mehek Jethani</Text>
 		</Flex>
 	);
 };

@@ -2,7 +2,7 @@ import api from "./client";
 
 export const auth = {
 	login: () => {
-		const baseURL = import.meta.env.DEV ? "http://localhost:5050" : "";
+		const baseURL = import.meta.env.DEV ? "http://127.0.0.1:5050" : "";
 		window.location.href = `${baseURL}/auth/login`;
 	},
 

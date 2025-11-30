@@ -34,7 +34,9 @@ export const theme = createTheme({
 		],
 	},
 	autoContrast: true,
-	fontFamily: "Inter, system-ui, sans-serif",
+	fontFamily: "IBM Plex Mono, monospace",
+	fontFamilyMonospace: "IBM Plex Mono, monospace",
+	headings: { fontFamily: "Inter, sans-serif" },
 	components: {
 		Anchor: Anchor.extend({
 			defaultProps: {

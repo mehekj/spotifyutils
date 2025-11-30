@@ -70,9 +70,11 @@ export default function Navbar() {
 					onMouseLeave={disableLogoAnimate}
 				>
 					<Logo size={90} animate={animateLogo} />
-					decod
-					<Text span inherit c="spotify.5">
-						ify
+					<Text span inherit ml={4}>
+						decod
+						<Text span inherit c="spotify.5">
+							ify
+						</Text>
 					</Text>
 				</Title>
 

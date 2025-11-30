@@ -73,7 +73,7 @@ authRouter.get("/redirect", async (req, res) => {
 		setTokenCookies(res, access_token, refresh_token, expires_in);
 
 		const redirectBase =
-			process.env.NODE_ENV === "production" ? "" : "http://localhost:5173";
+			process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:5173";
 		res.redirect(`${redirectBase}/`);
 	} catch (err) {
 		console.error("Error getting tokens:", err.message);
