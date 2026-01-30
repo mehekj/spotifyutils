@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Logo({
 	size = 174,
@@ -6,6 +6,8 @@ export default function Logo({
 	barWidth = 6,
 	animate = false,
 }) {
+	const svgRef = useRef(null);
+
 	const [bars] = useState(() => {
 		const leftBracketRightX = 24.384;
 		const rightBracketLeftX = 149.416;
@@ -45,8 +47,16 @@ export default function Logo({
 		});
 	});
 
+	useEffect(() => {
+		const svg = svgRef.current;
+		if (!svg || typeof svg.pauseAnimations !== "function") return;
+		if (animate) svg.unpauseAnimations();
+		else svg.pauseAnimations();
+	}, [animate]);
+
 	return (
 		<svg
+			ref={svgRef}
 			width={size}
 			height={(size / 174) * 62}
 			viewBox="0 0 174 62"
@@ -73,22 +83,20 @@ export default function Logo({
 					y={bar.centerY - bar.baseHeight / 2}
 					fill="#1ED760"
 				>
-					{animate && (
-						<>
-							<animate
-								attributeName="height"
-								values={bar.heightValues}
-								dur={bar.duration}
-								repeatCount="indefinite"
-							/>
-							<animate
-								attributeName="y"
-								values={bar.yValues}
-								dur={bar.duration}
-								repeatCount="indefinite"
-							/>
-						</>
-					)}
+					<>
+						<animate
+							attributeName="height"
+							values={bar.heightValues}
+							dur={bar.duration}
+							repeatCount="indefinite"
+						/>
+						<animate
+							attributeName="y"
+							values={bar.yValues}
+							dur={bar.duration}
+							repeatCount="indefinite"
+						/>
+					</>
 				</rect>
 			))}
 		</svg>
