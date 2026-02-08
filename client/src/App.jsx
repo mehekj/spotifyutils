@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { UserContext } from "./UserContext";
 import UserProvider from "./components/UserProvider";
+import UploadProvider from "./components/UploadProvider";
 
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
@@ -49,7 +50,9 @@ export default function App() {
 		>
 			<BrowserRouter>
 				<UserProvider>
-					<AppContent />
+					<UploadProvider>
+						<AppContent />
+					</UploadProvider>
 				</UserProvider>
 			</BrowserRouter>
 		</MantineProvider>

@@ -20,17 +20,23 @@ import {
 	FaTimes,
 } from "react-icons/fa";
 import { UserContext } from "../UserContext";
+import { UploadContext } from "../UploadContext";
 import { users } from "../api";
 import useConfirm from "../components/ConfirmDialog";
 import { validateFiles } from "../utils/validation";
 
 const Upload = () => {
 	const { user, updateUser } = useContext(UserContext);
+	const {
+		progress,
+		setProgress,
+		currFile,
+		setCurrFile,
+		completedTime,
+		setCompletedTime,
+	} = useContext(UploadContext);
 	const [files, setFiles] = useState([]);
 	const [validationResults, setValidationResults] = useState([]);
-	const [progress, setProgress] = useState(-1);
-	const [currFile, setCurrFile] = useState(null);
-	const [completedTime, setCompletedTime] = useState(-1);
 	const [validationError, setValidationError] = useState(null);
 	const { confirm, ConfirmModal } = useConfirm();
 
