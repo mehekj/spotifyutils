@@ -2,6 +2,7 @@ import {
 	Alert,
 	Button,
 	Container,
+	Dialog,
 	Group,
 	LoadingOverlay,
 	Progress,
@@ -117,8 +118,7 @@ const Upload = () => {
 	const onFileSubmit = async (e) => {
 		e.preventDefault();
 
-		if (files.length === 0) {
-			setValidationError("No files selected");
+		if (files.length === 0 || inProgress()) {
 			return;
 		}
 
@@ -168,7 +168,7 @@ const Upload = () => {
 	};
 
 	return (
-		<Container size="xl">
+		<Container size="xl" bg="dark.8">
 			<Stack gap="lg">
 				<Title>Upload</Title>
 
@@ -191,6 +191,7 @@ const Upload = () => {
 						onReject={onDropRejected}
 						maxSize={13 * 1024 * 1024}
 						accept={["application/json"]}
+						disabled={inProgress()}
 					>
 						<LoadingOverlay
 							visible={inProgress()}
@@ -209,7 +210,7 @@ const Upload = () => {
 												<Group
 													bg={result.valid ? "spotify" : "red"}
 													p="xs"
-													style={{ borderRadius: "4px" }}
+													bdrs="sm"
 												>
 													{result.valid ? (
 														<FaCheckCircle size={16} />
@@ -278,39 +279,40 @@ const Upload = () => {
 						</Button>
 					</Tooltip>
 				</Stack>
-				{inProgress() && (
-					<Stack>
+				<Dialog opened={progress >= 0 && progress <= 100} justify="flex-end">
+					{inProgress() ? (
+						<Stack bg="dark.8" p="md" bdrs="sm">
+							<Alert
+								color="red"
+								variant="light"
+								title="DO NOT REFRESH THE PAGE"
+								icon={<FaExclamationCircle />}
+							>
+								your upload will not complete
+							</Alert>
+							<Text ta="center">
+								{progress === 100
+									? "finished upload"
+									: progress === 99
+										? "wiping old data"
+										: progress >= 0
+											? `uploading ${currFile.name}`
+											: ""}
+							</Text>
+							<Progress value={progress} />
+						</Stack>
+					) : (
 						<Alert
-							color="red"
 							variant="light"
-							title="DO NOT REFRESH THE PAGE"
-							icon={<FaExclamationCircle />}
+							title="Upload completed!"
+							icon={<FaRegCheckCircle />}
+							withCloseButton={true}
+							onClose={() => setProgress(-1)}
 						>
-							your upload will not complete
+							{new Date(completedTime).toLocaleString()}
 						</Alert>
-						<Progress value={progress} />
-						<Text ta="center">
-							{progress === 100
-								? "finished upload"
-								: progress === 99
-									? "wiping old data"
-									: progress >= 0
-										? `uploading ${currFile.name}`
-										: ""}
-						</Text>
-					</Stack>
-				)}
-				{progress === 100 && (
-					<Alert
-						variant="light"
-						title="Upload completed!"
-						icon={<FaRegCheckCircle />}
-						withCloseButton={true}
-						onClose={() => setProgress(-1)}
-					>
-						{new Date(completedTime).toLocaleString()}
-					</Alert>
-				)}
+					)}
+				</Dialog>
 			</Stack>
 			{ConfirmModal}
 		</Container>
