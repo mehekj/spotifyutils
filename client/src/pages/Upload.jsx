@@ -2,10 +2,8 @@ import {
 	Alert,
 	Button,
 	Container,
-	Dialog,
 	Group,
 	LoadingOverlay,
-	Progress,
 	Stack,
 	Text,
 	Title,
@@ -13,36 +11,21 @@ import {
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useContext, useState } from "react";
-import {
-	FaCheckCircle,
-	FaExclamationCircle,
-	FaRegCheckCircle,
-	FaTimes,
-} from "react-icons/fa";
-import { UserContext } from "../UserContext";
+import { FaCheckCircle, FaExclamationCircle, FaTimes } from "react-icons/fa";
 import { UploadContext } from "../UploadContext";
+import { UserContext } from "../UserContext";
 import { users } from "../api";
 import useConfirm from "../components/ConfirmDialog";
 import { validateFiles } from "../utils/validation";
 
 const Upload = () => {
 	const { user, updateUser } = useContext(UserContext);
-	const {
-		progress,
-		setProgress,
-		currFile,
-		setCurrFile,
-		completedTime,
-		setCompletedTime,
-	} = useContext(UploadContext);
+	const { inProgress, setProgress, setCurrFile, setCompletedTime } =
+		useContext(UploadContext);
 	const [files, setFiles] = useState([]);
 	const [validationResults, setValidationResults] = useState([]);
 	const [validationError, setValidationError] = useState(null);
 	const { confirm, ConfirmModal } = useConfirm();
-
-	const inProgress = () => {
-		return progress >= 0 && progress < 100;
-	};
 
 	const removeFile = (indexToRemove) => {
 		setFiles(files.filter((_, idx) => idx !== indexToRemove));
@@ -285,40 +268,6 @@ const Upload = () => {
 						</Button>
 					</Tooltip>
 				</Stack>
-				<Dialog opened={progress >= 0 && progress <= 100} justify="flex-end">
-					{inProgress() ? (
-						<Stack bg="dark.8" p="md" bdrs="sm">
-							<Alert
-								color="red"
-								variant="light"
-								title="DO NOT REFRESH THE PAGE"
-								icon={<FaExclamationCircle />}
-							>
-								your upload will not complete
-							</Alert>
-							<Text ta="center">
-								{progress === 100
-									? "finished upload"
-									: progress === 99
-										? "wiping old data"
-										: progress >= 0
-											? `uploading ${currFile.name}`
-											: ""}
-							</Text>
-							<Progress value={progress} />
-						</Stack>
-					) : (
-						<Alert
-							variant="light"
-							title="Upload completed!"
-							icon={<FaRegCheckCircle />}
-							withCloseButton={true}
-							onClose={() => setProgress(-1)}
-						>
-							{new Date(completedTime).toLocaleString()}
-						</Alert>
-					)}
-				</Dialog>
 			</Stack>
 			{ConfirmModal}
 		</Container>
