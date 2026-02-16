@@ -2,12 +2,13 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import "./environment.js";
+import { albumsRouter } from "./routes/albums.js";
+import { artistsRouter } from "./routes/artists.js";
+import { authRouter } from "./routes/auth.js";
+import { tracksRouter } from "./routes/tracks.js";
+import { usersRouter } from "./routes/users.js";
 import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
-import { authRouter } from "./routes/auth.js";
-import { usersRouter } from "./routes/users.js";
-import { tracksRouter } from "./routes/tracks.js";
-import { artistsRouter } from "./routes/artists.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,6 +18,7 @@ app.use("/auth/", authRouter);
 app.use("/users/", usersRouter);
 app.use("/tracks/", tracksRouter);
 app.use("/artists/", artistsRouter);
+app.use("/albums", albumsRouter);
 
 const buildPath = path.join(__dirname, "..", "client", "dist");
 app.use(express.static(buildPath));

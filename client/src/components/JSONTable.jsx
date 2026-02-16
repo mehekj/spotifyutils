@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import LikeButton from "./LikeButton";
 import ArtistLink from "./ArtistLink";
 import TrackLink from "./TrackLink";
+import AlbumLink from "./AlbumLink";
 
 export default function JSONTable({ data, keys = null }) {
 	const columns = useMemo(() => {
@@ -29,6 +30,12 @@ export default function JSONTable({ data, keys = null }) {
 					<ArtistLink name={row[key].toString()}>
 						{row[key].toString()}
 					</ArtistLink>
+				);
+			case "master_metadata_album_album_name":
+				return (
+					<AlbumLink name={row[key].toString()}>
+						{row[key].toString()}
+					</AlbumLink>
 				);
 			default:
 				return <Text>{String(row[key])}</Text>;

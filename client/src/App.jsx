@@ -1,6 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Album from "./pages/Album";
 import { UserContext } from "./UserContext";
 import UploadProvider from "./components/UploadProvider";
 import UserProvider from "./components/UserProvider";
@@ -28,6 +29,7 @@ function AppContent() {
 				<Route path="/track" element={<Track />} />
 				<Route path="/upload" element={<Upload />} />
 				<Route path="/artist" element={<Artist />} />
+				<Route path="/album" element={<Album />} />
 			</Routes>
 		</>
 	);

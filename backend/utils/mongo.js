@@ -1,3 +1,26 @@
+export const getAlbumStreams = async (userID, albumName) => {
+	try {
+		const pipeline = [
+			{
+				$match: {
+					$and: [
+						{ user: userID },
+						{ master_metadata_album_album_name: albumName },
+					],
+				},
+			},
+			{
+				$sort: {
+					ts: -1,
+				},
+			},
+		];
+		const result = await streams.aggregate(pipeline).toArray();
+		return result;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get album streams", 500, error);
+	}
+};
 import { MongoClient } from "mongodb";
 
 const connectionString = process.env.MONGO_URI || "";

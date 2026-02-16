@@ -55,7 +55,7 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		throw new SpotifyAPIError(
 			"Spotify API request failed",
 			status || 500,
-			err.message || err.response?.data,
+			err.response?.data || err.message,
 		);
 	}
 };
