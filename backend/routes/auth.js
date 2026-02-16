@@ -16,6 +16,9 @@ const scopes = [
 	"user-library-read",
 	"playlist-read-private",
 	"playlist-modify-private",
+	"playlist-modify-public",
+	"user-follow-read",
+	"user-follow-modify",
 ];
 
 authRouter.get("/login", (req, res) => {
@@ -33,7 +36,7 @@ authRouter.get("/login", (req, res) => {
 				redirect_uri: REDIRECT_URI,
 				state: state,
 				show_dialog: true,
-			})
+			}),
 	);
 });
 
@@ -63,10 +66,10 @@ authRouter.get("/redirect", async (req, res) => {
 				headers: {
 					"content-type": "application/x-www-form-urlencoded",
 					Authorization: `Basic ${Buffer.from(
-						`${CLIENT_ID}:${CLIENT_SECRET}`
+						`${CLIENT_ID}:${CLIENT_SECRET}`,
 					).toString("base64")}`,
 				},
-			}
+			},
 		);
 
 		const { access_token, refresh_token, expires_in } = response.data;

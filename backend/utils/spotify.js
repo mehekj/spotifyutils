@@ -15,7 +15,6 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	const tokens = getTokenCookies(req);
 	const accessToken = tokens.accessToken;
 	const refreshToken = tokens.refreshToken;
-
 	try {
 		const result = await axios({
 			url: `${baseUrl}${endpoint}`,
@@ -33,7 +32,7 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 			if (!newAccessToken) {
 				throw new SpotifyAPIError(
 					"Failed to refresh Spotify access token",
-					401
+					401,
 				);
 			}
 
@@ -48,7 +47,7 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 				throw new SpotifyAPIError(
 					"Spotify API request failed after refresh",
 					retryErr.response?.status,
-					retryErr.response?.data
+					retryErr.response?.data,
 				);
 			}
 		}
@@ -56,7 +55,7 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		throw new SpotifyAPIError(
 			"Spotify API request failed",
 			status || 500,
-			err.response?.data || err.message
+			err.message || err.response?.data,
 		);
 	}
 };

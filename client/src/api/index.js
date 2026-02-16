@@ -1,3 +1,4 @@
+export { artists } from "./artists";
 export { auth } from "./auth";
-export { users } from "./users";
 export { tracks } from "./tracks";
+export { users } from "./users";

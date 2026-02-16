@@ -7,14 +7,32 @@ import { SpotifyAPIError } from "./utils/spotify.js";
 import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 import { tracksRouter } from "./routes/tracks.js";
+import { artistsRouter } from "./routes/artists.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+app.use("/auth/", authRouter);
+app.use("/users/", usersRouter);
+app.use("/tracks/", tracksRouter);
+app.use("/artists/", artistsRouter);
+
+const buildPath = path.join(__dirname, "..", "client", "dist");
+app.use(express.static(buildPath));
+
+app.get(/.*/, (req, res) => {
+	res.sendFile(path.join(buildPath, "index.html"));
+});
+
 app.use((err, req, res, next) => {
 	if (err instanceof SpotifyAPIError) {
-		console.error("Spotify request error:", err.details);
+		console.error("Spotify request error:", {
+			message: err.message,
+			details: err.details,
+			stack: err.stack,
+			error: err,
+		});
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -22,7 +40,12 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof MongoAPIError) {
-		console.error("MongoDB request error:", err.details);
+		console.error("MongoDB request error:", {
+			message: err.message,
+			details: err.details,
+			stack: err.stack,
+			error: err,
+		});
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
@@ -30,26 +53,24 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof FilesAPIError) {
-		console.error("Files request error:", err.details);
+		console.error("Files request error:", {
+			message: err.message,
+			details: err.details,
+			stack: err.stack,
+			error: err,
+		});
 		return res.status(err.status || 500).json({
 			message: err.message,
 			details: err.details,
 		});
 	}
 
-	console.error("Unhandled error:", err);
+	console.error("Unhandled error:", {
+		message: err.message,
+		stack: err.stack,
+		error: err,
+	});
 	res.status(500).json({ message: "Internal server error" });
-});
-
-app.use("/auth/", authRouter);
-app.use("/users/", usersRouter);
-app.use("/tracks/", tracksRouter);
-
-const buildPath = path.join(__dirname, "..", "client", "dist");
-app.use(express.static(buildPath));
-
-app.get(/.*/, (req, res) => {
-	res.sendFile(path.join(buildPath, "index.html"));
 });
 
 const PORT = process.env.PORT || 5050;

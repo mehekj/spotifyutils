@@ -13,10 +13,20 @@ export default function JSONTable({ data, keys = null }) {
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":
-				return <LikeButton id={row["_id"]} like={row["liked"]} />;
-			case "track":
 				return (
-					<Anchor to={`/track?uri=${row["_id"]}`}>{row[key].toString()}</Anchor>
+					<LikeButton uri={row["spotify_track_uri"]} like={row["liked"]} />
+				);
+			case "master_metadata_track_name":
+				return (
+					<Anchor to={`/track?uri=${row["spotify_track_uri"]}`}>
+						{row[key].toString()}
+					</Anchor>
+				);
+			case "master_metadata_album_artist_name":
+				return (
+					<Anchor to={`/artist?name=${row[key].toString()}`}>
+						{row[key].toString()}
+					</Anchor>
 				);
 			default:
 				return <Text>{String(row[key])}</Text>;

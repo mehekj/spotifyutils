@@ -55,11 +55,29 @@ const Home = () => {
 					<LoadingPage />
 				) : (
 					top20.length > 0 && (
-						<JSONTable data={top20} keys={["track", "artist", "liked"]} />
+						<JSONTable
+							data={top20}
+							keys={[
+								"master_metadata_track_name",
+								"master_metadata_album_artist_name",
+								"liked",
+							]}
+						/>
 					)
 				)}
-				{/* {bottom20.length > 0 && (
-					<JSONTable data={bottom20} keys={["track", "artist", "liked"]} />
+				{/* {loading ? (
+					<LoadingPage />
+				) : (
+					bottom20.length > 0 && (
+						<JSONTable
+							data={bottom20}
+							keys={[
+								"master_metadata_track_name",
+								"master_metadata_album_artist_name",
+								"liked",
+							]}
+						/>
+					)
 				)} */}
 			</Stack>
 		</Container>

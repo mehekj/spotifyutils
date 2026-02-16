@@ -6,7 +6,7 @@ export default defineConfig({
 	server: {
 		host: "127.0.0.1",
 		proxy: {
-			"^/(users|auth|tracks)": {
+			"^/(users|auth|tracks|artists)": {
 				target: "http://127.0.0.1:5050",
 				changeOrigin: true,
 			},

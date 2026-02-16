@@ -157,7 +157,7 @@ const Upload = () => {
 	};
 
 	return (
-		<Container size="xl" bg="dark.8">
+		<Container size="xl">
 			<Stack gap="lg">
 				<Title>Upload</Title>
 

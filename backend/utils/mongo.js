@@ -42,7 +42,7 @@ export const setUserUpload = async (userID, uploadTime) => {
 		await users.updateOne(
 			{ user: userID },
 			{ $set: { user: userID, uploadTime: uploadTime } },
-			{ upsert: true }
+			{ upsert: true },
 		);
 	} catch (error) {
 		throw new MongoAPIError("Failed to set user upload", 500, error);
@@ -97,8 +97,11 @@ export const getTopTracks = async (userID, limit = 20) => {
 			{
 				$group: {
 					_id: "$spotify_track_uri",
-					track: { $first: "$master_metadata_track_name" },
-					artist: { $first: "$master_metadata_album_artist_name" },
+					spotify_track_uri: { $first: "$spotify_track_uri" },
+					master_metadata_track_name: { $first: "$master_metadata_track_name" },
+					master_metadata_album_artist_name: {
+						$first: "$master_metadata_album_artist_name",
+					},
 					count: { $sum: 1 },
 				},
 			},
@@ -128,8 +131,11 @@ export const getBottomTracks = async (userID, limit = 20) => {
 			{
 				$group: {
 					_id: "$spotify_track_uri",
-					track: { $first: "$master_metadata_track_name" },
-					artist: { $first: "$master_metadata_album_artist_name" },
+					spotify_track_uri: { $first: "$spotify_track_uri" },
+					master_metadata_track_name: { $first: "$master_metadata_track_name" },
+					master_metadata_album_artist_name: {
+						$first: "$master_metadata_album_artist_name",
+					},
 					count: { $sum: 1 },
 				},
 			},
@@ -163,5 +169,30 @@ export const getTrackStreams = async (userID, trackURI) => {
 		return result;
 	} catch (error) {
 		throw new MongoAPIError("Failed to get track streams", 500, error);
+	}
+};
+
+export const getArtistStreams = async (userID, artistName) => {
+	try {
+		const pipeline = [
+			{
+				$match: {
+					$and: [
+						{ user: userID },
+						{ master_metadata_album_artist_name: artistName },
+					],
+				},
+			},
+			{
+				$sort: {
+					ts: -1,
+				},
+			},
+		];
+
+		const result = await streams.aggregate(pipeline).toArray();
+		return result;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get artist streams", 500, error);
 	}
 };

@@ -24,7 +24,7 @@ tracksRouter.get("/top", async (req, res, next) => {
 		const likedRes = await spotifyGet(
 			req,
 			res,
-			`/me/tracks/contains?ids=${idStr}`
+			`/me/tracks/contains?ids=${idStr}`,
 		);
 		tracks.forEach((track, i) => (track.liked = likedRes[i]));
 
@@ -47,7 +47,7 @@ tracksRouter.get("/bottom", async (req, res, next) => {
 		const likedRes = await spotifyGet(
 			req,
 			res,
-			`/me/tracks/contains?ids=${idStr}`
+			`/me/tracks/contains?ids=${idStr}`,
 		);
 		tracks.forEach((track, i) => (track.liked = likedRes[i]));
 
@@ -59,7 +59,7 @@ tracksRouter.get("/bottom", async (req, res, next) => {
 
 tracksRouter.get("/:uri/streams", async (req, res, next) => {
 	console.log(
-		`Fetching user ${req.user.display_name}'s streams for track ${req.params.uri}`
+		`Fetching user ${req.user.display_name}'s streams for track ${req.params.uri}`,
 	);
 
 	try {
@@ -72,8 +72,7 @@ tracksRouter.get("/:uri/streams", async (req, res, next) => {
 
 tracksRouter.put("/:uri/like", async (req, res, next) => {
 	try {
-		const id = req.params.uri.split(":")[2];
-		await spotifyPut(req, res, `/me/tracks?ids=${id}`);
+		await spotifyPut(req, res, `/me/library?uris=${req.params.uri}`);
 		res.end();
 	} catch (err) {
 		next(err);
@@ -82,8 +81,7 @@ tracksRouter.put("/:uri/like", async (req, res, next) => {
 
 tracksRouter.delete("/:uri/like", async (req, res, next) => {
 	try {
-		const id = req.params.uri.split(":")[2];
-		await spotifyDelete(req, res, `/me/tracks?ids=${id}`);
+		await spotifyDelete(req, res, `/me/library?uris=${req.params.uri}`);
 		res.end();
 	} catch (err) {
 		next(err);
@@ -92,11 +90,10 @@ tracksRouter.delete("/:uri/like", async (req, res, next) => {
 
 tracksRouter.get("/:uri/like", async (req, res, next) => {
 	try {
-		const id = req.params.uri.split(":")[2];
 		const response = await spotifyGet(
 			req,
 			res,
-			`/me/tracks/contains?ids=${id}`
+			`/me/library/contains?uris=${req.params.uri}`,
 		);
 		res.json(response);
 	} catch (err) {

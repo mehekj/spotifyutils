@@ -1,17 +1,18 @@
-import { Loader, MantineProvider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { UserContext } from "./UserContext";
-import UserProvider from "./components/UserProvider";
 import UploadProvider from "./components/UploadProvider";
+import UserProvider from "./components/UserProvider";
 
+import LoadingPage from "./components/LoadingPage";
 import NavBar from "./components/NavBar";
+import Artist from "./pages/Artist";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Track from "./pages/Track";
 import Upload from "./pages/Upload";
 import { theme } from "./theme";
-import LoadingPage from "./components/LoadingPage";
 
 function AppContent() {
 	const { user, loading } = useContext(UserContext);
@@ -26,6 +27,7 @@ function AppContent() {
 				<Route path="/" element={<Home />} />
 				<Route path="/track" element={<Track />} />
 				<Route path="/upload" element={<Upload />} />
+				<Route path="/artist" element={<Artist />} />
 			</Routes>
 		</>
 	);

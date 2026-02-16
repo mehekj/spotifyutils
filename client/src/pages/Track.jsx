@@ -1,9 +1,8 @@
 import {
+	Anchor,
 	Container,
 	Group,
 	Image,
-	Loader,
-	Skeleton,
 	Stack,
 	Text,
 	Title,
@@ -13,8 +12,8 @@ import { useSearchParams } from "react-router-dom";
 import { tracks } from "../api";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
-import { UserContext } from "../UserContext";
 import LoadingPage from "../components/LoadingPage";
+import { UserContext } from "../UserContext";
 
 export default function TrackEvent() {
 	const { user } = useContext(UserContext);
@@ -67,14 +66,21 @@ export default function TrackEvent() {
 									{trackInfo.name}
 								</Title>
 								<LikeButton
-									id={searchParams.get("uri")}
+									uri={searchParams.get("uri")}
 									like={liked}
 									size={64}
 								/>
 							</Group>
 							<Group align="baseline">
 								<Text fz={20} ta="center">
-									{trackInfo.artists.map((artist) => artist.name).join(", ")}
+									{trackInfo.artists.map((artist, idx) => (
+										<>
+											<Anchor to={`/artist?name=${artist.name}`}>
+												{artist.name}
+											</Anchor>
+											{idx < trackInfo.artists.length - 1 && ", "}
+										</>
+									))}
 								</Text>
 							</Group>
 						</Stack>

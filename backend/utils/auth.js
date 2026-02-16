@@ -60,10 +60,10 @@ export const refreshSpotifyToken = async (refreshToken, res) => {
 				headers: {
 					"content-type": "application/x-www-form-urlencoded",
 					Authorization: `Basic ${Buffer.from(
-						`${CLIENT_ID}:${CLIENT_SECRET}`
+						`${CLIENT_ID}:${CLIENT_SECRET}`,
 					).toString("base64")}`,
 				},
-			}
+			},
 		);
 
 		const newAccessToken = response.data.access_token;
