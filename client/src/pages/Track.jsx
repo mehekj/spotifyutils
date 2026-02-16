@@ -1,15 +1,8 @@
-import {
-	Anchor,
-	Container,
-	Group,
-	Image,
-	Stack,
-	Text,
-	Title,
-} from "@mantine/core";
+import { Container, Group, Image, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tracks } from "../api";
+import ArtistLink from "../components/ArtistLink";
 import JSONTable from "../components/JSONTable";
 import LikeButton from "../components/LikeButton";
 import LoadingPage from "../components/LoadingPage";
@@ -75,9 +68,7 @@ export default function TrackEvent() {
 								<Text fz={20} ta="center">
 									{trackInfo.artists.map((artist, idx) => (
 										<>
-											<Anchor to={`/artist?name=${artist.name}`}>
-												{artist.name}
-											</Anchor>
+											<ArtistLink name={artist.name} />
 											{idx < trackInfo.artists.length - 1 && ", "}
 										</>
 									))}

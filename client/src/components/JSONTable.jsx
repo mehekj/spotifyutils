@@ -1,6 +1,8 @@
-import { Anchor, Table, Text } from "@mantine/core";
+import { Table, Text } from "@mantine/core";
 import { useMemo } from "react";
 import LikeButton from "./LikeButton";
+import ArtistLink from "./ArtistLink";
+import TrackLink from "./TrackLink";
 
 export default function JSONTable({ data, keys = null }) {
 	const columns = useMemo(() => {
@@ -18,15 +20,15 @@ export default function JSONTable({ data, keys = null }) {
 				);
 			case "master_metadata_track_name":
 				return (
-					<Anchor to={`/track?uri=${row["spotify_track_uri"]}`}>
+					<TrackLink uri={row["spotify_track_uri"]}>
 						{row[key].toString()}
-					</Anchor>
+					</TrackLink>
 				);
 			case "master_metadata_album_artist_name":
 				return (
-					<Anchor to={`/artist?name=${row[key].toString()}`}>
+					<ArtistLink name={row[key].toString()}>
 						{row[key].toString()}
-					</Anchor>
+					</ArtistLink>
 				);
 			default:
 				return <Text>{String(row[key])}</Text>;
