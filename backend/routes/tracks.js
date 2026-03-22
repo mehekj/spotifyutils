@@ -19,12 +19,11 @@ tracksRouter.get("/top", async (req, res, next) => {
 		const userID = req.user.id;
 		const tracks = await getTopTracks(userID, limit);
 
-		const ids = tracks.map((track) => track._id.split(":")[2]);
-		const idStr = ids.join("%2C");
+		const uris = tracks.map((track) => track._id).join(",");
 		const likedRes = await spotifyGet(
 			req,
 			res,
-			`/me/tracks/contains?ids=${idStr}`,
+			`/me/library/contains?uris=${uris}`,
 		);
 		tracks.forEach((track, i) => (track.liked = likedRes[i]));
 
@@ -42,12 +41,11 @@ tracksRouter.get("/bottom", async (req, res, next) => {
 		const userID = req.user.id;
 		const tracks = await getBottomTracks(userID, limit);
 
-		const ids = tracks.map((track) => track._id.split(":")[2]);
-		const idStr = ids.join("%2C");
+		const uris = tracks.map((track) => track._id).join(",");
 		const likedRes = await spotifyGet(
 			req,
 			res,
-			`/me/tracks/contains?ids=${idStr}`,
+			`/me/library/contains?uris=${uris}`,
 		);
 		tracks.forEach((track, i) => (track.liked = likedRes[i]));
 
