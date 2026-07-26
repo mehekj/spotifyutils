@@ -1,4 +1,4 @@
-export const getAlbumStreams = async (userID, albumName) => {
+export const getAlbumStreams = async (userID, albumUri) => {
 	try {
 		const pipeline = [
 			{
@@ -19,7 +19,7 @@ export const getAlbumStreams = async (userID, albumName) => {
 			},
 			{
 				$match: {
-					"track.album_name": albumName,
+					"track.album_uri": albumUri,
 				},
 			},
 			{
@@ -115,7 +115,9 @@ export const insertTrackStubs = async (data) => {
 	try {
 		const uniqueTracks = [
 			...new Map(
-				data.map((entry) => [entry.spotify_track_uri, entry]),
+				data
+					.filter((entry) => entry?.spotify_track_uri)
+					.map((entry) => [entry.spotify_track_uri, entry]),
 			).values(),
 		];
 
@@ -128,11 +130,22 @@ export const insertTrackStubs = async (data) => {
 				name: track.master_metadata_track_name,
 				artist_name: track.master_metadata_album_artist_name,
 				album_name: track.master_metadata_album_album_name,
+					})),
+				album: { name: track.master_metadata_album_album_name, uri: null },
 			}),
 		);
 
-		const result = await tracks.insertMany(trackDocs, { ordered: false });
-		console.log(`Inserted ${result.insertedCount} track stubs`);
+		const result = await tracks.bulkWrite(
+			trackDocs.map((doc) => ({
+				updateOne: {
+					filter: { _id: doc._id },
+					update: {
+						$setOnInsert: doc,
+					},
+					upsert: true,
+				},
+			`Track stub operations complete, inserted: ${result.upsertedCount}, matched: ${result.matchedCount}, modified: ${result.modifiedCount}`,
+		);
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert track stubs", 500, error);
 	}
@@ -166,14 +179,24 @@ const createTrackStubDocument = (trackUri, metadata = {}) => ({
 	album_uri: metadata.album_uri || null,
 	duration_ms: metadata.duration_ms || null,
 	image: {
-		small: metadata.image?.small || null,
-		medium: metadata.image?.medium || null,
-		large: metadata.image?.large || null,
-	},
-	status: "stub",
-	createdAt: new Date(),
-	updatedAt: new Date(),
-});
+const createTrackStubDocument = (trackUri, metadata = {}) => {
+	const artists = metadata.artists ?? [];
+	return {
+		_id: trackUri,
+		name: metadata.name || null,
+		artists,
+		album: metadata.album || null,
+		duration_ms: metadata.duration_ms || null,
+		image: {
+			small: metadata.images?.[2] || null,
+			medium: metadata.images?.[1] || null,
+			large: metadata.images?.[0] || null,
+		},
+		status: "stub",
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	};
+};
 
 export const createTrackStub = async (trackUri, metadata = {}) => {
 	try {
@@ -201,19 +224,26 @@ export const getTrackByUri = async (trackUri) => {
 
 export const updateTrackFromSpotify = async (trackUri, spotifyTrack) => {
 	try {
+		const artists = (spotifyTrack?.artists || []).map((artist) => ({
+			name: artist?.name || null,
+			uri: artist?.uri || null,
+		}));
+
+		console.log(spotifyTrack.album.images);
+
 		const updatedTrack = {
 			_id: trackUri,
 			name: spotifyTrack?.name || null,
-			artist_name:
-				spotifyTrack?.artists?.map((artist) => artist.name).join(", ") || null,
-			artist_uri: spotifyTrack?.artists?.[0]?.uri || null,
-			album_name: spotifyTrack?.album?.name || null,
-			album_uri: spotifyTrack?.album?.uri || null,
+			artists,
+			album: {
+				name: spotifyTrack?.album?.name || null,
+				uri: spotifyTrack?.album?.uri || null,
+			},
 			duration_ms: spotifyTrack?.duration_ms || null,
 			image: {
-				small: spotifyTrack?.album?.images?.[2]?.url || null,
-				medium: spotifyTrack?.album?.images?.[1]?.url || null,
-				large: spotifyTrack?.album?.images?.[0]?.url || null,
+				small: spotifyTrack?.album?.images?.[2] || null,
+				medium: spotifyTrack?.album?.images?.[1] || null,
+				large: spotifyTrack?.album?.images?.[0] || null,
 			},
 			status: "enriched",
 			updatedAt: new Date(),
@@ -247,10 +277,6 @@ export const getTopTracks = async (userID, limit = 20) => {
 				$group: {
 					_id: "$spotify_track_uri",
 					spotify_track_uri: { $first: "$spotify_track_uri" },
-					master_metadata_track_name: { $first: "$master_metadata_track_name" },
-					master_metadata_album_artist_name: {
-						$first: "$master_metadata_album_artist_name",
-					},
 					count: { $sum: 1 },
 				},
 			},
@@ -281,10 +307,6 @@ export const getBottomTracks = async (userID, limit = 20) => {
 				$group: {
 					_id: "$spotify_track_uri",
 					spotify_track_uri: { $first: "$spotify_track_uri" },
-					master_metadata_track_name: { $first: "$master_metadata_track_name" },
-					master_metadata_album_artist_name: {
-						$first: "$master_metadata_album_artist_name",
-					},
 					count: { $sum: 1 },
 				},
 			},
@@ -321,7 +343,7 @@ export const getTrackStreams = async (userID, trackURI) => {
 	}
 };
 
-export const getArtistStreams = async (userID, artistName) => {
+export const getArtistStreams = async (userID, artistUri) => {
 	try {
 		const pipeline = [
 			{
@@ -342,7 +364,7 @@ export const getArtistStreams = async (userID, artistName) => {
 			},
 			{
 				$match: {
-					"track.artist_name": artistName,
+					"track.artists.uri": artistUri,
 				},
 			},
 			{

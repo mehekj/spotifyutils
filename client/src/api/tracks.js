@@ -12,25 +12,31 @@ export const tracks = {
 	},
 
 	getStreams: async (trackURI) => {
-		const response = await api.get(`/tracks/${trackURI}/streams`);
+		const response = await api.get(
+			`/tracks/${encodeURIComponent(trackURI)}/streams`,
+		);
 		return response.data;
 	},
 
 	toggleLike: async (trackURI, liked) => {
 		if (liked) {
-			await api.delete(`/tracks/${trackURI}/like`);
+			await api.delete(`/tracks/${encodeURIComponent(trackURI)}/like`);
 		} else {
-			await api.put(`/tracks/${trackURI}/like`);
+			await api.put(`/tracks/${encodeURIComponent(trackURI)}/like`);
 		}
 	},
 
 	isLiked: async (trackURI) => {
-		const response = await api.get(`/tracks/${trackURI}/like`);
+		const response = await api.get(
+			`/tracks/${encodeURIComponent(trackURI)}/like`,
+		);
 		return response.data;
 	},
 
 	getTrackInfo: async (trackURI) => {
-		const response = await api.get(`/tracks/${trackURI}/info`);
+		const response = await api.get(
+			`/tracks/${encodeURIComponent(trackURI)}/info`,
+		);
 		return response.data;
 	},
 };

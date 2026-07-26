@@ -16,15 +16,15 @@ export default function AlbumPage() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const albumName = searchParams.get("name");
-			if (!user.id || !albumName) return;
+			const albumUri = searchParams.get("uri");
+			if (!user.id || !albumUri) return;
 
 			try {
 				setLoading(true);
-				const infoRes = await albums.getAlbumInfo(albumName);
+				const infoRes = await albums.getAlbumInfo(albumUri);
 				setAlbumInfo(infoRes);
 				if (infoRes && infoRes.uri) {
-					const streamsRes = await albums.getStreams(albumName);
+					const streamsRes = await albums.getStreams(albumUri);
 					setAlbumStreams(streamsRes);
 				}
 				setLoading(false);
@@ -58,7 +58,7 @@ export default function AlbumPage() {
 								<Text fz={20} ta="center">
 									{albumInfo.artists.map((artist, idx) => (
 										<>
-											<ArtistLink name={artist.name} />
+											<ArtistLink uri={artist.uri} name={artist.name} />
 											{idx < albumInfo.artists.length - 1 && ", "}
 										</>
 									))}
@@ -68,14 +68,7 @@ export default function AlbumPage() {
 					</Group>
 				)}
 				{albumStreams !== null && (
-					<JSONTable
-						data={albumStreams}
-						keys={[
-							"ts",
-							"master_metadata_track_name",
-							"master_metadata_album_artist_name",
-						]}
-					/>
+					<JSONTable data={albumStreams} keys={["ts", "track", "artist"]} />
 				)}
 			</Stack>
 		</Container>

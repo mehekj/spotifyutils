@@ -3,17 +3,25 @@ import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { spotifyDelete, spotifyGet, spotifyPut } from "../utils/spotify.js";
 import { getArtistStreams } from "../utils/mongo.js";
 
+const getSpotifyArtistId = (value) => {
+	const match = value?.match(/^spotify:artist:([a-zA-Z0-9]+)$/);
+	return match?.[1] || null;
+};
+
 export const artistsRouter = express.Router();
 
 artistsRouter.use(requireSpotifyAuth, attachSpotifyUser);
 
-artistsRouter.get("/:name/info", async (req, res, next) => {
+artistsRouter.get("/:uri/info", async (req, res, next) => {
 	try {
-		const response = await spotifyGet(
-			req,
-			res,
-			`/search?q=artist:${req.params.name}&type=artist&limit=1`,
-		);
+		const artistId = getSpotifyArtistId(req.params.uri);
+		const response = artistId
+			? await spotifyGet(req, res, `/artists/${artistId}`)
+			: await spotifyGet(
+					req,
+					res,
+					`/search?q=artist:${req.params.uri}&type=artist&limit=1`,
+				);
 		res.json(response);
 	} catch (err) {
 		next(err);
@@ -51,13 +59,13 @@ artistsRouter.delete("/:uri/following", async (req, res, next) => {
 	}
 });
 
-artistsRouter.get("/:name/streams", async (req, res, next) => {
+artistsRouter.get("/:uri/streams", async (req, res, next) => {
 	console.log(
-		`Fetching user ${req.user.display_name}'s streams for artist ${req.params.name}`,
+		`Fetching user ${req.user.display_name}'s streams for artist ${req.params.uri}`,
 	);
 
 	try {
-		const streams = await getArtistStreams(req.user.id, req.params.name);
+		const streams = await getArtistStreams(req.user.id, req.params.uri);
 		res.json(streams);
 	} catch (err) {
 		next(err);

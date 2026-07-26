@@ -24,16 +24,16 @@ export default function TrackEvent() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const name = searchParams.get("name");
-			if (!user.id || !name) return;
+			const artistUri = searchParams.get("uri");
+			if (!user.id || !artistUri) return;
 
 			try {
 				setLoading(true);
-				const infoRes = await artists.getArtistInfo(name);
+				const infoRes = await artists.getArtistInfo(artistUri);
 				setArtistInfo(infoRes);
 				if (infoRes && infoRes.uri) {
 					const [streamsRes, followingRes] = await Promise.all([
-						artists.getStreams(name),
+						artists.getStreams(infoRes.uri),
 						artists.following(infoRes.uri),
 					]);
 					setArtistStreams(streamsRes);
@@ -80,14 +80,7 @@ export default function TrackEvent() {
 					</Group>
 				)}
 				{artistStreams !== null && (
-					<JSONTable
-						data={artistStreams}
-						keys={[
-							"ts",
-							"master_metadata_track_name",
-							"master_metadata_album_album_name",
-						]}
-					/>
+					<JSONTable data={artistStreams} keys={["ts", "track", "album"]} />
 				)}
 			</Stack>
 		</Container>

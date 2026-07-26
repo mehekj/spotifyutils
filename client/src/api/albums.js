@@ -1,13 +1,17 @@
 import api from "./client";
 
 export const albums = {
-	getAlbumInfo: async (albumId) => {
-		const response = await api.get(`/albums/${albumId}/info`);
-		return response.data.albums.items[0];
+	getAlbumInfo: async (albumUri) => {
+		const response = await api.get(
+			`/albums/${encodeURIComponent(albumUri)}/info`,
+		);
+		return response.data?.albums?.items?.[0] || response.data;
 	},
 
-	getStreams: async (albumId) => {
-		const response = await api.get(`/albums/${albumId}/streams`);
+	getStreams: async (albumUri) => {
+		const response = await api.get(
+			`/albums/${encodeURIComponent(albumUri)}/streams`,
+		);
 		return response.data;
 	},
 };

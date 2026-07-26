@@ -1,9 +1,10 @@
 import { Anchor } from "@mantine/core";
 
-export default function ArtistLink({ name, children }) {
+export default function ArtistLink({ uri, name, children }) {
+	const targetUri = uri || name;
 	return (
-		<Anchor to={`/artist?name=${encodeURIComponent(name)}`}>
-			{children || name}
+		<Anchor to={`/artist?uri=${encodeURIComponent(targetUri)}`}>
+			{children || name || uri}
 		</Anchor>
 	);
 }

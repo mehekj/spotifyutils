@@ -56,21 +56,17 @@ const Home = () => {
 				) : (
 					<Text mb="xl">
 						Looks like you haven't uploaded any data yet. Add your files{" "}
-						<Anchor to="/upload">here</Anchor>.
+						<Anchor to="/upload" td="underline">
+							here
+						</Anchor>
+						.
 					</Text>
 				)}
 				{isLoading ? (
 					<LoadingPage />
 				) : (
 					top20?.length > 0 && (
-						<JSONTable
-							data={top20}
-							keys={[
-								"master_metadata_track_name",
-								"master_metadata_album_artist_name",
-								"liked",
-							]}
-						/>
+						<JSONTable data={top20} keys={["track", "artist", "liked"]} />
 					)
 				)}
 				{/* {loading ? (
@@ -80,8 +76,8 @@ const Home = () => {
 						<JSONTable
 							data={bottom20}
 							keys={[
-								"master_metadata_track_name",
-								"master_metadata_album_artist_name",
+								"track",
+								"artist",
 								"liked",
 							]}
 						/>

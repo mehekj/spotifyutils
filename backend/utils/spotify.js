@@ -95,12 +95,12 @@ export const getOrEnrichTrack = async (req, res, trackUri) => {
 
 	const existingTrack = await getTrackByUri(trackUri);
 	if (existingTrack?.status === "enriched") {
-		console.log(`Track metadata already enriched for ${trackUri}`);
+		// console.log(`Track metadata already enriched for ${trackUri}`);
 		return existingTrack;
 	}
 
 	if (pendingTrackEnrichments.has(trackUri)) {
-		console.log(`Track enrichment already in progress for ${trackUri}`);
+		// console.log(`Track enrichment already in progress for ${trackUri}`);
 		return pendingTrackEnrichments.get(trackUri);
 	}
 

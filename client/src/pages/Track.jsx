@@ -43,20 +43,22 @@ export default function TrackEvent() {
 
 	if (loading) return <LoadingPage />;
 
+	const imageUrl = trackInfo?.image?.medium?.url || null;
+	const imageWidth = trackInfo?.image?.medium?.width || null;
+	const artists = Array.isArray(trackInfo?.artists) ? trackInfo.artists : [];
+
 	return (
 		<Container size="xl">
 			<Stack gap="xl">
 				{trackInfo !== null && (
 					<Group align="end" my="xl" grow preventGrowOverflow={false}>
-						<Image
-							src={trackInfo.album.images[1].url}
-							maw={trackInfo.album.images[1].width}
-							mr="xl"
-						/>
+						{imageUrl && (
+							<Image src={imageUrl} maw={imageWidth || undefined} mr="xl" />
+						)}
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
-									{trackInfo.name}
+									{trackInfo.name || "Unknown track"}
 								</Title>
 								<LikeButton
 									uri={searchParams.get("uri")}
@@ -66,11 +68,11 @@ export default function TrackEvent() {
 							</Group>
 							<Group align="baseline">
 								<Text fz={20} ta="center">
-									{trackInfo.artists.map((artist, idx) => (
-										<>
-											<ArtistLink name={artist.name} />
-											{idx < trackInfo.artists.length - 1 && ", "}
-										</>
+									{artists.map((artist, idx) => (
+										<span key={artist.uri || artist.name || idx}>
+											<ArtistLink uri={artist.uri} name={artist.name} />
+											{idx < artists.length - 1 && ", "}
+										</span>
 									))}
 								</Text>
 							</Group>

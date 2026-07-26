@@ -9,6 +9,7 @@ import { tracksRouter } from "./routes/tracks.js";
 import { usersRouter } from "./routes/users.js";
 import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
+import { FilesAPIError } from "./utils/files.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

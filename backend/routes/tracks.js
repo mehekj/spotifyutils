@@ -39,9 +39,9 @@ const mergeTrackResults = async (req, res, rows) => {
 		return {
 			...row,
 			liked: likedRes[index],
-			master_metadata_track_name: trackDoc?.name || null,
-			master_metadata_album_artist_name: trackDoc?.artist_name || null,
-			master_metadata_album_album_name: trackDoc?.album_name || null,
+			name: trackDoc?.name || null,
+			artists: trackDoc?.artists || [],
+			album: trackDoc.album || null,
 			track: trackDoc,
 		};
 	});
