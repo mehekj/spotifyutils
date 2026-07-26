@@ -8,31 +8,39 @@ import LoadingPage from "../components/LoadingPage";
 const Home = () => {
 	const { user } = useContext(UserContext);
 
-	const [loading, setLoading] = useState(true);
-	const [top20, setTop20] = useState({});
-	// const [bottom20, setBottom20] = useState({});
+	const [top20, setTop20] = useState(null);
+	// const [bottom20, setBottom20] = useState(null);
 
 	useEffect(() => {
-		if (user.id && user.lastUpload) {
-			tracks
-				.getTop(20)
-				.then(setTop20)
-				.catch((err) => {
-					if (!err._handled) {
-						console.error("Error fetching user top tracks:", err);
-					}
-				})
-				.finally(() => setLoading(false));
-			// tracks
-			// 	.getBottom(20)
-			// 	.then(setBottom20)
-			// 	.catch((err) => {
-			// 		if (!err._handled) {
-			// 			console.error("Error fetching user bottom tracks:", err);
-			// 		}
-			// 	});
+		if (!user.id || !user.lastUpload) {
+			return;
 		}
-	}, [user]);
+
+		let isActive = true;
+
+		tracks
+			.getTop(20)
+			.then((data) => {
+				if (isActive) {
+					setTop20(data ?? []);
+				}
+			})
+			.catch((err) => {
+				if (!err._handled) {
+					console.error("Error fetching user top tracks:", err);
+				}
+
+				if (isActive) {
+					setTop20([]);
+				}
+			});
+
+		return () => {
+			isActive = false;
+		};
+	}, [user.id, user.lastUpload]);
+
+	const isLoading = Boolean(user.id && user.lastUpload && top20 === null);
 
 	return (
 		<Container size="xl">
@@ -51,10 +59,10 @@ const Home = () => {
 						<Anchor to="/upload">here</Anchor>.
 					</Text>
 				)}
-				{loading ? (
+				{isLoading ? (
 					<LoadingPage />
 				) : (
-					top20.length > 0 && (
+					top20?.length > 0 && (
 						<JSONTable
 							data={top20}
 							keys={[
