@@ -1,18 +1,19 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { insertStreams } from "./mongo.js";
+import { insertStreams, insertTrackStubs } from "./mongo.js";
 
 const CHUNK_DIR = `${os.tmpdir()}/chunks`;
 const MAX_CHUNK_SIZE = 4 * 1024 * 1024;
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
 const CHUNK_RETENTION_MS = 24 * 60 * 60 * 1000;
 
+const isValidSpotifyTrackUri = (uri) => {
+	return typeof uri === "string" && /^spotify:track:[a-zA-Z0-9]+$/.test(uri);
+};
+
 const hasTrackInfo = (record) => {
-	return (
-		(record.master_metadata_track_name || record.spotify_track_uri) &&
-		record.master_metadata_album_artist_name
-	);
+	return isValidSpotifyTrackUri(record.spotify_track_uri);
 };
 
 const sanitizeRecord = (record) => {
@@ -129,6 +130,7 @@ const mergeAndStoreChunks = async (
 		});
 
 		if (validRecords.length > 0) {
+			await insertTrackStubs(validRecords);
 			await insertStreams(validRecords);
 		}
 

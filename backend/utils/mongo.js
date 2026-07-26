@@ -34,9 +34,10 @@ try {
 	console.error(err);
 }
 
-let db = conn.db("spotutils");
+let db = conn.db("decodify");
 const users = db.collection("users");
 const streams = db.collection("streams");
+const tracks = db.collection("tracks");
 
 export class MongoAPIError extends Error {
 	constructor(message, status, details) {
@@ -74,7 +75,8 @@ export const setUserUpload = async (userID, uploadTime) => {
 
 export const deleteStreams = async () => {
 	try {
-		await streams.deleteMany({});
+		await Promise.all([streams.deleteMany({}), tracks.deleteMany({})]);
+		console.log("Deleted all stream and track documents");
 	} catch (error) {
 		throw new MongoAPIError("Failed to delete all streams", 500, error);
 	}
@@ -96,10 +98,50 @@ export const deleteUsers = async () => {
 	}
 };
 
+export const insertTrackStubs = async (data) => {
+	try {
+		const uniqueTracks = [
+			...new Map(
+				data.map((entry) => [entry.spotify_track_uri, entry]),
+			).values(),
+		];
+
+		if (uniqueTracks.length === 0) {
+			return;
+		}
+
+		const trackDocs = uniqueTracks.map((track) => ({
+			_id: track.spotify_track_uri,
+			name: track.master_metadata_track_name,
+			artist_name: track.master_metadata_album_artist_name,
+			artist_uri: null,
+			album_name: track.master_metadata_album_album_name,
+			album_uri: null,
+			duration_ms: null,
+			image: {
+				small: null,
+				medium: null,
+				large: null,
+			},
+			status: "stub",
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}));
+
+		const result = await tracks.insertMany(trackDocs, { ordered: false });
+		console.log(`Inserted ${result.insertedCount} track stubs`);
+	} catch (error) {
+		throw new MongoAPIError("Failed to insert track stubs", 500, error);
+	}
+};
+
 export const insertStreams = async (data) => {
 	try {
-		const result = await streams.insertMany(data);
-		console.log(`Inserted ${result.insertedCount} documents`);
+		const streamDocs = data.map((entry) => ({
+			...entry,
+		}));
+		const result = await streams.insertMany(streamDocs);
+		console.log(`Inserted ${result.insertedCount} stream documents`);
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert streams", 500, error);
 	}
