@@ -5,7 +5,47 @@ import {
 	getBottomTracks,
 	getTrackStreams,
 } from "../utils/mongo.js";
-import { spotifyDelete, spotifyGet, spotifyPut } from "../utils/spotify.js";
+import {
+	spotifyDelete,
+	spotifyGet,
+	spotifyPut,
+	getOrEnrichTrack,
+} from "../utils/spotify.js";
+
+const mergeTrackResults = async (req, res, rows) => {
+	const uris = rows
+		.map((row) => row.spotify_track_uri || row._id)
+		.filter(Boolean);
+
+	const enrichedTracks = await Promise.all(
+		uris.map((trackUri) => getOrEnrichTrack(req, res, trackUri)),
+	);
+	const trackMap = new Map(
+		enrichedTracks.filter(Boolean).map((track) => [track._id, track]),
+	);
+
+	const likedRes =
+		uris.length > 0
+			? await spotifyGet(
+					req,
+					res,
+					`/me/library/contains?uris=${uris.join(",")}`,
+				)
+			: [];
+
+	return rows.map((row, index) => {
+		const trackUri = row.spotify_track_uri || row._id;
+		const trackDoc = trackMap.get(trackUri);
+		return {
+			...row,
+			liked: likedRes[index],
+			master_metadata_track_name: trackDoc?.name || null,
+			master_metadata_album_artist_name: trackDoc?.artist_name || null,
+			master_metadata_album_album_name: trackDoc?.album_name || null,
+			track: trackDoc,
+		};
+	});
+};
 
 export const tracksRouter = express.Router();
 
@@ -18,16 +58,9 @@ tracksRouter.get("/top", async (req, res, next) => {
 	try {
 		const userID = req.user.id;
 		const tracks = await getTopTracks(userID, limit);
+		const response = await mergeTrackResults(req, res, tracks);
 
-		const uris = tracks.map((track) => track._id).join(",");
-		const likedRes = await spotifyGet(
-			req,
-			res,
-			`/me/library/contains?uris=${uris}`,
-		);
-		tracks.forEach((track, i) => (track.liked = likedRes[i]));
-
-		res.json(tracks);
+		res.json(response);
 	} catch (err) {
 		next(err);
 	}
@@ -40,16 +73,9 @@ tracksRouter.get("/bottom", async (req, res, next) => {
 	try {
 		const userID = req.user.id;
 		const tracks = await getBottomTracks(userID, limit);
+		const response = await mergeTrackResults(req, res, tracks);
 
-		const uris = tracks.map((track) => track._id).join(",");
-		const likedRes = await spotifyGet(
-			req,
-			res,
-			`/me/library/contains?uris=${uris}`,
-		);
-		tracks.forEach((track, i) => (track.liked = likedRes[i]));
-
-		res.json(tracks);
+		res.json(response);
 	} catch (err) {
 		next(err);
 	}
@@ -61,6 +87,7 @@ tracksRouter.get("/:uri/streams", async (req, res, next) => {
 	);
 
 	try {
+		await getOrEnrichTrack(req, res, req.params.uri);
 		const streams = await getTrackStreams(req.user.id, req.params.uri);
 		res.json(streams);
 	} catch (err) {
@@ -101,8 +128,7 @@ tracksRouter.get("/:uri/like", async (req, res, next) => {
 
 tracksRouter.get("/:uri/info", async (req, res, next) => {
 	try {
-		const id = req.params.uri.split(":")[2];
-		const response = await spotifyGet(req, res, `/tracks/${id}`);
+		const response = await getOrEnrichTrack(req, res, req.params.uri);
 		res.json(response);
 	} catch (err) {
 		next(err);

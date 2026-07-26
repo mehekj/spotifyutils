@@ -1,5 +1,10 @@
 import axios from "axios";
 import { getTokenCookies, refreshSpotifyToken } from "./auth.js";
+import {
+	createTrackStub,
+	getTrackByUri,
+	updateTrackFromSpotify,
+} from "./mongo.js";
 
 export class SpotifyAPIError extends Error {
 	constructor(message, status, details) {
@@ -74,4 +79,59 @@ export const spotifyDelete = (req, res, endpoint, data = {}) =>
 
 export const getUserData = async (req, res) => {
 	return spotifyGet(req, res, "/me");
+};
+
+const pendingTrackEnrichments = new Map();
+
+const getSpotifyTrackId = (trackUri) => {
+	const parts = trackUri?.split(":") || [];
+	return parts[2] || null;
+};
+
+export const getOrEnrichTrack = async (req, res, trackUri) => {
+	if (!trackUri) {
+		return null;
+	}
+
+	const existingTrack = await getTrackByUri(trackUri);
+	if (existingTrack?.status === "enriched") {
+		console.log(`Track metadata already enriched for ${trackUri}`);
+		return existingTrack;
+	}
+
+	if (pendingTrackEnrichments.has(trackUri)) {
+		console.log(`Track enrichment already in progress for ${trackUri}`);
+		return pendingTrackEnrichments.get(trackUri);
+	}
+
+	const pendingPromise = (async () => {
+		try {
+			await createTrackStub(trackUri);
+
+			const spotifyTrackId = getSpotifyTrackId(trackUri);
+			if (!spotifyTrackId) {
+				throw new SpotifyAPIError("Invalid Spotify track URI", 400, {
+					trackUri,
+				});
+			}
+
+			console.log(`Fetching Spotify metadata for track ${trackUri}`);
+			const spotifyTrack = await spotifyGet(
+				req,
+				res,
+				`/tracks/${spotifyTrackId}`,
+			);
+			return updateTrackFromSpotify(trackUri, spotifyTrack);
+		} catch (error) {
+			console.error(`Failed to enrich track metadata for ${trackUri}`, error);
+			throw error;
+		}
+	})();
+
+	pendingTrackEnrichments.set(trackUri, pendingPromise);
+	try {
+		return await pendingPromise;
+	} finally {
+		pendingTrackEnrichments.delete(trackUri);
+	}
 };
