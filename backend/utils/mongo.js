@@ -137,9 +137,16 @@ export const insertTrackStubs = async (data) => {
 
 export const insertStreams = async (data) => {
 	try {
-		const streamDocs = data.map((entry) => ({
-			...entry,
-		}));
+		const streamDocs = data.map(
+			({
+				master_metadata_track_name,
+				master_metadata_album_artist_name,
+				master_metadata_album_album_name,
+				...entry
+			}) => ({
+				...entry,
+			}),
+		);
 		const result = await streams.insertMany(streamDocs);
 		console.log(`Inserted ${result.insertedCount} stream documents`);
 	} catch (error) {
