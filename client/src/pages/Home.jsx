@@ -40,7 +40,7 @@ const Home = () => {
 		};
 	}, [user.id, user.lastUpload]);
 
-	const isLoading = Boolean(user.id && user.lastUpload && top20 === null);
+	const isLoading = user.id && user.lastUpload && top20 === null;
 
 	return (
 		<Container size="xl">
