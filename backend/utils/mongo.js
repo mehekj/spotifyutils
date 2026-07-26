@@ -128,8 +128,11 @@ export const insertTrackStubs = async (data) => {
 		const trackDocs = uniqueTracks.map((track) =>
 			createTrackStubDocument(track.spotify_track_uri, {
 				name: track.master_metadata_track_name,
-				artist_name: track.master_metadata_album_artist_name,
-				album_name: track.master_metadata_album_album_name,
+				artists: track.master_metadata_album_artist_name
+					.split(",")
+					.map((artistName) => ({
+						name: artistName.trim(),
+						uri: null,
 					})),
 				album: { name: track.master_metadata_album_album_name, uri: null },
 			}),
@@ -144,6 +147,9 @@ export const insertTrackStubs = async (data) => {
 					},
 					upsert: true,
 				},
+			})),
+		);
+		console.log(
 			`Track stub operations complete, inserted: ${result.upsertedCount}, matched: ${result.matchedCount}, modified: ${result.modifiedCount}`,
 		);
 	} catch (error) {
@@ -170,15 +176,6 @@ export const insertStreams = async (data) => {
 	}
 };
 
-const createTrackStubDocument = (trackUri, metadata = {}) => ({
-	_id: trackUri,
-	name: metadata.name || null,
-	artist_name: metadata.artist_name || null,
-	artist_uri: metadata.artist_uri || null,
-	album_name: metadata.album_name || null,
-	album_uri: metadata.album_uri || null,
-	duration_ms: metadata.duration_ms || null,
-	image: {
 const createTrackStubDocument = (trackUri, metadata = {}) => {
 	const artists = metadata.artists ?? [];
 	return {
