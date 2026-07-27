@@ -5,6 +5,7 @@ import LikeButton from "./LikeButton";
 import TrackLink from "./TrackLink";
 
 export default function JSONTable({ data, keys = null }) {
+	console.log(data[0]);
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":

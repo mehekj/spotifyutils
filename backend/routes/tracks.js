@@ -4,13 +4,9 @@ import {
 	getTopTracks,
 	getBottomTracks,
 	getTrackStreams,
-} from "../utils/mongo.js";
-import {
-	spotifyDelete,
-	spotifyGet,
-	spotifyPut,
 	getOrEnrichTrack,
-} from "../utils/spotify.js";
+} from "../utils/mongo.js";
+import { spotifyDelete, spotifyGet, spotifyPut } from "../utils/spotify.js";
 
 const mergeTrackResults = async (req, res, rows) => {
 	const uris = rows
