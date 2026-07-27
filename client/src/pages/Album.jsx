@@ -1,6 +1,6 @@
 import { Container, Group, Image, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { albums } from "../api/albums";
 import ArtistLink from "../components/ArtistLink";
 import JSONTable from "../components/JSONTable";
@@ -9,24 +9,21 @@ import { UserContext } from "../UserContext";
 
 export default function AlbumPage() {
 	const { user } = useContext(UserContext);
-	const [searchParams] = useSearchParams();
+	const { uri } = useParams();
 	const [albumStreams, setAlbumStreams] = useState(null);
 	const [albumInfo, setAlbumInfo] = useState(null);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const albumUri = searchParams.get("uri");
-			if (!user.id || !albumUri) return;
+			if (!user.id || !uri) return;
 
 			try {
 				setLoading(true);
-				const infoRes = await albums.getAlbumInfo(albumUri);
+				const infoRes = await albums.getAlbumInfo(uri);
 				setAlbumInfo(infoRes);
-				if (infoRes && infoRes.uri) {
-					const streamsRes = await albums.getStreams(albumUri);
-					setAlbumStreams(streamsRes);
-				}
+				const streamsRes = await albums.getStreams(uri);
+				setAlbumStreams(streamsRes);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch album data:", error);
@@ -34,7 +31,7 @@ export default function AlbumPage() {
 		};
 
 		fetchData();
-	}, [searchParams, user.id]);
+	}, [uri, user.id]);
 
 	if (loading) return <LoadingPage />;
 

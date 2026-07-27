@@ -8,7 +8,7 @@ import {
 	Title,
 } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { artists } from "../api";
 import JSONTable from "../components/JSONTable";
 import LoadingPage from "../components/LoadingPage";
@@ -16,7 +16,7 @@ import { UserContext } from "../UserContext";
 
 export default function TrackEvent() {
 	const { user } = useContext(UserContext);
-	const [searchParams] = useSearchParams();
+	const { uri } = useParams();
 	const [artistStreams, setArtistStreams] = useState(null);
 	const [following, setFollowing] = useState(false);
 	const [artistInfo, setArtistInfo] = useState(null);
@@ -24,21 +24,18 @@ export default function TrackEvent() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const artistUri = searchParams.get("uri");
-			if (!user.id || !artistUri) return;
+			if (!user.id || !uri) return;
 
 			try {
 				setLoading(true);
-				const infoRes = await artists.getArtistInfo(artistUri);
+				const infoRes = await artists.getArtistInfo(uri);
 				setArtistInfo(infoRes);
-				if (infoRes && infoRes.uri) {
-					const [streamsRes, followingRes] = await Promise.all([
-						artists.getStreams(infoRes.uri),
-						artists.following(infoRes.uri),
-					]);
-					setArtistStreams(streamsRes);
-					setFollowing(followingRes);
-				}
+				const [streamsRes, followingRes] = await Promise.all([
+					artists.getStreams(uri),
+					artists.following(uri),
+				]);
+				setArtistStreams(streamsRes);
+				setFollowing(followingRes);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch artist data:", error);
@@ -46,7 +43,7 @@ export default function TrackEvent() {
 		};
 
 		fetchData();
-	}, [searchParams, user.id]);
+	}, [uri, user.id]);
 
 	if (loading) return <LoadingPage />;
 

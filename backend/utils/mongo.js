@@ -1,40 +1,5 @@
-export const getAlbumStreams = async (userID, albumUri) => {
-	try {
-		const pipeline = [
-			{
-				$match: {
-					user: userID,
-				},
-			},
-			{
-				$lookup: {
-					from: "tracks",
-					localField: "spotify_track_uri",
-					foreignField: "_id",
-					as: "track",
-				},
-			},
-			{
-				$unwind: "$track",
-			},
-			{
-				$match: {
-					"track.album_uri": albumUri,
-				},
-			},
-			{
-				$sort: {
-					ts: -1,
-				},
-			},
-		];
-		const result = await streams.aggregate(pipeline).toArray();
-		return result;
-	} catch (error) {
-		throw new MongoAPIError("Failed to get album streams", 500, error);
-	}
-};
 import { MongoClient } from "mongodb";
+import { getSpotifyItemId, spotifyGet } from "./spotify.js";
 
 const connectionString = process.env.MONGO_URI || "";
 
@@ -116,8 +81,8 @@ export const insertTrackStubs = async (data) => {
 		const uniqueTracks = [
 			...new Map(
 				data
-					.filter((entry) => entry?.spotify_track_uri)
-					.map((entry) => [entry.spotify_track_uri, entry]),
+					.filter((entry) => getSpotifyItemId(entry?.spotify_track_uri))
+					.map((entry) => [getSpotifyItemId(entry?.spotify_track_uri), entry]),
 			).values(),
 		];
 
@@ -126,7 +91,7 @@ export const insertTrackStubs = async (data) => {
 		}
 
 		const trackDocs = uniqueTracks.map((track) =>
-			createTrackStubDocument(track.spotify_track_uri, {
+			createTrackStubDocument(getSpotifyItemId(track.spotify_track_uri), {
 				name: track.master_metadata_track_name,
 				artists: track.master_metadata_album_artist_name
 					.split(",")
@@ -164,8 +129,10 @@ export const insertStreams = async (data) => {
 				master_metadata_track_name,
 				master_metadata_album_artist_name,
 				master_metadata_album_album_name,
+				spotify_track_uri,
 				...entry
 			}) => ({
+				spotify_track_uri: getSpotifyItemId(spotify_track_uri),
 				...entry,
 			}),
 		);
@@ -223,7 +190,7 @@ export const updateTrackFromSpotify = async (trackUri, spotifyTrack) => {
 	try {
 		const artists = (spotifyTrack?.artists || []).map((artist) => ({
 			name: artist?.name || null,
-			uri: artist?.uri || null,
+			uri: getSpotifyItemId(artist?.uri) || null,
 		}));
 
 		const updatedTrack = {
@@ -232,7 +199,7 @@ export const updateTrackFromSpotify = async (trackUri, spotifyTrack) => {
 			artists,
 			album: {
 				name: spotifyTrack?.album?.name || null,
-				uri: spotifyTrack?.album?.uri || null,
+				uri: getSpotifyItemId(spotifyTrack?.album?.uri) || null,
 			},
 			duration_ms: spotifyTrack?.duration_ms || null,
 			image: {
@@ -256,6 +223,7 @@ export const updateTrackFromSpotify = async (trackUri, spotifyTrack) => {
 	}
 };
 
+const pendingTrackEnrichments = new Map();
 export const getOrEnrichTrack = async (req, res, trackUri) => {
 	if (!trackUri) {
 		return null;
@@ -276,19 +244,14 @@ export const getOrEnrichTrack = async (req, res, trackUri) => {
 		try {
 			await createTrackStub(trackUri);
 
-			const spotifyTrackId = getSpotifyItemId(trackUri);
-			if (!spotifyTrackId) {
+			if (!trackUri) {
 				throw new SpotifyAPIError("Invalid Spotify track URI", 400, {
 					trackUri,
 				});
 			}
 
 			console.log(`Fetching Spotify metadata for track ${trackUri}`);
-			const spotifyTrack = await spotifyGet(
-				req,
-				res,
-				`/tracks/${spotifyTrackId}`,
-			);
+			const spotifyTrack = await spotifyGet(req, res, `/tracks/${trackUri}`);
 			return updateTrackFromSpotify(trackUri, spotifyTrack);
 		} catch (error) {
 			console.error(`Failed to enrich track metadata for ${trackUri}`, error);
@@ -397,23 +360,35 @@ export const getArtistStreams = async (userID, artistUri) => {
 			{
 				$lookup: {
 					from: "tracks",
-					localField: "spotify_track_uri",
-					foreignField: "_id",
+					let: { trackId: "$spotify_track_uri" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{ $eq: ["$_id", "$$trackId"] },
+										{ $in: [artistUri, "$artists.uri"] },
+									],
+								},
+							},
+						},
+					],
 					as: "track",
 				},
 			},
 			{
-				$unwind: "$track",
-			},
-			{
 				$match: {
-					"track.artists.uri": artistUri,
+					track: { $ne: [] },
 				},
 			},
 			{
-				$sort: {
-					ts: -1,
+				$set: {
+					track: { $first: "$track" },
 				},
+			},
+
+			{
+				$sort: { ts: -1 },
 			},
 		];
 
@@ -421,5 +396,55 @@ export const getArtistStreams = async (userID, artistUri) => {
 		return result;
 	} catch (error) {
 		throw new MongoAPIError("Failed to get artist streams", 500, error);
+	}
+};
+
+export const getAlbumStreams = async (userID, albumUri) => {
+	try {
+		console.log(`Fetching user ${userID}'s streams for album ${albumUri}`);
+		const pipeline = [
+			{
+				$match: {
+					user: userID,
+				},
+			},
+			{
+				$lookup: {
+					from: "tracks",
+					let: { trackId: "$spotify_track_uri" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{ $eq: ["$_id", "$$trackId"] },
+										{ $eq: ["$album.uri", albumUri] },
+									],
+								},
+							},
+						},
+					],
+					as: "track",
+				},
+			},
+			{
+				$match: {
+					track: { $ne: [] },
+				},
+			},
+			{
+				$set: {
+					track: { $first: "$track" },
+				},
+			},
+
+			{
+				$sort: { ts: -1 },
+			},
+		];
+		const result = await streams.aggregate(pipeline).toArray();
+		return result;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get album streams", 500, error);
 	}
 };

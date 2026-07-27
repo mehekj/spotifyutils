@@ -1,10 +1,5 @@
 import axios from "axios";
 import { getTokenCookies, refreshSpotifyToken } from "./auth.js";
-import {
-	createTrackStub,
-	getTrackByUri,
-	updateTrackFromSpotify,
-} from "./mongo.js";
 
 export class SpotifyAPIError extends Error {
 	constructor(message, status, details) {
@@ -81,9 +76,44 @@ export const getUserData = async (req, res) => {
 	return spotifyGet(req, res, "/me");
 };
 
-const pendingTrackEnrichments = new Map();
-
-const getSpotifyItemId = (uri) => {
+export const getSpotifyItemId = (uri) => {
 	const parts = uri?.split(":") || [];
 	return parts[2] || null;
+};
+
+export const isValidSpotifyId = (id) => {
+	return typeof id === "string" && /^[a-zA-Z0-9]+$/.test(id);
+};
+
+export const isValidSpotifyTrackUri = (uri) => {
+	return typeof uri === "string" && /^spotify:track:[a-zA-Z0-9]+$/.test(uri);
+};
+
+export const isValidSpotifyArtistUri = (uri) => {
+	return typeof uri === "string" && /^spotify:artist:[a-zA-Z0-9]+$/.test(uri);
+};
+
+export const isValidSpotifyAlbumUri = (uri) => {
+	return typeof uri === "string" && /^spotify:album:[a-zA-Z0-9]+$/.test(uri);
+};
+
+export const getSpotifyTrackUriFromId = (id) => {
+	if (!isValidSpotifyId(id)) {
+		throw new Error("Invalid Spotify ID");
+	}
+	return `spotify:track:${id}`;
+};
+
+export const getSpotifyArtistUriFromId = (id) => {
+	if (!isValidSpotifyId(id)) {
+		throw new Error("Invalid Spotify ID");
+	}
+	return `spotify:artist:${id}`;
+};
+
+export const getSpotifyAlbumUriFromId = (id) => {
+	if (!isValidSpotifyId(id)) {
+		throw new Error("Invalid Spotify ID");
+	}
+	return `spotify:album:${id}`;
 };

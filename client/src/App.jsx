@@ -26,10 +26,10 @@ function AppContent() {
 			<NavBar />
 			<Routes>
 				<Route path="/" element={<Home />} />
-				<Route path="/track" element={<Track />} />
+				<Route path="/track/:uri" element={<Track />} />
 				<Route path="/upload" element={<Upload />} />
-				<Route path="/artist" element={<Artist />} />
-				<Route path="/album" element={<Album />} />
+				<Route path="/artist/:uri" element={<Artist />} />
+				<Route path="/album/:uri" element={<Album />} />
 			</Routes>
 		</>
 	);

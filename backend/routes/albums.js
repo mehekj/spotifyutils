@@ -1,12 +1,7 @@
 import express from "express";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
-import { spotifyGet } from "../utils/spotify.js";
 import { getAlbumStreams } from "../utils/mongo.js";
-
-const getSpotifyAlbumId = (value) => {
-	const match = value?.match(/^spotify:album:([a-zA-Z0-9]+)$/);
-	return match?.[1] || null;
-};
+import { spotifyGet } from "../utils/spotify.js";
 
 export const albumsRouter = express.Router();
 
@@ -14,14 +9,7 @@ albumsRouter.use(requireSpotifyAuth, attachSpotifyUser);
 
 albumsRouter.get("/:uri/info", async (req, res, next) => {
 	try {
-		const albumId = getSpotifyAlbumId(req.params.uri);
-		const response = albumId
-			? await spotifyGet(req, res, `/albums/${albumId}`)
-			: await spotifyGet(
-					req,
-					res,
-					`/search?q=album:${req.params.uri}&type=album&limit=1`,
-				);
+		const response = await spotifyGet(req, res, `/albums/${req.params.uri}`);
 		res.json(response);
 	} catch (err) {
 		next(err);

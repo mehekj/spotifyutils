@@ -5,28 +5,45 @@ import LikeButton from "./LikeButton";
 import TrackLink from "./TrackLink";
 
 export default function JSONTable({ data, keys = null }) {
-	console.log(data[0]);
+	const getTrackUri = (row) => {
+		return row.spotify_track_uri || null;
+	};
+
+	const getLiked = (row) => {
+		return row.liked || false;
+	};
+
+	const getTrackName = (row) => {
+		return row.name || row.track?.name || null;
+	};
+
+	const getArtists = (row) => {
+		return row.artists || row.track?.artists || [];
+	};
+
+	const getAlbum = (row) => {
+		return row.album || row.track?.album || null;
+	};
+
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":
-				return (
-					<LikeButton uri={row["spotify_track_uri"]} like={row["liked"]} />
-				);
+				return <LikeButton uri={getTrackUri(row)} like={getLiked(row)} />;
 			case "track":
 				return (
-					<TrackLink uri={row["spotify_track_uri"]}>{row["name"]}</TrackLink>
+					<TrackLink uri={getTrackUri(row)}>{getTrackName(row)}</TrackLink>
 				);
 			case "artist":
-				return row["artists"].map((artist, idx) => (
+				return getArtists(row).map((artist, idx) => (
 					<span key={artist.uri || artist.name || idx}>
 						<ArtistLink uri={artist.uri} name={artist.name} />
-						{idx < row["artists"].length - 1 && ", "}
+						{idx < getArtists(row).length - 1 && ", "}
 					</span>
 				));
 			case "album":
 				return (
-					<AlbumLink uri={row["album_uri"]} name={row["album"]}>
-						{row["album"]}
+					<AlbumLink uri={getAlbum(row)?.uri} name={getAlbum(row)}>
+						{getAlbum(row)?.name}
 					</AlbumLink>
 				);
 			default:

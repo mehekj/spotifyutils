@@ -1,6 +1,6 @@
 import { Container, Group, Image, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { tracks } from "../api";
 import ArtistLink from "../components/ArtistLink";
 import JSONTable from "../components/JSONTable";
@@ -10,7 +10,7 @@ import { UserContext } from "../UserContext";
 
 export default function TrackEvent() {
 	const { user } = useContext(UserContext);
-	const [searchParams] = useSearchParams();
+	const { uri } = useParams();
 	const [trackStreams, setTrackStreams] = useState(null);
 	const [liked, setLiked] = useState(false);
 	const [trackInfo, setTrackInfo] = useState(null);
@@ -18,7 +18,6 @@ export default function TrackEvent() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const uri = searchParams.get("uri");
 			if (!user.id || !uri) return;
 
 			try {
@@ -39,7 +38,7 @@ export default function TrackEvent() {
 		};
 
 		fetchData();
-	}, [searchParams, user.id]);
+	}, [uri, user.id]);
 
 	if (loading) return <LoadingPage />;
 
@@ -60,11 +59,7 @@ export default function TrackEvent() {
 								<Title mr="sm" size={48}>
 									{trackInfo.name || "Unknown track"}
 								</Title>
-								<LikeButton
-									uri={searchParams.get("uri")}
-									like={liked}
-									size={64}
-								/>
+								<LikeButton uri={uri} like={liked} size={64} />
 							</Group>
 							<Group align="baseline">
 								<Text fz={20} ta="center">

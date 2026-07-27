@@ -1,12 +1,17 @@
 import express from "express";
-import { requireSpotifyAuth, attachSpotifyUser } from "../utils/auth.js";
+import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import {
-	getTopTracks,
 	getBottomTracks,
-	getTrackStreams,
 	getOrEnrichTrack,
+	getTopTracks,
+	getTrackStreams,
 } from "../utils/mongo.js";
-import { spotifyDelete, spotifyGet, spotifyPut } from "../utils/spotify.js";
+import {
+	getSpotifyTrackUriFromId,
+	spotifyDelete,
+	spotifyGet,
+	spotifyPut,
+} from "../utils/spotify.js";
 
 const mergeTrackResults = async (req, res, rows) => {
 	const uris = rows
@@ -25,7 +30,7 @@ const mergeTrackResults = async (req, res, rows) => {
 			? await spotifyGet(
 					req,
 					res,
-					`/me/library/contains?uris=${uris.join(",")}`,
+					`/me/library/contains?uris=${uris.map((uri) => getSpotifyTrackUriFromId(uri)).join(",")}`,
 				)
 			: [];
 
@@ -114,7 +119,7 @@ tracksRouter.get("/:uri/like", async (req, res, next) => {
 		const response = await spotifyGet(
 			req,
 			res,
-			`/me/library/contains?uris=${req.params.uri}`,
+			`/me/library/contains?uris=${getSpotifyTrackUriFromId(req.params.uri)}`,
 		);
 		res.json(response);
 	} catch (err) {
