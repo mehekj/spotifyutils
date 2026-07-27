@@ -1,0 +1,20 @@
+{
+	"name": "spotifyutils",
+	"version": "1.0.0",
+	"description": "If this ever sees the light of day, it'll be a miracle",
+	"main": "index.js",
+	"scripts": {
+		"server": "cd backend && nodemon server.js",
+		"client": "cd client && npm start",
+		"dev": "concurrently \"npm run server\" \"npm run client\"",
+		"build": "cd client && npm run build",
+		"deploy-build": "npm install && cd client && npm install && npm run build && cd ../backend && npm install",
+		"deploy-server": "cd backend && npm start",
+		"local-deploy": "npm run build && npm run server"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"concurrently": "^9.2.1"
+	}
+}

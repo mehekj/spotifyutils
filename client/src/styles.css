@@ -1,0 +1,28 @@
+a,
+button,
+svg {
+	transition: background-color 200ms ease, color 200ms ease,
+		border-color 200ms ease;
+}
+
+.hover-green {
+	svg {
+		stroke: currentColor;
+		fill: currentColor;
+		transition: stroke 200ms ease, fill 200ms ease, color 200ms ease;
+	}
+}
+
+.hover-green {
+	svg:hover {
+		stroke: var(--mantine-primary-color-filled);
+		fill: var(--mantine-primary-color-filled);
+	}
+}
+
+.hover-green {
+    &:hover
+    {
+        color: var(--mantine-primary-color-filled) !important;
+    }
+}

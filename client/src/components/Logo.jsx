@@ -1,0 +1,104 @@
+import { useState, useEffect, useRef } from "react";
+
+export default function Logo({
+	size = 174,
+	barCount = 12,
+	barWidth = 6,
+	animate = false,
+}) {
+	const svgRef = useRef(null);
+
+	const [bars] = useState(() => {
+		const leftBracketRightX = 24.384;
+		const rightBracketLeftX = 149.416;
+
+		const innerWidth = rightBracketLeftX - leftBracketRightX; // space between brackets
+		const totalBarsWidth = barCount * barWidth;
+		const remaining = innerWidth - totalBarsWidth;
+		const spacing = remaining > 0 ? remaining / (barCount + 1) : 4;
+
+		const centerY = 31;
+
+		return Array.from({ length: barCount }).map((_, i) => {
+			const baseHeight = Math.floor(8 + Math.random() * 24);
+			const wave = Array.from({ length: 3 }).map(() => {
+				const offset = (Math.random() - 0.5) * 70;
+
+				return Math.max(4, baseHeight + Math.floor(offset));
+			});
+			const heightValues = [baseHeight, ...wave, baseHeight].join(";");
+			const yValues = [baseHeight, ...wave, baseHeight]
+				.map((h) => centerY - Number(h) / 2)
+				.join(";");
+
+			const duration = (1.2 + Math.random() * 0.9).toFixed(2) + "s";
+
+			const x = leftBracketRightX + spacing * (i + 1) + barWidth * i;
+
+			return {
+				x,
+				baseHeight,
+				centerY,
+				barWidth,
+				heightValues,
+				yValues,
+				duration,
+			};
+		});
+	});
+
+	useEffect(() => {
+		const svg = svgRef.current;
+		if (!svg || typeof svg.pauseAnimations !== "function") return;
+		if (animate) svg.unpauseAnimations();
+		else svg.pauseAnimations();
+	}, [animate]);
+
+	return (
+		<svg
+			ref={svgRef}
+			width={size}
+			height={(size / 174) * 62}
+			viewBox="0 0 174 62"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M15.84 55.624C13.664 55.624 12.112 55.128 11.184 54.136C10.256 53.176 9.792 51.944 9.792 50.44V48.28C9.792 47.48 9.872 46.776 10.032 46.168C10.224 45.56 10.448 45.016 10.704 44.536C10.96 44.056 11.248 43.64 11.568 43.288C11.888 42.904 12.192 42.536 12.48 42.184C13.024 41.544 13.392 41 13.584 40.552C13.808 40.072 13.92 39.576 13.92 39.064C13.92 38.232 13.488 37.592 12.624 37.144C11.76 36.696 10.464 36.472 8.736 36.472H4.416V31.672H8.736C10.464 31.672 11.76 31.448 12.624 31C13.488 30.552 13.92 29.912 13.92 29.08C13.92 28.568 13.808 28.088 13.584 27.64C13.392 27.16 13.024 26.6 12.48 25.96C12.192 25.64 11.888 25.288 11.568 24.904C11.248 24.52 10.96 24.088 10.704 23.608C10.448 23.128 10.224 22.584 10.032 21.976C9.872 21.368 9.792 20.664 9.792 19.864V17.704C9.792 16.2 10.256 14.968 11.184 14.008C12.112 13.016 13.664 12.52 15.84 12.52H24.384V17.272H15.504V19.576C15.504 20.792 15.696 21.72 16.08 22.36C16.496 23 16.944 23.64 17.424 24.28C17.968 24.952 18.48 25.672 18.96 26.44C19.44 27.208 19.68 28.104 19.68 29.128C19.68 30.472 19.216 31.544 18.288 32.344C17.36 33.144 15.936 33.656 14.016 33.88V34.264C15.936 34.488 17.36 35 18.288 35.8C19.216 36.6 19.68 37.672 19.68 39.016C19.68 40.04 19.44 40.936 18.96 41.704C18.48 42.472 17.968 43.192 17.424 43.864C16.944 44.504 16.496 45.144 16.08 45.784C15.696 46.424 15.504 47.352 15.504 48.568V50.872H24.384V55.624H15.84Z"
+				fill="white"
+			/>
+
+			<path
+				d="M157.96 12.52C160.136 12.52 161.688 13.016 162.616 14.008C163.544 14.968 164.008 16.2 164.008 17.704V19.864C164.008 20.664 163.912 21.368 163.72 21.976C163.56 22.584 163.352 23.128 163.096 23.608C162.84 24.088 162.552 24.52 162.232 24.904C161.912 25.288 161.608 25.64 161.32 25.96C160.776 26.6 160.392 27.16 160.168 27.64C159.976 28.088 159.88 28.568 159.88 29.08C159.88 29.912 160.312 30.552 161.176 31C162.04 31.448 163.336 31.672 165.064 31.672H169.384V36.472H165.064C163.336 36.472 162.04 36.696 161.176 37.144C160.312 37.592 159.88 38.232 159.88 39.064C159.88 39.576 159.976 40.072 160.168 40.552C160.392 41 160.776 41.544 161.32 42.184C161.608 42.536 161.912 42.904 162.232 43.288C162.552 43.64 162.84 44.056 163.096 44.536C163.352 45.016 163.56 45.56 163.72 46.168C163.912 46.776 164.008 47.48 164.008 48.28V50.44C164.008 51.944 163.544 53.176 162.616 54.136C161.688 55.128 160.136 55.624 157.96 55.624H149.416V50.872H158.296V48.568C158.296 47.352 158.088 46.424 157.672 45.784C157.288 45.144 156.856 44.504 156.376 43.864C155.832 43.192 155.32 42.472 154.84 41.704C154.36 40.936 154.12 40.04 154.12 39.016C154.12 37.672 154.584 36.6 155.512 35.8C156.44 35 157.864 34.488 159.784 34.264V33.88C157.864 33.656 156.44 33.144 155.512 32.344C154.584 31.544 154.12 30.472 154.12 29.128C154.12 28.104 154.36 27.208 154.84 26.44C155.32 25.672 155.832 24.952 156.376 24.28C156.856 23.64 157.288 23 157.672 22.36C158.088 21.72 158.296 20.792 158.296 19.576V17.272H149.416V12.52H157.96Z"
+				fill="white"
+			/>
+
+			{bars.map((bar, idx) => (
+				<rect
+					key={idx}
+					x={bar.x}
+					width={bar.barWidth}
+					rx={2}
+					height={bar.baseHeight}
+					y={bar.centerY - bar.baseHeight / 2}
+					fill="#1ED760"
+				>
+					<>
+						<animate
+							attributeName="height"
+							values={bar.heightValues}
+							dur={bar.duration}
+							repeatCount="indefinite"
+						/>
+						<animate
+							attributeName="y"
+							values={bar.yValues}
+							dur={bar.duration}
+							repeatCount="indefinite"
+						/>
+					</>
+				</rect>
+			))}
+		</svg>
+	);
+}
