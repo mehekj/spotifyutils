@@ -187,13 +187,6 @@ export const uploadChunk = async (
 			await mergeAndStoreChunks(fileName, totalChunks, userID, uploadTime);
 		}
 	} catch (err) {
-		if (err instanceof FilesAPIError) {
-			throw err;
-		}
-		throw new FilesAPIError(
-			`Failed to upload chunk ${chunkNum + 1} of ${totalChunks}`,
-			500,
-			err.message,
-		);
+		throw err;
 	}
 };

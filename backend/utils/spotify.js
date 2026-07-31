@@ -103,21 +103,21 @@ export const isValidSpotifyAlbumUri = (uri) => {
 
 export const getSpotifyTrackUriFromId = (id) => {
 	if (!isValidSpotifyId(id)) {
-		throw new Error("Invalid Spotify ID");
+		throw new SpotifyAPIError("Invalid Spotify ID");
 	}
 	return `spotify:track:${id}`;
 };
 
 export const getSpotifyArtistUriFromId = (id) => {
 	if (!isValidSpotifyId(id)) {
-		throw new Error("Invalid Spotify ID");
+		throw new SpotifyAPIError("Invalid Spotify ID", 500);
 	}
 	return `spotify:artist:${id}`;
 };
 
 export const getSpotifyAlbumUriFromId = (id) => {
 	if (!isValidSpotifyId(id)) {
-		throw new Error("Invalid Spotify ID");
+		throw new SpotifyAPIError("Invalid Spotify ID", 500);
 	}
 	return `spotify:album:${id}`;
 };
