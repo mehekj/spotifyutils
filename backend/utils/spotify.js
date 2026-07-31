@@ -103,7 +103,7 @@ export const isValidSpotifyAlbumUri = (uri) => {
 
 export const getSpotifyTrackUriFromId = (id) => {
 	if (!isValidSpotifyId(id)) {
-		throw new SpotifyAPIError("Invalid Spotify ID");
+		throw new SpotifyAPIError("Invalid Spotify ID", 500);
 	}
 	return `spotify:track:${id}`;
 };
