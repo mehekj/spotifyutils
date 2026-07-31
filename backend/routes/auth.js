@@ -8,6 +8,7 @@ import {
 	REDIRECT_URI,
 	setTokenCookies,
 } from "../utils/auth.js";
+import { logDebug, logError } from "../utils/logger.js";
 
 export const authRouter = express.Router();
 
@@ -25,7 +26,7 @@ authRouter.get("/login", (req, res) => {
 	const state = generateRandomString(16);
 	const scope = scopes.join(" ");
 
-	console.log("User attempting to log in, redirect:", REDIRECT_URI);
+	logDebug("auth", "login requested", { redirectUri: REDIRECT_URI });
 
 	res.redirect(
 		"https://accounts.spotify.com/authorize?" +
@@ -52,7 +53,7 @@ authRouter.get("/redirect", async (req, res) => {
 	}
 
 	const code = req.query.code;
-	console.log("User logged in, requesting Spotify access token");
+	logDebug("auth", "token exchange requested");
 
 	try {
 		const response = await axios.post(
@@ -79,13 +80,13 @@ authRouter.get("/redirect", async (req, res) => {
 			process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:5173";
 		res.redirect(`${redirectBase}/`);
 	} catch (err) {
-		console.error("Error getting tokens:", err.message);
+		logError("auth", "failed to exchange Spotify auth code", err);
 		res.status(500).json({ message: "Failed to retrieve access token" });
 	}
 });
 
 authRouter.post("/logout", (req, res) => {
-	console.log("User logging out");
+	logDebug("auth", "logout requested");
 	res.clearCookie("spotify_access_token");
 	res.clearCookie("spotify_refresh_token");
 	res.end();

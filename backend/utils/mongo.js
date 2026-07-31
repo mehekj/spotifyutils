@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { getSpotifyItemId, spotifyGet } from "./spotify.js";
+import { logDebug, logError } from "./logger.js";
 
 const connectionString = process.env.MONGO_URI || "";
 
@@ -9,7 +10,7 @@ let conn;
 try {
 	conn = await client.connect();
 } catch (err) {
-	console.error(err);
+	logError("mongo", "failed to connect to MongoDB", err);
 }
 
 let db = conn.db("decodify");
@@ -54,7 +55,7 @@ export const setUserUpload = async (userID, uploadTime) => {
 export const deleteStreams = async () => {
 	try {
 		await Promise.all([streams.deleteMany({}), tracks.deleteMany({})]);
-		console.log("Deleted all stream and track documents");
+		logDebug("mongo", "deleted all stream and track documents");
 	} catch (error) {
 		throw new MongoAPIError("Failed to delete all streams", 500, error);
 	}
@@ -114,9 +115,11 @@ export const insertTrackStubs = async (data) => {
 				},
 			})),
 		);
-		console.log(
-			`Track stub operations complete, inserted: ${result.upsertedCount}, matched: ${result.matchedCount}, modified: ${result.modifiedCount}`,
-		);
+		logDebug("mongo", "track stub operations complete", {
+			inserted: result.upsertedCount,
+			matched: result.matchedCount,
+			modified: result.modifiedCount,
+		});
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert track stubs", 500, error);
 	}
@@ -137,7 +140,9 @@ export const insertStreams = async (data) => {
 			}),
 		);
 		const result = await streams.insertMany(streamDocs, { ordered: false });
-		console.log(`Inserted ${result.insertedCount} stream documents`);
+		logDebug("mongo", "inserted stream documents", {
+			insertedCount: result.insertedCount,
+		});
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert streams", 500, error);
 	}
@@ -171,7 +176,7 @@ export const createTrackStub = async (trackUri, metadata = {}) => {
 
 		const stub = createTrackStubDocument(trackUri, metadata);
 		await tracks.insertOne(stub);
-		console.log(`Inserted track stub for ${trackUri}`);
+		logDebug("mongo", "created track stub", { trackUri });
 		return stub;
 	} catch (error) {
 		throw new MongoAPIError("Failed to create track stub", 500, error);
@@ -216,7 +221,7 @@ export const updateTrackFromSpotify = async (trackUri, spotifyTrack) => {
 			{ $set: updatedTrack },
 			{ upsert: true },
 		);
-		console.log(`Enriched track metadata for ${trackUri}`);
+		logDebug("mongo", "enriched track metadata", { trackUri });
 		return updatedTrack;
 	} catch (error) {
 		throw new MongoAPIError("Failed to update track from Spotify", 500, error);
@@ -231,12 +236,10 @@ export const getOrEnrichTrack = async (req, res, trackUri) => {
 
 	const existingTrack = await getTrackByUri(trackUri);
 	if (existingTrack?.status === "enriched") {
-		// console.log(`Track metadata already enriched for ${trackUri}`);
 		return existingTrack;
 	}
 
 	if (pendingTrackEnrichments.has(trackUri)) {
-		// console.log(`Track enrichment already in progress for ${trackUri}`);
 		return pendingTrackEnrichments.get(trackUri);
 	}
 
@@ -250,11 +253,11 @@ export const getOrEnrichTrack = async (req, res, trackUri) => {
 				});
 			}
 
-			console.log(`Fetching Spotify metadata for track ${trackUri}`);
+			logDebug("mongo", "fetching Spotify metadata for track", { trackUri });
 			const spotifyTrack = await spotifyGet(req, res, `/tracks/${trackUri}`);
 			return updateTrackFromSpotify(trackUri, spotifyTrack);
 		} catch (error) {
-			console.error(`Failed to enrich track metadata for ${trackUri}`, error);
+			logError("mongo", "failed to enrich track metadata", error, { trackUri });
 			throw error;
 		}
 	})();
@@ -401,7 +404,7 @@ export const getArtistStreams = async (userID, artistUri) => {
 
 export const getAlbumStreams = async (userID, albumUri) => {
 	try {
-		console.log(`Fetching user ${userID}'s streams for album ${albumUri}`);
+		logDebug("mongo", "fetching album streams", { userId: userID, albumUri });
 		const pipeline = [
 			{
 				$match: {

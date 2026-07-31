@@ -12,6 +12,7 @@ import {
 	spotifyGet,
 	spotifyPut,
 } from "../utils/spotify.js";
+import { logDebug, logError } from "../utils/logger.js";
 
 const mergeTrackResults = async (req, res, rows) => {
 	const uris = rows
@@ -54,7 +55,7 @@ tracksRouter.use(requireSpotifyAuth, attachSpotifyUser);
 
 tracksRouter.get("/top", async (req, res, next) => {
 	const limit = parseInt(req.query.limit) || 20;
-	console.log(`Fetching top ${limit} for user:`, req.user.display_name);
+	logDebug("tracks", "fetching top tracks", { userId: req.user.id, limit });
 
 	try {
 		const userID = req.user.id;
@@ -69,7 +70,7 @@ tracksRouter.get("/top", async (req, res, next) => {
 
 tracksRouter.get("/bottom", async (req, res, next) => {
 	const limit = parseInt(req.query.limit) || 20;
-	console.log(`Fetching bottom ${limit} for user:`, req.user.display_name);
+	logDebug("tracks", "fetching bottom tracks", { userId: req.user.id, limit });
 
 	try {
 		const userID = req.user.id;
@@ -83,9 +84,10 @@ tracksRouter.get("/bottom", async (req, res, next) => {
 });
 
 tracksRouter.get("/:uri/streams", async (req, res, next) => {
-	console.log(
-		`Fetching user ${req.user.display_name}'s streams for track ${req.params.uri}`,
-	);
+	logDebug("tracks", "fetching track streams", {
+		userId: req.user.id,
+		trackUri: req.params.uri,
+	});
 
 	try {
 		await getOrEnrichTrack(req, res, req.params.uri);
@@ -97,6 +99,11 @@ tracksRouter.get("/:uri/streams", async (req, res, next) => {
 });
 
 tracksRouter.put("/:uri/like", async (req, res, next) => {
+	logDebug("tracks", "liking track", {
+		userId: req.user.id,
+		trackUri: req.params.uri,
+	});
+
 	try {
 		await spotifyPut(req, res, `/me/library?uris=${req.params.uri}`);
 		res.end();
@@ -106,6 +113,11 @@ tracksRouter.put("/:uri/like", async (req, res, next) => {
 });
 
 tracksRouter.delete("/:uri/like", async (req, res, next) => {
+	logDebug("tracks", "unliking track", {
+		userId: req.user.id,
+		trackUri: req.params.uri,
+	});
+
 	try {
 		await spotifyDelete(req, res, `/me/library?uris=${req.params.uri}`);
 		res.end();
@@ -115,6 +127,11 @@ tracksRouter.delete("/:uri/like", async (req, res, next) => {
 });
 
 tracksRouter.get("/:uri/like", async (req, res, next) => {
+	logDebug("tracks", "fetching like status", {
+		userId: req.user.id,
+		trackUri: req.params.uri,
+	});
+
 	try {
 		const response = await spotifyGet(
 			req,
@@ -128,6 +145,11 @@ tracksRouter.get("/:uri/like", async (req, res, next) => {
 });
 
 tracksRouter.get("/:uri/info", async (req, res, next) => {
+	logDebug("tracks", "fetching track info", {
+		userId: req.user.id,
+		trackUri: req.params.uri,
+	});
+
 	try {
 		const response = await getOrEnrichTrack(req, res, req.params.uri);
 		res.json(response);

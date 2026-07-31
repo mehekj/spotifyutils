@@ -9,6 +9,7 @@ import {
 	setUserUpload,
 } from "../utils/mongo.js";
 import { uploadChunk } from "../utils/files.js";
+import { logDebug, logError } from "../utils/logger.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -18,7 +19,7 @@ export const usersRouter = express.Router();
 usersRouter.use(requireSpotifyAuth, attachSpotifyUser);
 
 usersRouter.get("/me", async (req, res, next) => {
-	console.log("Fetching Spotify user data for user:", req.user.display_name);
+	logDebug("users", "fetching current user profile", req.user);
 
 	try {
 		const user = req.user;
@@ -29,6 +30,8 @@ usersRouter.get("/me", async (req, res, next) => {
 });
 
 usersRouter.get("/me/uploads/last", async (req, res, next) => {
+	logDebug("users", "fetching last upload time", { userId: req.user.id });
+
 	try {
 		const lastUpload = await getUserUpload(req.user.id);
 		res.json({ lastUpload: lastUpload });
@@ -38,6 +41,11 @@ usersRouter.get("/me/uploads/last", async (req, res, next) => {
 });
 
 usersRouter.put("/me/uploads/last", async (req, res, next) => {
+	logDebug("users", "setting last upload time", {
+		userId: req.user.id,
+		time: req.query.time,
+	});
+
 	try {
 		await setUserUpload(req.user.id, Number(req.query.time));
 		res.end();
@@ -47,6 +55,8 @@ usersRouter.put("/me/uploads/last", async (req, res, next) => {
 });
 
 usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
+	logDebug("users", "uploading data chunk", { userId: req.user.id });
+
 	try {
 		const chunk = req.file.buffer;
 		const chunkNum = Number(req.body.chunkNum);
@@ -61,7 +71,7 @@ usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
 			totalChunks,
 			fileNum,
 			userID,
-			uploadTime
+			uploadTime,
 		);
 		res.end();
 	} catch (err) {
@@ -70,24 +80,15 @@ usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
 });
 
 usersRouter.delete("/me/data", async (req, res, next) => {
+	logDebug("users", "deleting previous user data", {
+		userId: req.user.id,
+		uploadTime: req.query.time,
+	});
+
 	try {
 		await deleteUserStreams(req.user.id, Number(req.query.time));
 		res.end();
 	} catch (err) {
 		next(err);
-	}
-});
-
-// this is obviously very bad lol but I need a quick way to wipe the DB for dev
-usersRouter.get("/nuke", async (req, res, next) => {
-	if (process.env.NODE_ENV === "development") {
-		console.log("self destruct button curse you perry the platypus");
-		try {
-			await deleteStreams();
-			await deleteUsers();
-			res.end();
-		} catch (err) {
-			next(err);
-		}
 	}
 });

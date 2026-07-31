@@ -74,7 +74,7 @@ const Upload = () => {
 		let chunkNum = 0;
 		let start = 0;
 		while (start < fileSize) {
-			console.log(
+			console.debug(
 				`Uploading chunk ${chunkNum + 1}/${totalChunks} of file ${
 					fileNum + 1
 				}/${files.length}`,

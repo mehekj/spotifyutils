@@ -7,9 +7,10 @@ import { artistsRouter } from "./routes/artists.js";
 import { authRouter } from "./routes/auth.js";
 import { tracksRouter } from "./routes/tracks.js";
 import { usersRouter } from "./routes/users.js";
+import { FilesAPIError } from "./utils/files.js";
 import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
-import { FilesAPIError } from "./utils/files.js";
+import { logDebug, logError } from "./utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,11 +31,9 @@ app.get(/.*/, (req, res) => {
 
 app.use((err, req, res, next) => {
 	if (err instanceof SpotifyAPIError) {
-		console.error("Spotify request error:", {
-			message: err.message,
-			details: err.details,
-			stack: err.stack,
-			error: err,
+		logError("spotify", "Spotify request error", err, {
+			userId: req.user?.id,
+			endpoint: req.originalUrl,
 		});
 		return res.status(err.status || 500).json({
 			message: err.message,
@@ -43,11 +42,9 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof MongoAPIError) {
-		console.error("MongoDB request error:", {
-			message: err.message,
-			details: err.details,
-			stack: err.stack,
-			error: err,
+		logError("mongo", "MongoDB request error", err, {
+			userId: req.user?.id,
+			endpoint: req.originalUrl,
 		});
 		return res.status(err.status || 500).json({
 			message: err.message,
@@ -56,11 +53,9 @@ app.use((err, req, res, next) => {
 	}
 
 	if (err instanceof FilesAPIError) {
-		console.error("Files request error:", {
-			message: err.message,
-			details: err.details,
-			stack: err.stack,
-			error: err,
+		logError("files", "Files request error", err, {
+			userId: req.user?.id,
+			endpoint: req.originalUrl,
 		});
 		return res.status(err.status || 500).json({
 			message: err.message,
@@ -68,16 +63,16 @@ app.use((err, req, res, next) => {
 		});
 	}
 
-	console.error("Unhandled error:", {
-		message: err.message,
-		stack: err.stack,
-		error: err,
+	logError("server", "Unhandled error", err, {
+		userId: req.user?.id,
+		endpoint: req.originalUrl,
 	});
+
 	res.status(500).json({ message: "Internal server error" });
 });
 
 const PORT = process.env.PORT || 5050;
 
 app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
+	logDebug("server", `Server is running on port ${PORT}`);
 });

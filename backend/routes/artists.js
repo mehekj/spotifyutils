@@ -2,18 +2,23 @@ import express from "express";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { getArtistStreams } from "../utils/mongo.js";
 import {
-	getSpotifyItemId,
+	getSpotifyArtistUriFromId,
 	spotifyDelete,
 	spotifyGet,
 	spotifyPut,
-	getSpotifyArtistUriFromId,
 } from "../utils/spotify.js";
+import { logDebug } from "../utils/logger.js";
 
 export const artistsRouter = express.Router();
 
 artistsRouter.use(requireSpotifyAuth, attachSpotifyUser);
 
 artistsRouter.get("/:uri/info", async (req, res, next) => {
+	logDebug("artists", "fetching artist info", {
+		userId: req.user.id,
+		artistUri: req.params.uri,
+	});
+
 	try {
 		const response = await spotifyGet(req, res, `/artists/${req.params.uri}`);
 		res.json(response);
@@ -23,6 +28,11 @@ artistsRouter.get("/:uri/info", async (req, res, next) => {
 });
 
 artistsRouter.get("/:uri/following", async (req, res, next) => {
+	logDebug("artists", "fetching artist following status", {
+		userId: req.user.id,
+		artistUri: req.params.uri,
+	});
+
 	try {
 		const response = await spotifyGet(
 			req,
@@ -36,6 +46,11 @@ artistsRouter.get("/:uri/following", async (req, res, next) => {
 });
 
 artistsRouter.put("/:uri/following", async (req, res, next) => {
+	logDebug("artists", "following artist", {
+		userId: req.user.id,
+		artistUri: req.params.uri,
+	});
+
 	try {
 		await spotifyPut(
 			req,
@@ -49,6 +64,11 @@ artistsRouter.put("/:uri/following", async (req, res, next) => {
 });
 
 artistsRouter.delete("/:uri/following", async (req, res, next) => {
+	logDebug("artists", "unfollowing artist", {
+		userId: req.user.id,
+		artistUri: req.params.uri,
+	});
+
 	try {
 		await spotifyDelete(
 			req,
@@ -62,9 +82,10 @@ artistsRouter.delete("/:uri/following", async (req, res, next) => {
 });
 
 artistsRouter.get("/:uri/streams", async (req, res, next) => {
-	console.log(
-		`Fetching user ${req.user.display_name}'s streams for artist ${req.params.uri}`,
-	);
+	logDebug("artists", "fetching artist streams", {
+		userId: req.user.id,
+		artistUri: req.params.uri,
+	});
 
 	try {
 		const streams = await getArtistStreams(req.user.id, req.params.uri);

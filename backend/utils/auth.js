@@ -1,6 +1,7 @@
 import axios from "axios";
 import QueryString from "qs";
 import { getUserData } from "./spotify.js";
+import { logDebug, logError } from "./logger.js";
 
 export const REDIRECT_URI = `${process.env.SERVER}/auth/redirect`;
 export const CLIENT_ID = process.env.CLIENT_ID;
@@ -34,13 +35,15 @@ export const getTokenCookies = (req) => {
 };
 
 export const setTokenCookies = (res, accessToken, refreshToken, expiresIn) => {
-	console.log("Updated spotify tokens");
+	logDebug("auth", "updated Spotify tokens", { expiresIn });
+
 	res.cookie("spotify_access_token", accessToken, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
 		sameSite: "lax",
 		maxAge: expiresIn * 1000,
 	});
+
 	res.cookie("spotify_refresh_token", refreshToken, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
@@ -73,7 +76,9 @@ export const refreshSpotifyToken = async (refreshToken, res) => {
 
 		return newAccessToken;
 	} catch (err) {
-		console.error("Failed to refresh token:", err.response?.data || err);
+		logError("auth", "failed to refresh Spotify token", err, {
+			status: err.response?.status,
+		});
 		return null;
 	}
 };
@@ -98,7 +103,7 @@ export const requireSpotifyAuth = async (req, res, next) => {
 
 		return next();
 	} catch (err) {
-		console.error("Spotify auth middleware error:", err);
+		logError("auth", "Spotify auth middleware error", err);
 		return res.status(500).json({ message: "Internal server error" });
 	}
 };
@@ -114,7 +119,7 @@ export const attachSpotifyUser = async (req, res, next) => {
 		req.user = user;
 		return next();
 	} catch (err) {
-		console.error("Error getting Spotify user:", err.message);
+		logError("auth", "failed to retrieve Spotify user profile", err);
 		return res
 			.status(500)
 			.json({ message: "Failed to fetch Spotify user profile" });

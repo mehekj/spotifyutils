@@ -63,7 +63,7 @@ const cleanupOldChunks = async () => {
 			}
 		}
 	} catch (err) {
-		console.error("Failed to cleanup old chunks:", err);
+		logError("files", "Failed to cleanup old chunks", err);
 	}
 };
 
@@ -77,7 +77,10 @@ const cleanupChunksForFile = async (fileName, totalChunks) => {
 		}
 		await Promise.all(rmPromises);
 	} catch (err) {
-		console.error(`Failed to cleanup chunks for ${fileName}:`, err);
+		logError("files", `Failed to cleanup chunks`, err, {
+			fileName,
+			totalChunks,
+		});
 	}
 };
 

@@ -26,7 +26,10 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		const status = err.response?.status;
 
 		if (status === 401 && refreshToken) {
-			console.warn("Access token expired - attempting refresh...");
+			logDebug("spotify", "Access token expired - attempting refresh...", {
+				userId: req.user?.id,
+				endpoint,
+			});
 
 			const newAccessToken = await refreshSpotifyToken(refreshToken, res);
 			if (!newAccessToken) {
