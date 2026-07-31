@@ -1,15 +1,10 @@
 import express from "express";
 import multer from "multer";
+import { deleteUserStreams } from "../db/streams.js";
+import { getUserUpload, setUserUpload } from "../db/users.js";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
-import {
-	deleteStreams,
-	deleteUserStreams,
-	deleteUsers,
-	getUserUpload,
-	setUserUpload,
-} from "../utils/mongo.js";
 import { uploadChunk } from "../utils/files.js";
-import { logDebug, logError } from "../utils/logger.js";
+import { logDebug } from "../utils/logger.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });

@@ -1,6 +1,6 @@
 import express from "express";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
-import { getArtistStreams } from "../utils/mongo.js";
+import { getArtistStreams } from "../db/streams.js";
 import {
 	getSpotifyArtistUriFromId,
 	spotifyDelete,

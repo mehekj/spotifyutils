@@ -8,9 +8,11 @@ import { authRouter } from "./routes/auth.js";
 import { tracksRouter } from "./routes/tracks.js";
 import { usersRouter } from "./routes/users.js";
 import { FilesAPIError } from "./utils/files.js";
+import { logDebug, logError } from "./utils/logger.js";
 import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
-import { logDebug, logError } from "./utils/logger.js";
+
+import "./db/conn.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -10,7 +10,7 @@ export const logError = (scope, message, error, details = {}) => {
 	const payload = {
 		message,
 		...(details && Object.keys(details).length > 0 ? details : {}),
-		...(error ? { error: error.message || error } : {}),
+		...(error ? { error } : {}),
 	};
 
 	console.error(formatScope(scope), payload);

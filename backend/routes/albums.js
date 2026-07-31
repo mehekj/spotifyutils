@@ -1,7 +1,7 @@
 import express from "express";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { logDebug } from "../utils/logger.js";
-import { getAlbumStreams } from "../utils/mongo.js";
+import { getAlbumStreams } from "../db/streams.js";
 import { spotifyGet } from "../utils/spotify.js";
 
 export const albumsRouter = express.Router();

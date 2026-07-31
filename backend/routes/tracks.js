@@ -1,18 +1,18 @@
 import express from "express";
-import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import {
 	getBottomTracks,
-	getOrEnrichTrack,
 	getTopTracks,
 	getTrackStreams,
-} from "../utils/mongo.js";
+} from "../db/streams.js";
+import { getOrEnrichTrack } from "../db/tracks.js";
+import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
+import { logDebug } from "../utils/logger.js";
 import {
 	getSpotifyTrackUriFromId,
 	spotifyDelete,
 	spotifyGet,
 	spotifyPut,
 } from "../utils/spotify.js";
-import { logDebug, logError } from "../utils/logger.js";
 
 const mergeTrackResults = async (req, res, rows) => {
 	const uris = rows

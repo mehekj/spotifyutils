@@ -1,7 +1,7 @@
 import axios from "axios";
 import QueryString from "qs";
-import { getUserData } from "./spotify.js";
 import { logDebug, logError } from "./logger.js";
+import { getUserData } from "./spotify.js";
 
 export const REDIRECT_URI = `${process.env.SERVER}/auth/redirect`;
 export const CLIENT_ID = process.env.CLIENT_ID;

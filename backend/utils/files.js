@@ -1,7 +1,9 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { insertStreams, insertTrackStubs } from "./mongo.js";
+import { insertStreams } from "../db/streams.js";
+import { insertTrackStubs } from "../db/tracks.js";
+import { logError } from "./logger.js";
 import { isValidSpotifyTrackUri } from "./spotify.js";
 
 const CHUNK_DIR = `${os.tmpdir()}/chunks`;

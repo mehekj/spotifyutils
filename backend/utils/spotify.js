@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getTokenCookies, refreshSpotifyToken } from "./auth.js";
+import { logDebug } from "./logger.js";
 
 export class SpotifyAPIError extends Error {
 	constructor(message, status, details) {
