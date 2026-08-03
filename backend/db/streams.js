@@ -23,16 +23,30 @@ export const deleteUserStreams = async (userID, uploadTime) => {
 export const insertStreams = async (data) => {
 	try {
 		const streamDocs = data.map(
-			({
-				master_metadata_track_name,
-				master_metadata_album_artist_name,
-				master_metadata_album_album_name,
-				spotify_track_uri,
-				...entry
-			}) => ({
-				spotify_track_uri: getSpotifyItemId(spotify_track_uri),
-				...entry,
-			}),
+			({ name, artistNames, albumName, spotifyTrackURI, ts, ...entry }) => {
+				const trackURI = getSpotifyItemId(spotifyTrackURI);
+				const artistNamesArray = artistNames.split(",").map((name) => name.trim());
+				const date = new Date(ts);
+				return {
+					spotifyTrackURI: trackURI,
+					name: name,
+
+					artistURIs: [],
+					artistNames: artistNamesArray,
+
+					albumURI: null,
+					albumName: albumName,
+
+					durationMs: null,
+					explicit: null,
+
+					ts: date,
+
+					metadataComplete: false,
+
+					...entry,
+				};
+			},
 		);
 		const result = await streams.insertMany(streamDocs, { ordered: false });
 		logDebug("mongo", "inserted stream documents", {
@@ -51,14 +65,14 @@ export const getTopTracks = async (userID, limit = 20) => {
 					$and: [
 						{ user: userID },
 						{ $expr: { $gte: ["$ms_played", 30000] } },
-						{ $expr: { $ne: ["$spotify_track_uri", null] } },
+						{ $expr: { $ne: ["$spotifyTrackURI", null] } },
 					],
 				},
 			},
 			{
 				$group: {
-					_id: "$spotify_track_uri",
-					spotify_track_uri: { $first: "$spotify_track_uri" },
+					_id: "$spotifyTrackURI",
+					spotifyTrackURI: { $first: "$spotifyTrackURI" },
 					count: { $sum: 1 },
 				},
 			},
@@ -81,14 +95,14 @@ export const getBottomTracks = async (userID, limit = 20) => {
 					$and: [
 						{ user: userID },
 						{ $expr: { $gte: ["$ms_played", 30000] } },
-						{ $expr: { $ne: ["$spotify_track_uri", null] } },
+						{ $expr: { $ne: ["$spotifyTrackURI", null] } },
 					],
 				},
 			},
 			{
 				$group: {
-					_id: "$spotify_track_uri",
-					spotify_track_uri: { $first: "$spotify_track_uri" },
+					_id: "$spotifyTrackURI",
+					spotifyTrackURI: { $first: "$spotifyTrackURI" },
 					count: { $sum: 1 },
 				},
 			},
@@ -108,7 +122,7 @@ export const getTrackStreams = async (userID, trackURI) => {
 		const pipeline = [
 			{
 				$match: {
-					$and: [{ user: userID }, { spotify_track_uri: trackURI }],
+					$and: [{ user: userID }, { spotifyTrackURI: trackURI }],
 				},
 			},
 			{
@@ -136,15 +150,12 @@ export const getArtistStreams = async (userID, artistUri) => {
 			{
 				$lookup: {
 					from: "tracks",
-					let: { trackId: "$spotify_track_uri" },
+					let: { trackId: "$spotifyTrackURI" },
 					pipeline: [
 						{
 							$match: {
 								$expr: {
-									$and: [
-										{ $eq: ["$_id", "$$trackId"] },
-										{ $in: [artistUri, "$artists.uri"] },
-									],
+									$and: [{ $eq: ["$_id", "$$trackId"] }, { $in: [artistUri, "$artists.uri"] }],
 								},
 							},
 						},
@@ -187,15 +198,12 @@ export const getAlbumStreams = async (userID, albumUri) => {
 			{
 				$lookup: {
 					from: "tracks",
-					let: { trackId: "$spotify_track_uri" },
+					let: { trackId: "$spotifyTrackURI" },
 					pipeline: [
 						{
 							$match: {
 								$expr: {
-									$and: [
-										{ $eq: ["$_id", "$$trackId"] },
-										{ $eq: ["$album.uri", albumUri] },
-									],
+									$and: [{ $eq: ["$_id", "$$trackId"] }, { $eq: ["$album.uri", albumUri] }],
 								},
 							},
 						},

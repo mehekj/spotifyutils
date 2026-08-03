@@ -60,14 +60,7 @@ usersRouter.post("/me/data", upload.single("chunk"), async (req, res, next) => {
 		const userID = req.user.id;
 		const uploadTime = Number(req.body.uploadTime);
 
-		await uploadChunk(
-			chunk,
-			chunkNum,
-			totalChunks,
-			fileNum,
-			userID,
-			uploadTime,
-		);
+		await uploadChunk(chunk, chunkNum, totalChunks, fileNum, userID, uploadTime);
 		res.end();
 	} catch (err) {
 		next(err);

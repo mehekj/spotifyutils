@@ -4,17 +4,25 @@
 	"description": "If this ever sees the light of day, it'll be a miracle",
 	"main": "index.js",
 	"scripts": {
-		"server": "cd backend && nodemon server.js",
+		"server": "cd backend && concurrently \"nodemon server.js\" \"nodemon workers/metadata.js\" \"nodemon workers/backfill.js\"",
 		"client": "cd client && npm start",
 		"dev": "concurrently \"npm run server\" \"npm run client\"",
 		"build": "cd client && npm run build",
 		"deploy-build": "npm install && cd client && npm install && npm run build && cd ../backend && npm install",
 		"deploy-server": "cd backend && npm start",
-		"local-deploy": "npm run build && npm run server"
+		"local-deploy": "npm run build && npm run server",
+		"deploy-metadata-install": "cd backend && npm install",
+		"deploy-metadata": "cd backend && node workers/metadata.js",
+		"deploy-backfill-install": "cd backend && npm install",
+		"deploy-backfill": "cd backend && node workers/backfill.js"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
 		"concurrently": "^9.2.1"
+	},
+	"devDependencies": {
+		"@prettier/plugin-xml": "^3.4.2",
+		"prettier": "^3.9.6"
 	}
 }

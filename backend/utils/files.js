@@ -36,13 +36,32 @@ const sanitizeRecord = (record) => {
 		"incognito_mode",
 	];
 
+	const remapFields = {
+		ts: "ts",
+		platform: "platform",
+		ms_played: "msPlayed",
+		conn_country: "connCountry",
+		ip_addr: "ipAddr",
+		master_metadata_track_name: "name",
+		master_metadata_album_artist_name: "artistNames",
+		master_metadata_album_album_name: "albumName",
+		spotify_track_uri: "spotifyTrackURI",
+		reason_start: "reasonStart",
+		reason_end: "reasonEnd",
+		shuffle: "shuffle",
+		skipped: "skipped",
+		offline: "offline",
+		offline_timestamp: "offlineTimestamp",
+		incognito_mode: "incognitoMode",
+	};
+
 	for (const field of allowedFields) {
 		if (field in record) {
 			const value = record[field];
 			if (typeof value === "string") {
-				sanitized[field] = value.slice(0, 1000);
+				sanitized[remapFields[field]] = value.slice(0, 1000);
 			} else {
-				sanitized[field] = value;
+				sanitized[remapFields[field]] = value;
 			}
 		}
 	}
@@ -73,9 +92,7 @@ const cleanupChunksForFile = async (fileName, totalChunks) => {
 	try {
 		const rmPromises = [];
 		for (let i = 0; i < totalChunks; i++) {
-			rmPromises.push(
-				fs.promises.rm(`${CHUNK_DIR}/${fileName}.part_${i}`, { force: true }),
-			);
+			rmPromises.push(fs.promises.rm(`${CHUNK_DIR}/${fileName}.part_${i}`, { force: true }));
 		}
 		await Promise.all(rmPromises);
 	} catch (err) {
@@ -95,12 +112,7 @@ export class FilesAPIError extends Error {
 	}
 }
 
-const mergeAndStoreChunks = async (
-	fileName,
-	totalChunks,
-	userID,
-	uploadTime,
-) => {
+const mergeAndStoreChunks = async (fileName, totalChunks, userID, uploadTime) => {
 	try {
 		const chunkPromises = Array.from({ length: totalChunks }, (_, i) =>
 			fs.promises.readFile(`${CHUNK_DIR}/${fileName}.part_${i}`),
@@ -132,10 +144,7 @@ const mergeAndStoreChunks = async (
 		});
 
 		if (validRecords.length > 0) {
-			await Promise.all([
-				insertTrackStubs(validRecords),
-				insertStreams(validRecords),
-			]);
+			await Promise.all([insertTrackStubs(validRecords), insertStreams(validRecords)]);
 		}
 
 		await cleanupChunksForFile(fileName, totalChunks);
@@ -145,24 +154,14 @@ const mergeAndStoreChunks = async (
 	}
 };
 
-export const uploadChunk = async (
-	chunk,
-	chunkNum,
-	totalChunks,
-	fileNum,
-	userID,
-	uploadTime,
-) => {
+export const uploadChunk = async (chunk, chunkNum, totalChunks, fileNum, userID, uploadTime) => {
 	try {
 		if (!Buffer.isBuffer(chunk)) {
 			throw new FilesAPIError("Invalid chunk format", 400);
 		}
 
 		if (chunk.length > MAX_CHUNK_SIZE) {
-			throw new FilesAPIError(
-				`Chunk size exceeds ${MAX_CHUNK_SIZE / 1024 / 1024}MB limit`,
-				400,
-			);
+			throw new FilesAPIError(`Chunk size exceeds ${MAX_CHUNK_SIZE / 1024 / 1024}MB limit`, 400);
 		}
 
 		if (chunkNum < 0 || chunkNum >= totalChunks || totalChunks <= 0) {

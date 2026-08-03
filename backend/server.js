@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import "./environment.js";
+import "./db/conn.js";
 import { albumsRouter } from "./routes/albums.js";
 import { artistsRouter } from "./routes/artists.js";
 import { authRouter } from "./routes/auth.js";
@@ -11,8 +11,6 @@ import { FilesAPIError } from "./utils/files.js";
 import { logDebug, logError } from "./utils/logger.js";
 import { MongoAPIError } from "./utils/mongo.js";
 import { SpotifyAPIError } from "./utils/spotify.js";
-
-import "./db/conn.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
