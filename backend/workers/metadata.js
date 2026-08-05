@@ -13,6 +13,7 @@ let spotifyTokenExpiresAt = 0;
 
 const RECOVERY_INTERVAL_MS = 5 * 60 * 1000;
 let lastRecoveryTime = null;
+let pausedUntil = 0;
 
 const getCachedSpotifyAccessToken = async () => {
 	if (spotifyAccessToken && Date.now() < spotifyTokenExpiresAt) {
@@ -59,6 +60,7 @@ async function processSingleTrack() {
 				$set: {
 					"metadataJob.status": newStatus,
 					"metadataJob.lockedAt": null,
+					"metadataJob.updatedAt": new Date(),
 				},
 			},
 		);
@@ -84,6 +86,8 @@ async function processSingleTrack() {
 			},
 		},
 	);
+
+	// TODO album entries and artist stubs
 
 	// logDebug("metadata", "Successfully processed track metadata", {
 	// 	trackId: track._id,
@@ -121,26 +125,19 @@ async function recoverLockedTracks() {
 }
 
 async function waitForRetry(retryAfter) {
-	await setTimeout(() => {
-		runningRequests--;
-	}, retryAfter);
+	return new Promise((resolve) => setTimeout(resolve, retryAfter));
 }
 
-while (true) {
-	recoverLockedTracks();
-
+async function processSingleTrackWorker() {
 	try {
-		if (runningRequests < MAX_CONCURRENT_REQUESTS) {
-			runningRequests++;
-			await processSingleTrack();
-			runningRequests--;
-		}
+		await processSingleTrack();
 	} catch (error) {
 		if (error.status === 429) {
 			const retryAfter = error.details?.retryAfter * 1000 || DEFAULT_RETRY_DELAY_MS;
-			logDebug("metadata", "Rate limit exceeded, retrying after delay", {
+			pausedUntil = Date.now() + retryAfter;
+			logDebug("metadata", "Rate limit exceeded; pausing all workers", {
 				retryAfter,
-				retryAt: new Date(Date.now() + retryAfter).toISOString(),
+				retryAt: new Date(pausedUntil).toISOString(),
 				error: error.message,
 			});
 			await waitForRetry(retryAfter);
@@ -148,9 +145,18 @@ while (true) {
 			logError("metadata", "Error processing track metadata", error.details?.error || error);
 			await waitForRetry(DEFAULT_RETRY_DELAY_MS);
 		}
+	} finally {
+		runningRequests--;
+	}
+}
+
+while (true) {
+	await recoverLockedTracks();
+
+	while (runningRequests < MAX_CONCURRENT_REQUESTS) {
+		runningRequests++;
+		processSingleTrackWorker();
 	}
 
-	if (runningRequests >= MAX_CONCURRENT_REQUESTS) {
-		await setTimeout(() => {}, 200);
-	}
+	await waitForRetry(200);
 }
