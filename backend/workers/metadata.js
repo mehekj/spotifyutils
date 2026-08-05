@@ -13,7 +13,12 @@ let spotifyTokenExpiresAt = 0;
 
 const RECOVERY_INTERVAL_MS = 5 * 60 * 1000;
 let lastRecoveryTime = null;
+
 let pausedUntil = 0;
+
+async function sleep(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const getCachedSpotifyAccessToken = async () => {
 	if (spotifyAccessToken && Date.now() < spotifyTokenExpiresAt) {
@@ -40,7 +45,7 @@ async function processSingleTrack() {
 				"metadataJob.attempts": { $inc: 1 },
 			},
 		},
-		{ sort: { updatedAt: 1 }, new: true },
+		{ sort: { "metadataJob.updatedAt": 1 }, new: true },
 	);
 
 	if (!track) {
@@ -77,6 +82,7 @@ async function processSingleTrack() {
 				"metadataJob.status": "completed",
 				"metadataJob.lockedAt": null,
 				"backfillJob.status": "pending",
+				name: trackData.name,
 				albumName: trackData.album.name,
 				albumURI: trackData.album.id,
 				artistNames: artistNames,
@@ -104,15 +110,15 @@ async function recoverLockedTracks() {
 
 	const result = await tracks.updateMany(
 		{
-			metadataStatus: "processing",
-			lockedAt: {
+			"metadataJob.status": "processing",
+			"metadataJob.lockedAt": {
 				$lt: new Date(now - RECOVERY_INTERVAL_MS),
 			},
 		},
 		{
 			$set: {
-				metadataStatus: "pending",
-				lockedAt: null,
+				"metadataJob.status": "pending",
+				"metadataJob.lockedAt": null,
 			},
 		},
 	);
@@ -124,10 +130,6 @@ async function recoverLockedTracks() {
 	});
 }
 
-async function waitForRetry(retryAfter) {
-	return new Promise((resolve) => setTimeout(resolve, retryAfter));
-}
-
 async function processSingleTrackWorker() {
 	try {
 		await processSingleTrack();
@@ -135,15 +137,15 @@ async function processSingleTrackWorker() {
 		if (error.status === 429) {
 			const retryAfter = error.details?.retryAfter * 1000 || DEFAULT_RETRY_DELAY_MS;
 			pausedUntil = Date.now() + retryAfter;
-			logDebug("metadata", "Rate limit exceeded; pausing all workers", {
-				retryAfter,
-				retryAt: new Date(pausedUntil).toISOString(),
-				error: error.message,
-			});
-			await waitForRetry(retryAfter);
+			// logDebug("metadata", "Rate limit exceeded; pausing all workers", {
+			// 	retryAfter,
+			// 	retryAt: new Date(pausedUntil).toISOString(),
+			// 	error: error.message,
+			// });
+			await sleep(retryAfter);
 		} else {
 			logError("metadata", "Error processing track metadata", error.details?.error || error);
-			await waitForRetry(DEFAULT_RETRY_DELAY_MS);
+			await sleep(DEFAULT_RETRY_DELAY_MS);
 		}
 	} finally {
 		runningRequests--;
@@ -158,5 +160,5 @@ while (true) {
 		processSingleTrackWorker();
 	}
 
-	await waitForRetry(200);
+	await sleep(200);
 }
