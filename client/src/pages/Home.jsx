@@ -50,6 +50,13 @@ const Home = () => {
 				{user.lastUpload ? (
 					<Text mb="xl">
 						Your last data upload: {user.lastUpload && new Date(user.lastUpload).toLocaleString()}
+						<br />
+						{user.indexedStreams !== undefined && user.totalStreams !== undefined && (
+							<span>
+								{" "}
+								Indexed Streams: {user.indexedStreams} | Total Streams: {user.totalStreams}
+							</span>
+						)}
 					</Text>
 				) : (
 					<Text mb="xl">

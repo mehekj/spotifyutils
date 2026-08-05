@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { deleteUserStreams } from "../db/streams.js";
+import { deleteUserStreams, getTotalStreams, getIndexedStreams } from "../db/streams.js";
 import { getUserUpload, setUserUpload } from "../db/users.js";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { uploadChunk } from "../utils/files.js";
@@ -29,7 +29,17 @@ usersRouter.get("/me/uploads/last", async (req, res, next) => {
 
 	try {
 		const lastUpload = await getUserUpload(req.user.id);
-		res.json({ lastUpload: lastUpload });
+		if (!lastUpload) {
+			res.json({ lastUpload: lastUpload, indexedStreams: 0, totalStreams: 0 });
+		}
+
+		const indexedStreams = await getIndexedStreams(req.user.id, lastUpload);
+		const totalStreams = await getTotalStreams(req.user.id, lastUpload);
+		res.json({
+			lastUpload: lastUpload,
+			indexedStreams: indexedStreams,
+			totalStreams: totalStreams,
+		});
 	} catch (err) {
 		next(err);
 	}

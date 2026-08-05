@@ -3,15 +3,6 @@ import { MongoAPIError } from "../utils/mongo.js";
 import { getSpotifyItemId } from "../utils/spotify.js";
 import { streams } from "./conn.js";
 
-export const deleteStreams = async () => {
-	try {
-		await Promise.all([streams.deleteMany({}), tracks.deleteMany({})]);
-		logDebug("mongo", "deleted all stream and track documents");
-	} catch (error) {
-		throw new MongoAPIError("Failed to delete all streams", 500, error);
-	}
-};
-
 export const deleteUserStreams = async (userID, uploadTime) => {
 	try {
 		await streams.deleteMany({ user: userID, uploadTime: { $ne: uploadTime } });
@@ -54,6 +45,28 @@ export const insertStreams = async (data) => {
 		});
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert streams", 500, error);
+	}
+};
+
+export const getTotalStreams = async (userID, uploadTime) => {
+	try {
+		const totalStreams = await streams.countDocuments({ user: userID, uploadTime });
+		return totalStreams;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get total streams", 500, error);
+	}
+};
+
+export const getIndexedStreams = async (userID, uploadTime) => {
+	try {
+		const indexedStreams = await streams.countDocuments({
+			user: userID,
+			uploadTime,
+			metadataComplete: true,
+		});
+		return indexedStreams;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get indexed streams", 500, error);
 	}
 };
 

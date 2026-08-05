@@ -83,6 +83,13 @@ const spotifyRequest = async (req, res, endpoint, options = {}, explicitAccessTo
 			}
 		}
 
+		if (status === 429) {
+			const retryAfter = err.response?.headers?.["retry-after"];
+			throw new SpotifyAPIError("Spotify API rate limit exceeded", 429, {
+				retryAfter: retryAfter ? parseInt(retryAfter, 10) : null,
+			});
+		}
+
 		throw new SpotifyAPIError(
 			"Spotify API request failed",
 			status || 500,

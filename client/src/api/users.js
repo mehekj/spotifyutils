@@ -10,6 +10,8 @@ export const users = {
 		return {
 			...userResponse.data,
 			lastUpload: uploadsResponse.data.lastUpload ?? null,
+			indexedStreams: uploadsResponse.data.indexedStreams ?? 0,
+			totalStreams: uploadsResponse.data.totalStreams ?? 0,
 		};
 	},
 
