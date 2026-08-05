@@ -11,11 +11,42 @@ export class SpotifyAPIError extends Error {
 	}
 }
 
-const spotifyRequest = async (req, res, endpoint, options = {}) => {
-	const baseUrl = "https://api.spotify.com/v1";
+export const resolveSpotifyAccessToken = async (req, res, explicitAccessToken = null) => {
+	if (explicitAccessToken) {
+		return {
+			accessToken: explicitAccessToken,
+			refreshToken: null,
+		};
+	}
+
 	const tokens = getTokenCookies(req);
 	const accessToken = tokens.accessToken;
 	const refreshToken = tokens.refreshToken;
+
+	if (accessToken) {
+		return { accessToken, refreshToken };
+	}
+
+	if (!refreshToken) {
+		throw new SpotifyAPIError("No Spotify access token available", 401);
+	}
+
+	const newAccessToken = await refreshSpotifyToken(refreshToken, res);
+	if (!newAccessToken) {
+		throw new SpotifyAPIError("Failed to refresh Spotify access token", 401);
+	}
+
+	return { accessToken: newAccessToken, refreshToken };
+};
+
+const spotifyRequest = async (req, res, endpoint, options = {}, explicitAccessToken = null) => {
+	const baseUrl = "https://api.spotify.com/v1";
+	const { accessToken, refreshToken } = await resolveSpotifyAccessToken(
+		req,
+		res,
+		explicitAccessToken,
+	);
+
 	try {
 		const result = await axios({
 			url: `${baseUrl}${endpoint}`,
@@ -25,25 +56,21 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 		return result.data;
 	} catch (err) {
 		const status = err.response?.status;
-
 		if (status === 401 && refreshToken) {
 			logDebug("spotify", "Access token expired - attempting refresh...", {
-				userId: req.user?.id,
+				userId: req?.user?.id,
 				endpoint,
 			});
 
-			const newAccessToken = await refreshSpotifyToken(refreshToken, res);
-			if (!newAccessToken) {
-				throw new SpotifyAPIError(
-					"Failed to refresh Spotify access token",
-					401,
-				);
+			const refreshedTokens = await refreshSpotifyToken(refreshToken, res);
+			if (!refreshedTokens?.accessToken) {
+				throw new SpotifyAPIError("Failed to refresh Spotify access token", 401);
 			}
 
 			try {
 				const retry = await axios({
 					url: `${baseUrl}${endpoint}`,
-					headers: { Authorization: `Bearer ${newAccessToken}` },
+					headers: { Authorization: `Bearer ${refreshedTokens.accessToken}` },
 					...options,
 				});
 				return retry.data;
@@ -64,17 +91,17 @@ const spotifyRequest = async (req, res, endpoint, options = {}) => {
 	}
 };
 
-export const spotifyGet = (req, res, endpoint, params = {}) =>
-	spotifyRequest(req, res, endpoint, { method: "GET", params });
+export const spotifyGet = (req, res, endpoint, params = {}, accessToken = null) =>
+	spotifyRequest(req, res, endpoint, { method: "GET", params }, accessToken);
 
-export const spotifyPost = (req, res, endpoint, data = {}) =>
-	spotifyRequest(req, res, endpoint, { method: "POST", data });
+export const spotifyPost = (req, res, endpoint, data = {}, accessToken = null) =>
+	spotifyRequest(req, res, endpoint, { method: "POST", data }, accessToken);
 
-export const spotifyPut = (req, res, endpoint, data = {}) =>
-	spotifyRequest(req, res, endpoint, { method: "PUT", data });
+export const spotifyPut = (req, res, endpoint, data = {}, accessToken = null) =>
+	spotifyRequest(req, res, endpoint, { method: "PUT", data }, accessToken);
 
-export const spotifyDelete = (req, res, endpoint, data = {}) =>
-	spotifyRequest(req, res, endpoint, { method: "DELETE", data });
+export const spotifyDelete = (req, res, endpoint, data = {}, accessToken = null) =>
+	spotifyRequest(req, res, endpoint, { method: "DELETE", data }, accessToken);
 
 export const getUserData = async (req, res) => {
 	return spotifyGet(req, res, "/me");

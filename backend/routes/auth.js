@@ -1,9 +1,9 @@
-import axios from "axios";
 import express from "express";
 import QueryString from "qs";
 import {
 	CLIENT_ID,
-	CLIENT_SECRET,
+	clearTokenCookies,
+	exchangeSpotifyAuthorizationCode,
 	generateRandomString,
 	REDIRECT_URI,
 	setTokenCookies,
@@ -47,37 +47,22 @@ authRouter.get("/redirect", async (req, res) => {
 	}
 
 	if (!req.query.state) {
-		return res
-			.status(400)
-			.json({ message: "Authorization code state mismatch" });
+		return res.status(400).json({ message: "Authorization code state mismatch" });
 	}
 
 	const code = req.query.code;
 	logDebug("auth", "token exchange requested");
 
 	try {
-		const response = await axios.post(
-			"https://accounts.spotify.com/api/token",
-			QueryString.stringify({
-				grant_type: "authorization_code",
-				code,
-				redirect_uri: REDIRECT_URI,
-			}),
-			{
-				headers: {
-					"content-type": "application/x-www-form-urlencoded",
-					Authorization: `Basic ${Buffer.from(
-						`${CLIENT_ID}:${CLIENT_SECRET}`,
-					).toString("base64")}`,
-				},
-			},
-		);
+		const tokenResponse = await exchangeSpotifyAuthorizationCode(code, REDIRECT_URI);
+		if (!tokenResponse) {
+			throw new Error("Spotify token exchange returned no response");
+		}
 
-		const { access_token, refresh_token, expires_in } = response.data;
+		const { access_token, refresh_token, expires_in } = tokenResponse;
 		setTokenCookies(res, access_token, refresh_token, expires_in);
 
-		const redirectBase =
-			process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:5173";
+		const redirectBase = process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:5173";
 		res.redirect(`${redirectBase}/`);
 	} catch (err) {
 		logError("auth", "failed to exchange Spotify auth code", err);
@@ -87,7 +72,6 @@ authRouter.get("/redirect", async (req, res) => {
 
 authRouter.post("/logout", (req, res) => {
 	logDebug("auth", "logout requested");
-	res.clearCookie("spotify_access_token");
-	res.clearCookie("spotify_refresh_token");
+	clearTokenCookies(res);
 	res.end();
 });
