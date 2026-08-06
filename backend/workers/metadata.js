@@ -1,4 +1,4 @@
-import { tracks } from "../db/conn.js";
+import { tracks, artists, albums } from "../db/conn.js";
 import { getClientCredentialsAccessToken } from "../utils/auth.js";
 import { logDebug, logError } from "../utils/logger.js";
 import { spotifyGet } from "../utils/spotify.js";
@@ -75,7 +75,7 @@ async function processSingleTrack() {
 	const artistURIs = trackData.artists.map((artist) => artist.id);
 	const artistNames = trackData.artists.map((artist) => artist.name);
 
-	const finalTrack = await tracks.updateOne(
+	await tracks.updateOne(
 		{ _id: track._id },
 		{
 			$set: {
@@ -93,7 +93,30 @@ async function processSingleTrack() {
 		},
 	);
 
-	// TODO album entries and artist stubs
+	await albums.updateOne(
+		{ _id: trackData.album.id },
+		{
+			$setOnInsert: {
+				name: trackData.album.name,
+				albumType: trackData.album.album_type,
+				totalTracks: trackData.album.total_tracks,
+				images: trackData.album.images,
+				releaseDate: trackData.album.release_date,
+				artistURIs: trackData.album.artists.map((artist) => artist.id),
+			},
+		},
+		{ upsert: true },
+	);
+
+	await Promise.all(
+		trackData.artists.map((artist) =>
+			artists.updateOne(
+				{ _id: artist.id },
+				{ $setOnInsert: { name: artist.name, images: [] } },
+				{ upsert: true },
+			),
+		),
+	);
 
 	// logDebug("metadata", "Successfully processed track metadata", {
 	// 	trackId: track._id,
@@ -137,11 +160,11 @@ async function processSingleTrackWorker() {
 		if (error.status === 429) {
 			const retryAfter = error.details?.retryAfter * 1000 || DEFAULT_RETRY_DELAY_MS;
 			pausedUntil = Date.now() + retryAfter;
-			// logDebug("metadata", "Rate limit exceeded; pausing all workers", {
-			// 	retryAfter,
-			// 	retryAt: new Date(pausedUntil).toISOString(),
-			// 	error: error.message,
-			// });
+			logDebug("metadata", "Rate limit exceeded; pausing all workers", {
+				retryAfter,
+				retryAt: new Date(pausedUntil).toISOString(),
+				error: error.message,
+			});
 			await sleep(retryAfter);
 		} else {
 			logError("metadata", "Error processing track metadata", error.details?.error || error);

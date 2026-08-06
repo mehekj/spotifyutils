@@ -27,6 +27,7 @@ async function processSingleTrack() {
 
 	if (!track) {
 		logDebug("backfill", "No pending tracks found for processing");
+		await sleep(360000);
 		return;
 	}
 
@@ -38,7 +39,7 @@ async function processSingleTrack() {
 		{
 			$set: {
 				metadataComplete: true,
-				//name: track.name, MEH_TODO once data is fixed update this
+				name: track.name,
 				albumName: track.albumName,
 				albumURI: track.albumURI,
 				artistNames: track.artistNames,
