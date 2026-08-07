@@ -20,10 +20,11 @@ export default function AlbumPage() {
 
 			try {
 				setLoading(true);
-				const infoRes = await albums.getAlbumInfo(uri);
-				setAlbumInfo(infoRes);
+				// const infoRes = await albums.getAlbumInfo(uri);
+
 				const streamsRes = await albums.getStreams(uri);
 				setAlbumStreams(streamsRes);
+				setAlbumInfo(streamsRes[0]);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch album data:", error);
@@ -35,16 +36,20 @@ export default function AlbumPage() {
 
 	if (loading) return <LoadingPage />;
 
+	const artists = albumInfo
+		? albumInfo.artistNames.map((name, idx) => {
+				return { name, uri: albumInfo.artistURIs[idx] };
+			})
+		: [];
+
 	return (
 		<Container size="xl">
 			<Stack gap="xl">
 				{albumInfo !== null && (
 					<Group align="end" my="xl" grow preventGrowOverflow={false}>
-						<Image
-							src={albumInfo.images[1].url}
-							maw={albumInfo.images[1].width}
-							mr="xl"
-						/>
+						{albumInfo.images && (
+							<Image src={albumInfo.images[1].url} maw={albumInfo.images[1].width} mr="xl" />
+						)}
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
@@ -53,10 +58,10 @@ export default function AlbumPage() {
 							</Group>
 							<Group align="baseline">
 								<Text fz={20} ta="center">
-									{albumInfo.artists.map((artist, idx) => (
+									{artists.map((artist, idx) => (
 										<>
 											<ArtistLink uri={artist.uri} name={artist.name} />
-											{idx < albumInfo.artists.length - 1 && ", "}
+											{idx < artists.length - 1 && ", "}
 										</>
 									))}
 								</Text>

@@ -8,9 +8,7 @@ import LoadingPage from "../components/LoadingPage";
 const Home = () => {
 	const { user } = useContext(UserContext);
 
-	const [top20, setTop20] = useState([]);
-	// const [top20, setTop20] = useState(null);
-	// const [bottom20, setBottom20] = useState(null);
+	const [top20, setTop20] = useState(null);
 
 	useEffect(() => {
 		if (!user.id || !user.lastUpload) {
@@ -19,22 +17,22 @@ const Home = () => {
 
 		let isActive = true;
 
-		// tracks
-		// 	.getTop(20)
-		// 	.then((data) => {
-		// 		if (isActive) {
-		// 			setTop20(data ?? []);
-		// 		}
-		// 	})
-		// 	.catch((err) => {
-		// 		if (!err._handled) {
-		// 			console.error("Error fetching user top tracks:", err);
-		// 		}
+		tracks
+			.getTop(20)
+			.then((data) => {
+				if (isActive) {
+					setTop20(data ?? []);
+				}
+			})
+			.catch((err) => {
+				if (!err._handled) {
+					console.error("Error fetching user top tracks:", err);
+				}
 
-		// 		if (isActive) {
-		// 			setTop20([]);
-		// 		}
-		// 	});
+				if (isActive) {
+					setTop20([]);
+				}
+			});
 
 		return () => {
 			isActive = false;
@@ -70,22 +68,11 @@ const Home = () => {
 				{isLoading ? (
 					<LoadingPage />
 				) : (
-					top20?.length > 0 && <JSONTable data={top20} keys={["track", "artist", "liked"]} />
-				)}
-				{/* {loading ? (
-					<LoadingPage />
-				) : (
-					bottom20.length > 0 && (
-						<JSONTable
-							data={bottom20}
-							keys={[
-								"track",
-								"artist",
-								"liked",
-							]}
-						/>
+					// top20?.length > 0 && <JSONTable data={top20} keys={["track", "artist", "liked"]} />
+					top20?.length > 0 && (
+						<JSONTable data={top20} keys={["track", "artist", "album", "count"]} />
 					)
-				)} */}
+				)}
 			</Stack>
 		</Container>
 	);

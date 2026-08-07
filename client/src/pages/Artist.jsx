@@ -1,12 +1,4 @@
-import {
-	Button,
-	Container,
-	Group,
-	Image,
-	Stack,
-	Text,
-	Title,
-} from "@mantine/core";
+import { Button, Container, Group, Image, Stack, Text, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { artists } from "../api";
@@ -28,14 +20,14 @@ export default function TrackEvent() {
 
 			try {
 				setLoading(true);
-				const infoRes = await artists.getArtistInfo(uri);
-				setArtistInfo(infoRes);
+				// const infoRes = await artists.getArtistInfo(uri);
 				const [streamsRes, followingRes] = await Promise.all([
 					artists.getStreams(uri),
-					artists.following(uri),
+					// artists.following(uri),
 				]);
 				setArtistStreams(streamsRes);
-				setFollowing(followingRes);
+				// setFollowing(followingRes);
+				setArtistInfo(streamsRes[0]);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch artist data:", error);
@@ -52,15 +44,13 @@ export default function TrackEvent() {
 			<Stack gap="xl">
 				{artistInfo !== null && (
 					<Group align="end" my="xl" grow preventGrowOverflow={false}>
-						<Image
-							src={artistInfo.images[1].url}
-							maw={artistInfo.images[1].width}
-							mr="xl"
-						/>
+						{artistInfo.images && (
+							<Image src={artistInfo.images[1].url} maw={artistInfo.images[1].width} mr="xl" />
+						)}
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
-									{artistInfo.name}
+									{artistInfo.artistNames}
 								</Title>
 								<Button
 									variant="outline"

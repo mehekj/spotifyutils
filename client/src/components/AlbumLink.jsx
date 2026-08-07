@@ -1,9 +1,10 @@
-import { Anchor } from "@mantine/core";
+import { Anchor, Text } from "@mantine/core";
 
 export default function AlbumLink({ uri, name, children }) {
-	return (
-		<Anchor to={`/album/${encodeURIComponent(uri)}`}>
-			{children || name || uri}
-		</Anchor>
+	const parseURI = encodeURIComponent(uri);
+	return uri ? (
+		<Anchor to={`/album/${parseURI}`}>{children || name || uri}</Anchor>
+	) : (
+		<Text>{children || name || uri}</Text>
 	);
 }

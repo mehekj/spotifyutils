@@ -5,8 +5,12 @@ import LikeButton from "./LikeButton";
 import TrackLink from "./TrackLink";
 
 export default function JSONTable({ data, keys = null }) {
-	const getTrackUri = (row) => {
-		return row.spotify_track_uri || null;
+	const truncate = (str, n) => {
+		return str.length > n ? str.slice(0, n - 1) + "..." : str;
+	};
+
+	const getTrackURI = (row) => {
+		return row.spotifyTrackURI || row._id || null;
 	};
 
 	const getLiked = (row) => {
@@ -14,25 +18,29 @@ export default function JSONTable({ data, keys = null }) {
 	};
 
 	const getTrackName = (row) => {
-		return row.name || row.track?.name || null;
+		return truncate(row.name, 48) || null;
 	};
 
 	const getArtists = (row) => {
-		return row.artists || row.track?.artists || [];
+		return row.artistNames.map((name, idx) => {
+			return { name, uri: row.artistURIs[idx] };
+		});
 	};
 
-	const getAlbum = (row) => {
-		return row.album || row.track?.album || null;
+	const getAlbumName = (row) => {
+		return truncate(row.albumName, 48) || null;
+	};
+
+	const getAlbumURI = (row) => {
+		return row.albumURI || null;
 	};
 
 	const cell = (row, key) => {
 		switch (key) {
 			case "liked":
-				return <LikeButton uri={getTrackUri(row)} like={getLiked(row)} />;
+				return <LikeButton uri={getTrackURI(row)} like={getLiked(row)} />;
 			case "track":
-				return (
-					<TrackLink uri={getTrackUri(row)}>{getTrackName(row)}</TrackLink>
-				);
+				return <TrackLink uri={getTrackURI(row)}>{getTrackName(row)}</TrackLink>;
 			case "artist":
 				return getArtists(row).map((artist, idx) => (
 					<span key={artist.uri || artist.name || idx}>
@@ -42,12 +50,12 @@ export default function JSONTable({ data, keys = null }) {
 				));
 			case "album":
 				return (
-					<AlbumLink uri={getAlbum(row)?.uri} name={getAlbum(row)}>
-						{getAlbum(row)?.name}
+					<AlbumLink uri={getAlbumURI(row)} name={getAlbumName(row)}>
+						{getAlbumName(row)}
 					</AlbumLink>
 				);
 			default:
-				return <Text>{row[key] ?? ""}</Text>;
+				return <Text>{row[key] != null ? String(row[key]) : ""}</Text>;
 		}
 	};
 

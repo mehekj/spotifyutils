@@ -24,13 +24,13 @@ export default function TrackEvent() {
 				setLoading(true);
 				const [streamsRes, likedRes, infoRes] = await Promise.all([
 					tracks.getStreams(uri),
-					tracks.isLiked(uri),
-					tracks.getTrackInfo(uri),
+					// tracks.isLiked(uri),
+					// tracks.getTrackInfo(uri),
 				]);
 
 				setTrackStreams(streamsRes);
-				setLiked(likedRes[0]);
-				setTrackInfo(infoRes);
+				// setLiked(likedRes[0]);
+				setTrackInfo(streamsRes[0]);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch track data:", error);
@@ -44,16 +44,19 @@ export default function TrackEvent() {
 
 	const imageUrl = trackInfo?.image?.medium?.url || null;
 	const imageWidth = trackInfo?.image?.medium?.width || null;
-	const artists = Array.isArray(trackInfo?.artists) ? trackInfo.artists : [];
+
+	const artists = trackInfo
+		? trackInfo.artistNames.map((name, idx) => {
+				return { name, uri: trackInfo.artistURIs[idx] };
+			})
+		: [];
 
 	return (
 		<Container size="xl">
 			<Stack gap="xl">
 				{trackInfo !== null && (
 					<Group align="end" my="xl" grow preventGrowOverflow={false}>
-						{imageUrl && (
-							<Image src={imageUrl} maw={imageWidth || undefined} mr="xl" />
-						)}
+						{imageUrl && <Image src={imageUrl} maw={imageWidth || undefined} mr="xl" />}
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
@@ -80,12 +83,12 @@ export default function TrackEvent() {
 						keys={[
 							"ts",
 							"platform",
-							"ms_played",
-							"conn_country",
+							"msPlayed",
+							"connCountry",
 							"shuffle",
 							"skipped",
 							"offline",
-							"incognito_mode",
+							"incognitoMode",
 						]}
 					/>
 				)}

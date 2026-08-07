@@ -1,9 +1,5 @@
 import express from "express";
-import {
-	getBottomTracks,
-	getTopTracks,
-	getTrackStreams,
-} from "../db/streams.js";
+import { getTopTracks, getTrackStreams } from "../db/streams.js";
 import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { logDebug } from "../utils/logger.js";
 import {
@@ -25,21 +21,7 @@ tracksRouter.get("/top", async (req, res, next) => {
 		const userID = req.user.id;
 		const tracks = await getTopTracks(userID, limit);
 
-		res.json(response);
-	} catch (err) {
-		next(err);
-	}
-});
-
-tracksRouter.get("/bottom", async (req, res, next) => {
-	const limit = parseInt(req.query.limit) || 20;
-	logDebug("tracks", "fetching bottom tracks", { userId: req.user.id, limit });
-
-	try {
-		const userID = req.user.id;
-		const tracks = await getBottomTracks(userID, limit);
-
-		res.json(response);
+		res.json(tracks);
 	} catch (err) {
 		next(err);
 	}
@@ -52,7 +34,7 @@ tracksRouter.get("/:uri/streams", async (req, res, next) => {
 	});
 
 	try {
-		//TODO: implement track retrieval again
+		const streams = await getTrackStreams(req.user.id, req.params.uri);
 		res.json(streams);
 	} catch (err) {
 		next(err);
@@ -112,7 +94,7 @@ tracksRouter.get("/:uri/info", async (req, res, next) => {
 	});
 
 	try {
-		//TODO: implement track retrieval again
+		// TODO
 	} catch (err) {
 		next(err);
 	}

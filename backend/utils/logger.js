@@ -1,9 +1,13 @@
 const formatScope = (scope) => `[${scope}]`;
 
+const filteredScopes = ["backfill", "metadata"];
+const scopeFiltered = (scope) => filteredScopes.includes(scope);
+
 export const logDebug = (scope, message, details = {}) => {
-	const payload =
-		details && Object.keys(details).length > 0 ? { message, details } : message;
-	console.debug(formatScope(scope), payload);
+	if (!scopeFiltered(scope)) {
+		const payload = details && Object.keys(details).length > 0 ? { message, details } : message;
+		console.debug(formatScope(scope), payload);
+	}
 };
 
 export const logError = (scope, message, error, details = {}) => {

@@ -75,58 +75,62 @@ export const getTopTracks = async (userID, limit = 20) => {
 		const pipeline = [
 			{
 				$match: {
-					$and: [
-						{ user: userID },
-						{ $expr: { $gte: ["$ms_played", 30000] } },
-						{ $expr: { $ne: ["$spotifyTrackURI", null] } },
-					],
+					user: "mehekyj",
+					msPlayed: {
+						$gt: 30000,
+					},
+					spotifyTrackURI: {
+						$type: "string",
+					},
 				},
 			},
 			{
 				$group: {
 					_id: "$spotifyTrackURI",
-					spotifyTrackURI: { $first: "$spotifyTrackURI" },
-					count: { $sum: 1 },
+					name: {
+						$first: "$name",
+					},
+					artistURIs: {
+						$first: "$artistURIs",
+					},
+					artistNames: {
+						$first: "$artistNames",
+					},
+					albumURI: {
+						$first: "$albumURI",
+					},
+					albumName: {
+						$first: "$albumName",
+					},
+					durationMs: {
+						$first: "$durationMs",
+					},
+					explicit: {
+						$first: "$explicit",
+					},
+					metadataComplete: {
+						$min: "$metadataComplete",
+					},
+					count: {
+						$sum: 1,
+					},
 				},
 			},
-			{ $sort: { count: -1 } },
-			{ $limit: limit },
+			{
+				$sort: {
+					count: -1,
+					_id: 1,
+				},
+			},
+			{
+				$limit: 20,
+			},
 		];
 
 		const result = await streams.aggregate(pipeline).toArray();
 		return result;
 	} catch (error) {
 		throw new MongoAPIError(`Failed to get top ${limit} tracks`, 500, error);
-	}
-};
-
-export const getBottomTracks = async (userID, limit = 20) => {
-	try {
-		const pipeline = [
-			{
-				$match: {
-					$and: [
-						{ user: userID },
-						{ $expr: { $gte: ["$ms_played", 30000] } },
-						{ $expr: { $ne: ["$spotifyTrackURI", null] } },
-					],
-				},
-			},
-			{
-				$group: {
-					_id: "$spotifyTrackURI",
-					spotifyTrackURI: { $first: "$spotifyTrackURI" },
-					count: { $sum: 1 },
-				},
-			},
-			{ $sort: { count: 1 } },
-			{ $limit: limit },
-		];
-
-		const result = await streams.aggregate(pipeline).toArray();
-		return result;
-	} catch (error) {
-		throw new MongoAPIError(`Failed to get bottom ${limit} tracks`, 500, error);
 	}
 };
 
@@ -158,35 +162,9 @@ export const getArtistStreams = async (userID, artistUri) => {
 			{
 				$match: {
 					user: userID,
+					artistURIs: artistUri,
 				},
 			},
-			{
-				$lookup: {
-					from: "tracks",
-					let: { trackId: "$spotifyTrackURI" },
-					pipeline: [
-						{
-							$match: {
-								$expr: {
-									$and: [{ $eq: ["$_id", "$$trackId"] }, { $in: [artistUri, "$artists.uri"] }],
-								},
-							},
-						},
-					],
-					as: "track",
-				},
-			},
-			{
-				$match: {
-					track: { $ne: [] },
-				},
-			},
-			{
-				$set: {
-					track: { $first: "$track" },
-				},
-			},
-
 			{
 				$sort: { ts: -1 },
 			},
@@ -206,39 +184,14 @@ export const getAlbumStreams = async (userID, albumUri) => {
 			{
 				$match: {
 					user: userID,
+					albumURI: albumUri,
 				},
 			},
-			{
-				$lookup: {
-					from: "tracks",
-					let: { trackId: "$spotifyTrackURI" },
-					pipeline: [
-						{
-							$match: {
-								$expr: {
-									$and: [{ $eq: ["$_id", "$$trackId"] }, { $eq: ["$album.uri", albumUri] }],
-								},
-							},
-						},
-					],
-					as: "track",
-				},
-			},
-			{
-				$match: {
-					track: { $ne: [] },
-				},
-			},
-			{
-				$set: {
-					track: { $first: "$track" },
-				},
-			},
-
 			{
 				$sort: { ts: -1 },
 			},
 		];
+
 		const result = await streams.aggregate(pipeline).toArray();
 		return result;
 	} catch (error) {
