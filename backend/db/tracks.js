@@ -31,6 +31,7 @@ export const insertTrackStubs = async (data) => {
 
 							durationMs: null,
 							explicit: null,
+							images: [],
 
 							metadataJob: {
 								status: "pending",
