@@ -89,7 +89,6 @@ async function processSingleTrack() {
 				artistURIs: artistURIs,
 				durationMs: trackData.duration_ms,
 				explicit: trackData.explicit,
-				images: trackData.images,
 			},
 		},
 	);
