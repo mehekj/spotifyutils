@@ -8,7 +8,7 @@ import LikeButton from "../components/LikeButton";
 import LoadingPage from "../components/LoadingPage";
 import { UserContext } from "../UserContext";
 
-export default function TrackEvent() {
+export default function TrackPage() {
 	const { user } = useContext(UserContext);
 	const { uri } = useParams();
 	const [trackStreams, setTrackStreams] = useState(null);

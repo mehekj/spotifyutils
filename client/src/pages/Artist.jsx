@@ -6,7 +6,7 @@ import JSONTable from "../components/JSONTable";
 import LoadingPage from "../components/LoadingPage";
 import { UserContext } from "../UserContext";
 
-export default function TrackEvent() {
+export default function ArtistPage() {
 	const { user } = useContext(UserContext);
 	const { uri } = useParams();
 	const [artistStreams, setArtistStreams] = useState(null);
