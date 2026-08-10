@@ -3,6 +3,8 @@ import { attachSpotifyUser, requireSpotifyAuth } from "../utils/auth.js";
 import { logDebug } from "../utils/logger.js";
 import { getAlbumStreams } from "../db/streams.js";
 import { spotifyGet } from "../utils/spotify.js";
+import { getAlbumInfo } from "../db/albums.js";
+import { getArtistInfo } from "../db/artists.js";
 
 export const albumsRouter = express.Router();
 
@@ -15,8 +17,13 @@ albumsRouter.get("/:uri/info", async (req, res, next) => {
 	});
 
 	try {
-		const response = await spotifyGet(req, res, `/albums/${req.params.uri}`);
-		res.json(response);
+		const albumInfo = await getAlbumInfo(req.params.uri);
+		const artists = await Promise.all(
+			albumInfo.artistURIs.map((artistURI) => getArtistInfo(artistURI)),
+		);
+		const artistNames = artists.map((artist) => artist.name);
+		albumInfo.artistNames = artistNames;
+		res.json(albumInfo);
 	} catch (err) {
 		next(err);
 	}

@@ -20,11 +20,14 @@ export default function AlbumPage() {
 
 			try {
 				setLoading(true);
-				// const infoRes = await albums.getAlbumInfo(uri);
+
+				const infoRes = await albums.getAlbumInfo(uri);
+				setAlbumInfo(infoRes);
+				console.log(infoRes);
 
 				const streamsRes = await albums.getStreams(uri);
 				setAlbumStreams(streamsRes);
-				setAlbumInfo(streamsRes[0]);
+
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch album data:", error);
@@ -53,7 +56,7 @@ export default function AlbumPage() {
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
-									{albumInfo.albumName}
+									{albumInfo.name}
 								</Title>
 							</Group>
 							<Group align="baseline">

@@ -8,6 +8,7 @@ import {
 	spotifyPut,
 } from "../utils/spotify.js";
 import { logDebug } from "../utils/logger.js";
+import { getArtistInfo } from "../db/artists.js";
 
 export const artistsRouter = express.Router();
 
@@ -20,8 +21,8 @@ artistsRouter.get("/:uri/info", async (req, res, next) => {
 	});
 
 	try {
-		const response = await spotifyGet(req, res, `/artists/${req.params.uri}`);
-		res.json(response);
+		const artistInfo = await getArtistInfo(req.params.uri);
+		res.json(artistInfo);
 	} catch (err) {
 		next(err);
 	}
@@ -52,11 +53,7 @@ artistsRouter.put("/:uri/following", async (req, res, next) => {
 	});
 
 	try {
-		await spotifyPut(
-			req,
-			res,
-			`/me/library?uris=${getSpotifyArtistUriFromId(req.params.uri)}`,
-		);
+		await spotifyPut(req, res, `/me/library?uris=${getSpotifyArtistUriFromId(req.params.uri)}`);
 		res.end();
 	} catch (err) {
 		next(err);
@@ -70,11 +67,7 @@ artistsRouter.delete("/:uri/following", async (req, res, next) => {
 	});
 
 	try {
-		await spotifyDelete(
-			req,
-			res,
-			`/me/library?uris=${getSpotifyArtistUriFromId(req.params.uri)}`,
-		);
+		await spotifyDelete(req, res, `/me/library?uris=${getSpotifyArtistUriFromId(req.params.uri)}`);
 		res.end();
 	} catch (err) {
 		next(err);

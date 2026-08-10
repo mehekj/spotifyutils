@@ -22,15 +22,13 @@ export default function TrackPage() {
 
 			try {
 				setLoading(true);
-				const [streamsRes, likedRes, infoRes] = await Promise.all([
+				const [streamsRes, infoRes] = await Promise.all([
 					tracks.getStreams(uri),
-					// tracks.isLiked(uri),
-					// tracks.getTrackInfo(uri),
+					tracks.getTrackInfo(uri),
 				]);
 
 				setTrackStreams(streamsRes);
-				// setLiked(likedRes[0]);
-				setTrackInfo(streamsRes[0]);
+				setTrackInfo(infoRes);
 				setLoading(false);
 			} catch (error) {
 				console.error("Failed to fetch track data:", error);
@@ -42,8 +40,8 @@ export default function TrackPage() {
 
 	if (loading) return <LoadingPage />;
 
-	const imageUrl = trackInfo?.image?.medium?.url || null;
-	const imageWidth = trackInfo?.image?.medium?.width || null;
+	const imageUrl = trackInfo?.images[1].url || null;
+	const imageWidth = trackInfo?.images[1].width || null;
 
 	const artists = trackInfo
 		? trackInfo.artistNames.map((name, idx) => {

@@ -2,6 +2,7 @@ import { logDebug, logError } from "../utils/logger.js";
 import { MongoAPIError } from "../utils/mongo.js";
 import { getSpotifyItemId } from "../utils/spotify.js";
 import { tracks } from "./conn.js";
+import { getAlbumInfo } from "./albums.js";
 
 export const insertTrackStubs = async (data) => {
 	try {
@@ -62,5 +63,16 @@ export const insertTrackStubs = async (data) => {
 		});
 	} catch (error) {
 		throw new MongoAPIError("Failed to insert track stubs", 500, error);
+	}
+};
+
+export const getTrackInfo = async (uri) => {
+	try {
+		const trackInfo = await tracks.findOne({ _id: uri });
+		const albumInfo = await getAlbumInfo(trackInfo.albumURI);
+		trackInfo.images = albumInfo.images;
+		return trackInfo;
+	} catch (error) {
+		throw new MongoAPIError("Failed to get track info", 500, error);
 	}
 };

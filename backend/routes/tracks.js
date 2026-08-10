@@ -8,6 +8,7 @@ import {
 	spotifyGet,
 	spotifyPut,
 } from "../utils/spotify.js";
+import { getTrackInfo } from "../db/tracks.js";
 
 export const tracksRouter = express.Router();
 
@@ -94,7 +95,8 @@ tracksRouter.get("/:uri/info", async (req, res, next) => {
 	});
 
 	try {
-		// TODO
+		const trackInfo = await getTrackInfo(req.params.uri);
+		res.json(trackInfo);
 	} catch (err) {
 		next(err);
 	}
