@@ -40,11 +40,14 @@ export const insertTrackStubs = async (data) => {
 							},
 
 							backfillJob: {
-								status: "nometadata",
+								status: "pending",
 								attempts: 0,
 								lockedAt: null,
 								updatedAt: new Date(),
 							},
+						},
+						$set: {
+							"backfillJob.status": "pending",
 						},
 					},
 					upsert: true,

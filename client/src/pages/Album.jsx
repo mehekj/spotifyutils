@@ -53,7 +53,7 @@ export default function AlbumPage() {
 						<Stack>
 							<Group>
 								<Title mr="sm" size={48}>
-									{albumInfo.name}
+									{albumInfo.albumName}
 								</Title>
 							</Group>
 							<Group align="baseline">

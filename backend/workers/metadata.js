@@ -81,7 +81,6 @@ async function processSingleTrack() {
 			$set: {
 				"metadataJob.status": "completed",
 				"metadataJob.lockedAt": null,
-				"backfillJob.status": "pending",
 				name: trackData.name,
 				albumName: trackData.album.name,
 				albumURI: trackData.album.id,

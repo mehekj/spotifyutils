@@ -14,7 +14,7 @@ async function sleep(ms) {
 
 async function processSingleTrack() {
 	const track = await tracks.findOneAndUpdate(
-		{ "backfillJob.status": "pending" },
+		{ "metadataJob.status": "completed", "backfillJob.status": "pending" },
 		{
 			$set: {
 				"backfillJob.status": "processing",
@@ -27,7 +27,7 @@ async function processSingleTrack() {
 
 	if (!track) {
 		logDebug("backfill", "No pending tracks found for processing");
-		await sleep(360000);
+		await sleep(36000);
 		return;
 	}
 
@@ -116,5 +116,5 @@ while (true) {
 		processSingleTrackWorker();
 	}
 
-	await sleep(200);
+	await sleep(100);
 }
