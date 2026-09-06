@@ -40,11 +40,9 @@ export const insertTrackStubs = async (data) => {
 								updatedAt: new Date(),
 							},
 
-							backfillJob: {
-								attempts: 0,
-								lockedAt: null,
-								updatedAt: new Date(),
-							},
+							"backfillJob.attempts": 0,
+							"backfillJob.lockedAt": null,
+							"backfillJob.updatedAt": new Date(),
 						},
 						$set: {
 							"backfillJob.status": "pending",
